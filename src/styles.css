@@ -111,11 +111,11 @@ button, input, select {
   object-fit: contain;
 }
 
-html[data-theme="dark"] .logo {
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 18px;
-  padding: 14px 18px;
-}
+/*html[data-theme="dark"] .logo {*/
+/*  background: rgba(255, 255, 255, 0.92);*/
+/*  border-radius: 18px;*/
+/*  padding: 14px 18px;*/
+/*}*/
 
 .tagline {
   color: var(--muted);
