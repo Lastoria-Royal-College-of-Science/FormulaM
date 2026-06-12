@@ -21,8 +21,6 @@
   import type { WorkerResponse } from "./workers/workerProtocol";
   import { findFormulas } from "./core/search";
 
-  const THEME_STORAGE_KEY = "formulam-theme";
-
   let theme: ThemeName = "dark";
   let massIndex: MassIndex | null = null;
   let rows: FormulaSpaceRow[] = [];
@@ -41,17 +39,29 @@
   let hasSearched = false;
   let worker: Worker | null = null;
   let activeRequestId: string | null = null;
+  let colorSchemeMediaQuery: MediaQueryList | null = null;
 
   $: isBusy = status === "loading" || status === "running";
 
   function applyTheme(nextTheme: ThemeName): void {
     theme = nextTheme;
     document.documentElement.dataset.theme = nextTheme;
-    localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+  }
+
+  function handleThemeMediaChange(): void {
+    applyTheme(getSystemTheme());
   }
 
   function toggleTheme(): void {
     applyTheme(theme === "dark" ? "light" : "dark");
+  }
+
+  function getSystemTheme(): ThemeName {
+    return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  }
+
+  function syncThemeWithSystem(): void {
+    applyTheme(getSystemTheme());
   }
 
   function updateForm(patch: Partial<SearchFormState>): void {
@@ -161,8 +171,17 @@
   }
 
   onMount(async () => {
-    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-    applyTheme(savedTheme === "light" ? "light" : "dark");
+    syncThemeWithSystem();
+
+    colorSchemeMediaQuery = window.matchMedia("(prefers-color-scheme: light)");
+
+    if (typeof colorSchemeMediaQuery.addEventListener === "function") {
+      colorSchemeMediaQuery.addEventListener("change", handleThemeMediaChange);
+    } else {
+      // Safari and older browsers.
+      // @ts-expect-error legacy event support
+      colorSchemeMediaQuery.addListener(handleThemeMediaChange);
+    }
 
     try {
       worker = new Worker(new URL("./workers/formulaSearch.worker.ts", import.meta.url), { type: "module" });
@@ -189,6 +208,14 @@
 
   onDestroy(() => {
     worker?.terminate();
+    if (colorSchemeMediaQuery) {
+      if (typeof colorSchemeMediaQuery.removeEventListener === "function") {
+        colorSchemeMediaQuery.removeEventListener("change", handleThemeMediaChange);
+      } else {
+        // @ts-expect-error legacy event support
+        colorSchemeMediaQuery.removeListener(handleThemeMediaChange);
+      }
+    }
   });
 </script>
 
