@@ -3,19 +3,15 @@
 </p>
 
 <p align="center">
-  <strong>FormulaM JS</strong><br>
-  Front-end-only molecular formula enumeration from observed mass-spectrometry <code>m/z</code> values.
+  <strong>FormulaM</strong><br>
+  Molecular formula enumeration from observed mass-spectrometry <code>m/z</code> values.
 </p>
 
 ---
 
-## What this repository is
-
-This is the static JavaScript version of [FormulaM](https://github.com/Lastoria-Royal-College-of-Science/FormulaM). It is designed to run fully in the browser and can be hosted directly by GitHub Pages.
-
 ## Core behavior
 
-FormulaM JS keeps the same simplified formula-search behavior as the current Python/Streamlit FormulaM project:
+FormulaM keeps the same simplified formula-search behavior as the current Python/Streamlit FormulaM project:
 
 ```text
 candidate_mz = candidate_formula_mass / abs(charge)
@@ -67,4 +63,4 @@ tests/
 
 ## Scientific disclaimer
 
-FormulaM JS enumerates candidate formulas from exact-mass constraints. A returned formula is not a confirmed molecular identity or structure. Confirm candidates with isotope-pattern agreement, MS/MS fragmentation, retention time, ionization behavior, sample context, and chemical plausibility.
+FormulaM enumerates candidate formulas from exact-mass constraints. A returned formula is not a confirmed molecular identity or structure. Confirm candidates with isotope-pattern agreement, MS/MS fragmentation, retention time, ionization behavior, sample context, and chemical plausibility.
