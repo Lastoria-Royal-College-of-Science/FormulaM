@@ -8,36 +8,48 @@ import {
   maxBigInt,
   nonNegativeDecimalRational,
   rationalToDecimalString,
-} from "./decimal.js";
+} from "./decimal";
 import {
+  formatChargeState,
   formatFormula,
   formatIonFormula,
-  formatChargeState,
   normalizeSpeciesLabel,
   parseCharge,
-} from "./formula.js";
+} from "./formula";
+import type { FindFormulaRequest, FormulaHit, SearchElements } from "./types";
 
-function parseBound(bound) {
+type ElementBound = number | [number, number] | { min?: number | string; max?: number | string | null } | null | undefined;
+type InternalHit = FormulaHit & { _sort_abs_error: bigint; _sort_mass: bigint };
+
+function parseBound(bound: ElementBound): [number, number | null] {
   if (bound === null || bound === undefined) return [0, null];
-  if (Number.isInteger(bound)) return [0, bound];
+  if (Number.isInteger(bound)) return [0, Number(bound)];
   if (Array.isArray(bound) && bound.length === 2) return [Number(bound[0]), Number(bound[1])];
-  if (typeof bound === "object") return [Number(bound.min || 0), bound.max === undefined ? null : Number(bound.max)];
+  if (typeof bound === "object") {
+    const mapping = bound as { min?: number | string; max?: number | string | null };
+    return [Number(mapping.min ?? 0), mapping.max === undefined || mapping.max === null ? null : Number(mapping.max)];
+  }
   throw new Error("element bounds must be a max integer, [min, max], or {min, max}");
 }
 
-function parseNonNegativeCount(value, label) {
+function parseNonNegativeCount(value: unknown, label: string): number {
   const number = Number(value);
   if (!Number.isInteger(number) || number < 0) throw new Error(`${label} must be a non-negative integer`);
   return number;
 }
 
-function normalizeBounds(elements, massTable, upperMassInt, scaleDigits) {
+function normalizeBounds(
+  elements: SearchElements | string[],
+  massTable: Record<string, string>,
+  upperMassInt: bigint,
+  scaleDigits: number,
+): Record<string, [number, number]> {
   const entries = Array.isArray(elements)
-    ? elements.map((symbol) => [symbol, null])
-    : Object.entries(elements || {});
+    ? elements.map((symbol) => [symbol, null] as [string, null])
+    : Object.entries(elements || {}) as [string, ElementBound][];
   if (!entries.length) throw new Error("at least one element symbol is required");
 
-  const bounds = {};
+  const bounds: Record<string, [number, number]> = {};
   for (const [rawSymbol, rawBound] of entries) {
     const symbol = normalizeSpeciesLabel(rawSymbol);
     if (!(symbol in massTable)) throw new Error(`no exact mass is available for symbol or isotope label ${symbol}`);
@@ -54,14 +66,14 @@ function normalizeBounds(elements, massTable, upperMassInt, scaleDigits) {
   return bounds;
 }
 
-function ppmToleranceToScaled(targetMzInt, ppmValue) {
+function ppmToleranceToScaled(targetMzInt: bigint, ppmValue: unknown): bigint {
   const ppm = nonNegativeDecimalRational(ppmValue, "tolerance_ppm");
   const numerator = targetMzInt * ppm.numerator;
-  const denominator = ppm.denominator * 1000000n;
+  const denominator = ppm.denominator * 1_000_000n;
   return ceilRational(numerator, denominator);
 }
 
-function toSafeCount(value, label) {
+function toSafeCount(value: bigint, label: string): number {
   if (value < 0n) return 0;
   if (value > BigInt(Number.MAX_SAFE_INTEGER)) {
     throw new Error(`${label} is too large for browser enumeration; tighten element bounds`);
@@ -69,7 +81,21 @@ function toSafeCount(value, label) {
   return Number(value);
 }
 
-function buildCandidate({ composition, massInt, targetMzInt, charge, chargeAbs, scaleDigits }) {
+function buildCandidate({
+  composition,
+  massInt,
+  targetMzInt,
+  charge,
+  chargeAbs,
+  scaleDigits,
+}: {
+  composition: Record<string, number>;
+  massInt: bigint;
+  targetMzInt: bigint;
+  charge: number;
+  chargeAbs: number;
+  scaleDigits: number;
+}): InternalHit {
   const formula = formatFormula(composition);
   const neutralDiffInt = massInt - targetMzInt * BigInt(chargeAbs);
   return {
@@ -78,7 +104,7 @@ function buildCandidate({ composition, massInt, targetMzInt, charge, chargeAbs, 
     mass: bigIntToDecimalString(massInt, scaleDigits, 9),
     mz: rationalToDecimalString(massInt, BigInt(chargeAbs) * (10n ** BigInt(scaleDigits)), 9),
     error_da: rationalToDecimalString(neutralDiffInt, BigInt(chargeAbs) * (10n ** BigInt(scaleDigits)), 9),
-    error_ppm: rationalToDecimalString(neutralDiffInt * 1000000n, BigInt(chargeAbs) * targetMzInt, 6),
+    error_ppm: rationalToDecimalString(neutralDiffInt * 1_000_000n, BigInt(chargeAbs) * targetMzInt, 6),
     charge,
     charge_state: formatChargeState(charge),
     ion_formula: formatIonFormula(formula, charge),
@@ -96,7 +122,7 @@ export function findFormulas({
   maxResults = null,
   massIndex,
   massDigits = 9,
-}) {
+}: FindFormulaRequest): FormulaHit[] {
   if (!massIndex || !massIndex.masses) throw new Error("massIndex is required");
   if (massDigits < 6) throw new Error("massDigits must be at least 6");
 
@@ -107,7 +133,7 @@ export function findFormulas({
   const chargeAbs = Math.abs(resolvedCharge);
   const chargeAbsBig = BigInt(chargeAbs);
 
-  const toleranceCandidates = [];
+  const toleranceCandidates: bigint[] = [];
   if (toleranceDa !== null && toleranceDa !== undefined && String(toleranceDa).trim() !== "") {
     const daInt = decimalToScaledBigInt(toleranceDa, massDigits, "ceil");
     if (daInt < 0n) throw new Error("tolerance_da must be non-negative");
@@ -136,21 +162,21 @@ export function findFormulas({
   const maxCounts = symbols.map((symbol) => bounds[symbol][1]);
 
   const n = symbols.length;
-  const remMin = Array(n + 1).fill(0n);
-  const remMax = Array(n + 1).fill(0n);
+  const remMin = Array<bigint>(n + 1).fill(0n);
+  const remMax = Array<bigint>(n + 1).fill(0n);
   for (let i = n - 1; i >= 0; i -= 1) {
     remMin[i] = remMin[i + 1] + BigInt(minCounts[i]) * massesInt[i];
     remMax[i] = remMax[i + 1] + BigInt(maxCounts[i]) * massesInt[i];
   }
   if (remMin[0] > upperInt || remMax[0] < lowerInt) return [];
 
-  const candidates = [];
-  const composition = {};
+  const candidates: InternalHit[] = [];
+  const composition: Record<string, number> = {};
 
-  function recurse(index, currentMassInt) {
+  function recurse(index: number, currentMassInt: bigint): void {
     if (index === n) {
       if (lowerInt <= currentMassInt && currentMassInt <= upperInt) {
-        const cleanComposition = {};
+        const cleanComposition: Record<string, number> = {};
         for (const [symbol, count] of Object.entries(composition)) {
           if (count) cleanComposition[symbol] = count;
         }
@@ -192,7 +218,7 @@ export function findFormulas({
     return a.formula.localeCompare(b.formula);
   });
 
-  if (maxResults !== null && maxResults !== undefined && maxResults !== "") {
+  if (maxResults !== null && maxResults !== undefined) {
     const limit = Number(maxResults);
     if (!Number.isInteger(limit) || limit < 0) throw new Error("max_results must be a non-negative integer");
     return candidates.slice(0, limit).map(stripInternalFields);
@@ -200,7 +226,7 @@ export function findFormulas({
   return candidates.map(stripInternalFields);
 }
 
-function stripInternalFields(hit) {
-  const { _sort_abs_error, _sort_mass, ...publicHit } = hit;
+function stripInternalFields(hit: InternalHit): FormulaHit {
+  const { _sort_abs_error: _unusedAbs, _sort_mass: _unusedMass, ...publicHit } = hit;
   return publicHit;
 }

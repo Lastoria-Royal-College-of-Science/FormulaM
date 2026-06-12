@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.svg" alt="FormulaM" width="520">
+  <img src="public/logo.svg" alt="FormulaM" width="520">
 </p>
 
 <p align="center">
@@ -9,9 +9,9 @@
 
 ---
 
-## Core behavior
+## Overview
 
-FormulaM keeps the same simplified formula-search behavior as the current Python/Streamlit FormulaM project:
+This package is a Vite + TypeScript + Svelte refactor of the front-end-only FormulaM app. It keeps the same simplified exact-mass search rule:
 
 ```text
 candidate_mz = candidate_formula_mass / abs(charge)
@@ -19,46 +19,59 @@ candidate_mz = candidate_formula_mass / abs(charge)
 
 The input mass is always observed `m/z`. Charge is required and explicit. The sign of the charge is used only for labels such as `+`, `-`, `2+`, and `2-`.
 
-## Main features
+## Stack
 
-- Static HTML/CSS/JavaScript app.
-- Runs on GitHub Pages.
-- Observed `m/z` search.
-- Explicit positive or negative charge.
-- ppm, Da, or combined tolerance.
-- Isotope-aware formula search rows.
-- Repeated element rows with different isotopes, such as `12C` and `13C`.
-- CSV export.
-- Unified mass-data file at `data/masses.json`.
+- Vite
+- TypeScript
+- Svelte
+- Web Worker for formula enumeration
+- GitHub Pages static deployment
 
-## Repository layout
+## Local development
+
+```bash
+npm install
+npm run dev
+```
+
+## Checks
+
+```bash
+npm run validate:data
+npm test
+npm run build
+```
+
+## Project layout
 
 ```text
-index.html                  Web app entry point
-logo.svg                    Page logo
-favicon.svg                 Browser favicon
-.nojekyll                   Disable Jekyll processing on GitHub Pages
-package.json                Local scripts
-
+index.html
+vite.config.ts
+package.json
+public/
+  logo.svg
+  favicon.svg
+  data/masses.json
 src/
-  ui.js                     DOM/UI logic
-  search.js                 Formula enumeration algorithm
-  massData.js               Mass-data loading/indexing
-  formula.js                Formula labels, isotope labels, charge labels
-  decimal.js                BigInt decimal/rational helpers
-  styles.css                Page styling
-
-data/
-  masses.json               Unified isotope/element mass table
-
+  App.svelte
+  main.ts
+  components/
+  core/
+  workers/
+  styles/
 scripts/
-  check-masses.mjs          Mass-data validation script
-
+  check-masses.ts
 tests/
-  smoke-test.mjs            Basic search regression test
+  smoke.test.ts
+.github/workflows/pages.yml
+```
 
-.github/workflows/
-  pages.yml                 Optional GitHub Pages deployment workflow
+## Notes on mass data
+
+The included `public/data/masses.json` is generated from RDKit 2025.09.4 in the same shape expected by FormulaM. The GitHub connector could identify the current repository blob SHA but could not inline the large `data/masses.json` contents into this environment. For strict continuity with the repository at a specific commit, replace `public/data/masses.json` with the current `data/masses.json` from `Lastoria-Royal-College-of-Science/FormulaM` before final publication. You can do that with:
+
+```bash
+npm run sync:masses -- /path/to/FormulaM/data/masses.json
 ```
 
 ## Scientific disclaimer

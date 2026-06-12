@@ -1,16 +1,23 @@
 const TEN = 10n;
 
-export function expandExponential(rawValue) {
-  let text = String(rawValue).trim();
+export type RoundingMode = "ceil" | "floor" | "round";
+export interface Rational {
+  numerator: bigint;
+  denominator: bigint;
+}
+
+export function expandExponential(rawValue: unknown): string {
+  const text = String(rawValue).trim();
   if (!/[eE]/.test(text)) return text;
 
   const match = text.match(/^([+-]?)(\d*\.?\d+)[eE]([+-]?\d+)$/);
   if (!match) throw new Error(`Invalid decimal value: ${rawValue}`);
+
   const sign = match[1] || "";
   const mantissa = match[2];
   const exponent = Number.parseInt(match[3], 10);
   const [wholeRaw, fracRaw = ""] = mantissa.split(".");
-  const digits = `${wholeRaw || "0"}${fracRaw}`.replace(/^0+(?=\d)/, "");
+  const digits = `${wholeRaw || "0"}${fracRaw}`.replace(/^0+(?=\d)/, "") || "0";
   const decimalPosition = (wholeRaw || "0").length + exponent;
 
   if (decimalPosition <= 0) {
@@ -22,10 +29,11 @@ export function expandExponential(rawValue) {
   return `${sign}${digits.slice(0, decimalPosition)}.${digits.slice(decimalPosition)}`;
 }
 
-export function parseDecimalToRational(rawValue) {
+export function parseDecimalToRational(rawValue: unknown): Rational {
   const expanded = expandExponential(rawValue);
   const match = expanded.match(/^([+-]?)(\d+)(?:\.(\d*))?$/);
   if (!match) throw new Error(`Invalid decimal value: ${rawValue}`);
+
   const sign = match[1] === "-" ? -1n : 1n;
   const whole = match[2];
   const frac = match[3] || "";
@@ -36,7 +44,7 @@ export function parseDecimalToRational(rawValue) {
   };
 }
 
-export function decimalToScaledBigInt(rawValue, scaleDigits = 9, rounding = "round") {
+export function decimalToScaledBigInt(rawValue: unknown, scaleDigits = 9, rounding: RoundingMode = "round"): bigint {
   const expanded = expandExponential(rawValue);
   const match = expanded.match(/^([+-]?)(\d+)(?:\.(\d*))?$/);
   if (!match) throw new Error(`Invalid decimal value: ${rawValue}`);
@@ -58,12 +66,7 @@ export function decimalToScaledBigInt(rawValue, scaleDigits = 9, rounding = "rou
   return sign * magnitude;
 }
 
-export function ceilDiv(a, b) {
-  if (b <= 0n) throw new Error("ceilDiv divisor must be positive");
-  return -floorDiv(-a, b);
-}
-
-export function floorDiv(a, b) {
+export function floorDiv(a: bigint, b: bigint): bigint {
   if (b <= 0n) throw new Error("floorDiv divisor must be positive");
   let q = a / b;
   const r = a % b;
@@ -71,27 +74,28 @@ export function floorDiv(a, b) {
   return q;
 }
 
-export function ceilRational(numerator, denominator) {
+export function ceilDiv(a: bigint, b: bigint): bigint {
+  if (b <= 0n) throw new Error("ceilDiv divisor must be positive");
+  return -floorDiv(-a, b);
+}
+
+export function ceilRational(numerator: bigint, denominator: bigint): bigint {
   if (denominator <= 0n) throw new Error("denominator must be positive");
   if (numerator >= 0n) return (numerator + denominator - 1n) / denominator;
   return numerator / denominator;
 }
 
-export function absBigInt(value) {
+export function absBigInt(value: bigint): bigint {
   return value < 0n ? -value : value;
 }
 
-export function maxBigInt(a, b) {
+export function maxBigInt(a: bigint, b: bigint): bigint {
   return a > b ? a : b;
 }
 
-export function minBigInt(a, b) {
-  return a < b ? a : b;
-}
-
-export function bigIntToDecimalString(value, scaleDigits = 9, fractionDigits = scaleDigits) {
+export function bigIntToDecimalString(value: bigint, scaleDigits = 9, fractionDigits = scaleDigits): string {
   const sign = value < 0n ? "-" : "";
-  let magnitude = value < 0n ? -value : value;
+  const magnitude = value < 0n ? -value : value;
   const scale = TEN ** BigInt(scaleDigits);
   const whole = magnitude / scale;
   let frac = (magnitude % scale).toString().padStart(scaleDigits, "0");
@@ -108,10 +112,10 @@ export function bigIntToDecimalString(value, scaleDigits = 9, fractionDigits = s
   return fractionDigits === 0 ? `${sign}${whole}` : `${sign}${whole}.${frac}`;
 }
 
-export function rationalToDecimalString(numerator, denominator, fractionDigits = 9) {
+export function rationalToDecimalString(numerator: bigint, denominator: bigint, fractionDigits = 9): string {
   if (denominator <= 0n) throw new Error("denominator must be positive");
   const sign = numerator < 0n ? "-" : "";
-  let n = numerator < 0n ? -numerator : numerator;
+  const n = numerator < 0n ? -numerator : numerator;
   const scale = TEN ** BigInt(fractionDigits);
   let scaled = (n * scale) / denominator;
   const remainder = (n * scale) % denominator;
@@ -121,7 +125,7 @@ export function rationalToDecimalString(numerator, denominator, fractionDigits =
   return fractionDigits === 0 ? `${sign}${whole}` : `${sign}${whole}.${frac}`;
 }
 
-export function nonNegativeDecimalRational(rawValue, label) {
+export function nonNegativeDecimalRational(rawValue: unknown, label: string): Rational {
   const rational = parseDecimalToRational(rawValue);
   if (rational.numerator < 0n) throw new Error(`${label} must be non-negative`);
   return rational;

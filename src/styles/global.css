@@ -10,6 +10,7 @@
   --accent-contrast: #07111f;
   --danger: #ff7b72;
   --success: #56d364;
+  --info: #79c0ff;
   --shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -26,13 +27,11 @@ html[data-theme="light"] {
   --accent-contrast: #ffffff;
   --danger: #b42318;
   --success: #027a48;
+  --info: #175cd3;
   --shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
 }
 
-html[data-theme="dark"] {
-  color-scheme: dark;
-}
-
+html[data-theme="dark"] { color-scheme: dark; }
 * { box-sizing: border-box; }
 
 body {
@@ -42,9 +41,7 @@ body {
   color: var(--text);
 }
 
-button, input, select {
-  font: inherit;
-}
+button, input, select { font: inherit; }
 
 .page-shell {
   width: min(1180px, calc(100% - 32px));
@@ -78,15 +75,8 @@ button, input, select {
   font-weight: 650;
 }
 
-.github-link:hover, .theme-toggle:hover {
-  border-color: var(--accent);
-}
-
-.github-mark {
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
-}
+.github-link:hover, .theme-toggle:hover { border-color: var(--accent); }
+.github-mark { width: 20px; height: 20px; fill: currentColor; }
 
 .theme-toggle {
   padding: 8px 14px;
@@ -111,12 +101,6 @@ button, input, select {
   object-fit: contain;
 }
 
-/*html[data-theme="dark"] .logo {*/
-/*  background: rgba(255, 255, 255, 0.92);*/
-/*  border-radius: 18px;*/
-/*  padding: 14px 18px;*/
-/*}*/
-
 .tagline {
   color: var(--muted);
   margin: 12px auto 0;
@@ -133,11 +117,9 @@ button, input, select {
   margin: 18px 0;
 }
 
-.card h2, .card h3 {
-  margin-top: 0;
-}
+.card h2, .card h3 { margin-top: 0; }
 
-.status, .message {
+.message {
   border-radius: 12px;
   padding: 12px 14px;
   margin: 14px 0;
@@ -146,10 +128,9 @@ button, input, select {
   color: var(--muted);
 }
 
-.status[hidden], .message:empty { display: none; }
-
 .message.error { color: var(--danger); }
 .message.success { color: var(--success); }
+.message.info { color: var(--info); }
 
 .input-grid {
   display: grid;
@@ -257,8 +238,8 @@ dialog::backdrop { background: rgba(2, 6, 23, 0.45); }
   border: 1px solid var(--border);
 }
 
-button:disabled {
-  opacity: 0.5;
+button:disabled, input:disabled, select:disabled {
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
@@ -316,6 +297,12 @@ td {
 
 .results-table tbody tr:nth-child(odd) {
   background: color-mix(in srgb, var(--surface-2), transparent 35%);
+}
+
+.empty-results {
+  color: var(--muted);
+  text-align: center;
+  padding: 18px 8px;
 }
 
 .examples summary {

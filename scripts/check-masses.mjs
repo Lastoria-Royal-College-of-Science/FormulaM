@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const payload = JSON.parse(await readFile(new URL("../data/masses.json", import.meta.url), "utf8"));
+const payload = JSON.parse(await readFile(new URL("../public/data/masses.json", import.meta.url), "utf8"));
 
 assert.equal(typeof payload, "object");
 assert.equal(typeof payload.isotopes, "object");
