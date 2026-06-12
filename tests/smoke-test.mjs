@@ -41,4 +41,4 @@ const mixedIsotope = findFormulas({
 assert.ok(mixedIsotope.length > 0, "expected mixed isotope hit");
 assert.equal(mixedIsotope[0].formula, "C5[13C]H12O6");
 
-console.log("FormulaM JS smoke tests passed");
+console.log("FormulaM smoke tests passed");
