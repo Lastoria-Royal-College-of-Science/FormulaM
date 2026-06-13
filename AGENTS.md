@@ -49,6 +49,7 @@ Prefer small regression tests for the changed behavior. Do not weaken assertions
 - Keep Svelte components focused on rendering, input state, and user interaction.
 - Prefer explicit error messages over silent fallback behavior for scientific inputs.
 - If UnoCSS is introduced, use it for UI shortcuts and layout utilities only; do not let styling changes affect `src/core/` or worker behavior.
+- Semantic component styles must not be added to `src/styles/global.css`. Put them in `uno.config.ts` shortcuts/rules instead; keep `global.css` limited to design tokens, resets, and truly global element-level behavior.
 
 ## Do not
 
