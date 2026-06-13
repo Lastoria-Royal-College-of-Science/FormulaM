@@ -7,6 +7,11 @@
   import MessageBanner from "./components/MessageBanner.svelte";
   import ResultsTable from "./components/ResultsTable.svelte";
   import ExamplesPanel from "./components/ExamplesPanel.svelte";
+  import SpectrumImport from "./components/SpectrumImport.svelte";
+  import SpectrumPlot from "./components/SpectrumPlot.svelte";
+  import PlotSettingsPanel from "./components/PlotSettingsPanel.svelte";
+  import PeakInspector from "./components/PeakInspector.svelte";
+  import ExportPanel from "./components/ExportPanel.svelte";
   import { downloadHitsCsv } from "./core/csv";
   import { buildMassIndex, loadMassPayload } from "./core/massData";
   import {
@@ -17,9 +22,28 @@
     makeRow,
     validateAndBuildElements,
   } from "./core/searchSpace";
-  import type { AppStatus, FindFormulaRequest, FormulaHit, FormulaSpaceRow, MassIndex, SearchFormState, ThemeName } from "./core/types";
-  import type { WorkerResponse } from "./workers/workerProtocol";
+  import { getAssignment, attachAssignmentsToPeaks, buildPeakAssignment, removeAssignment, upsertAssignment } from "./core/assignments";
+  import { downloadAnnotatedSpectrumPng, downloadAssignmentsCsv } from "./core/exportSpectrum";
+  import { createPlotSettings, DEFAULT_PLOT_SETTINGS } from "./core/plotTicks";
   import { findFormulas } from "./core/search";
+  import { loadSpectrumImportSource } from "./core/spectrumImport";
+  import { buildSpectrumPreview, normalizeSpectrumTable, suggestSpectrumSelection } from "./core/spectrumNormalize";
+  import type {
+    AppStatus,
+    FindFormulaRequest,
+    FormulaHit,
+    FormulaSpaceRow,
+    MassIndex,
+    PeakAssignment,
+    PlotSettings,
+    SearchFormState,
+    SpectrumImportSheet,
+    SpectrumImportSource,
+    SpectrumPeak,
+    SpectrumPreviewTable,
+    ThemeName,
+  } from "./core/types";
+  import type { WorkerResponse } from "./workers/workerProtocol";
 
   let theme: ThemeName = "dark";
   let massIndex: MassIndex | null = null;
@@ -41,7 +65,35 @@
   let activeRequestId: string | null = null;
   let colorSchemeMediaQuery: MediaQueryList | null = null;
 
+  let rawSpectrumPeaks: SpectrumPeak[] = [];
+  let spectrumPeaks: SpectrumPeak[] = [];
+  let spectrumAssignments: PeakAssignment[] = [];
+  let selectedPeakId: string | null = null;
+  let selectedPeak: SpectrumPeak | null = null;
+  let selectedAssignment: PeakAssignment | null = null;
+  let spectrumImportSource: SpectrumImportSource | null = null;
+  let currentSpectrumImportSheet: SpectrumImportSheet | null = null;
+  let spectrumPreview: SpectrumPreviewTable | null = null;
+  let spectrumFileName = "";
+  let spectrumMzColumn = "";
+  let spectrumIntensityColumn = "";
+  let spectrumActiveSheetName = "";
+  let spectrumHasHeaderRow = true;
+  let spectrumMzColumnIndex: number | null = null;
+  let spectrumIntensityColumnIndex: number | null = null;
+  let spectrumImportError = "";
+  let includeUnassignedInAssignmentCsv = false;
+  let plotSettings: PlotSettings = { ...DEFAULT_PLOT_SETTINGS };
+
   $: isBusy = status === "loading" || status === "running";
+  $: spectrumPeaks = attachAssignmentsToPeaks(rawSpectrumPeaks, spectrumAssignments, selectedPeakId);
+  $: selectedPeak = spectrumPeaks.find((peak) => peak.id === selectedPeakId) ?? null;
+  $: selectedAssignment = getAssignment(spectrumAssignments, selectedPeakId);
+  $: assignedCount = spectrumAssignments.length;
+  $: selectedPeakLabel = selectedPeak ? selectedPeak.mz.toFixed(6) : "";
+  $: canExportAssignmentCsv = rawSpectrumPeaks.length > 0 && (includeUnassignedInAssignmentCsv || assignedCount > 0);
+  $: currentSpectrumImportSheet = spectrumImportSource?.sheets.find((sheet) => sheet.name === spectrumActiveSheetName) ?? spectrumImportSource?.sheets[0] ?? null;
+  $: spectrumPreview = currentSpectrumImportSheet ? buildSpectrumPreview(currentSpectrumImportSheet.table, spectrumHasHeaderRow) : null;
 
   function applyTheme(nextTheme: ThemeName): void {
     theme = nextTheme;
@@ -66,6 +118,47 @@
 
   function updateForm(patch: Partial<SearchFormState>): void {
     form = { ...form, ...patch };
+  }
+
+  function updatePlotSettings(patch: Partial<PlotSettings>): void {
+    plotSettings = { ...plotSettings, ...patch };
+  }
+
+  function clearImportedSpectrumData(): void {
+    rawSpectrumPeaks = [];
+    spectrumAssignments = [];
+    selectedPeakId = null;
+    spectrumMzColumn = "";
+    spectrumIntensityColumn = "";
+    includeUnassignedInAssignmentCsv = false;
+    plotSettings = { ...DEFAULT_PLOT_SETTINGS };
+    results = [];
+    hasSearched = false;
+  }
+
+  function clearSpectrumImportState(): void {
+    spectrumImportSource = null;
+    spectrumFileName = "";
+    spectrumActiveSheetName = "";
+    spectrumHasHeaderRow = true;
+    spectrumMzColumnIndex = null;
+    spectrumIntensityColumnIndex = null;
+    spectrumImportError = "";
+    clearImportedSpectrumData();
+  }
+
+  function resetPlotView(): void {
+    if (!rawSpectrumPeaks.length) {
+      plotSettings = { ...DEFAULT_PLOT_SETTINGS };
+      return;
+    }
+
+    const nextView = createPlotSettings(rawSpectrumPeaks);
+    plotSettings = {
+      ...plotSettings,
+      xMin: nextView.xMin,
+      xMax: nextView.xMax,
+    };
   }
 
   function updateRow(rowId: number, patch: Partial<FormulaSpaceRow>): void {
@@ -170,6 +263,171 @@
     if (results.length) downloadHitsCsv(results);
   }
 
+  function importSourceLabel(sheetName: string): string {
+    return spectrumImportSource && spectrumImportSource.sheets.length > 1 ? `${spectrumFileName} / ${sheetName}` : spectrumFileName;
+  }
+
+  function isSpectrumImportSheet(candidate: unknown): candidate is SpectrumImportSheet {
+    return Boolean(
+      candidate
+      && typeof candidate === "object"
+      && "name" in candidate
+      && "table" in candidate
+      && Array.isArray((candidate as SpectrumImportSheet).table),
+    );
+  }
+
+  function applySpectrumImportResult(sourceName: string, sheet: SpectrumImportSheet): void {
+    if (!sheet) {
+      throw new Error("Spectrum import failed: no active worksheet is selected.");
+    }
+
+    const imported = normalizeSpectrumTable(sheet.table, {
+      sourceName,
+      hasHeaderRow: spectrumHasHeaderRow,
+      mzColumnIndex: spectrumMzColumnIndex,
+      intensityColumnIndex: spectrumIntensityColumnIndex,
+    });
+
+    rawSpectrumPeaks = imported.peaks;
+    spectrumAssignments = [];
+    selectedPeakId = null;
+    spectrumMzColumn = imported.mzColumn;
+    spectrumIntensityColumn = imported.intensityColumn;
+    includeUnassignedInAssignmentCsv = false;
+    plotSettings = createPlotSettings(imported.peaks);
+    results = [];
+    hasSearched = false;
+  }
+
+  function applySuggestedSpectrumSelection(sheet: SpectrumImportSheet): void {
+    const suggestion = suggestSpectrumSelection(sheet.table, sheet.suggestedHasHeaderRow);
+    spectrumActiveSheetName = sheet.name;
+    spectrumHasHeaderRow = suggestion.hasHeaderRow;
+    spectrumMzColumnIndex = suggestion.mzColumnIndex;
+    spectrumIntensityColumnIndex = suggestion.intensityColumnIndex;
+  }
+
+  function handleApplySpectrumSelection(sheet: SpectrumImportSheet | Event | null = currentSpectrumImportSheet): void {
+    const resolvedSheet = isSpectrumImportSheet(sheet) ? sheet : currentSpectrumImportSheet;
+    if (!resolvedSheet) return;
+
+    try {
+      spectrumImportError = "";
+      const label = importSourceLabel(resolvedSheet.name);
+      applySpectrumImportResult(label, resolvedSheet);
+      status = "success";
+      message = `Imported ${rawSpectrumPeaks.length} peaks from ${label}. Adjust worksheet or column mapping if needed.`;
+    } catch (error) {
+      console.error(error);
+      clearImportedSpectrumData();
+      spectrumImportError = error instanceof Error ? error.message : String(error);
+      status = "error";
+      message = spectrumImportError;
+    }
+  }
+
+  function handleSpectrumSheetSelect(sheetName: string): void {
+    if (!spectrumImportSource) return;
+    const sheet = spectrumImportSource.sheets.find((candidate) => candidate.name === sheetName);
+    if (!sheet) return;
+    applySuggestedSpectrumSelection(sheet);
+    handleApplySpectrumSelection(sheet);
+  }
+
+  function handleSpectrumHasHeaderRowSelect(value: boolean): void {
+    spectrumHasHeaderRow = value;
+    if (!currentSpectrumImportSheet) return;
+
+    const suggestion = suggestSpectrumSelection(currentSpectrumImportSheet.table, value);
+    if (spectrumMzColumnIndex === null) spectrumMzColumnIndex = suggestion.mzColumnIndex;
+    if (spectrumIntensityColumnIndex === null) spectrumIntensityColumnIndex = suggestion.intensityColumnIndex;
+  }
+
+  function handleSpectrumMzColumnSelect(index: number | null): void {
+    spectrumMzColumnIndex = index;
+  }
+
+  function handleSpectrumIntensityColumnSelect(index: number | null): void {
+    spectrumIntensityColumnIndex = index;
+  }
+
+  async function handleSpectrumImport(file: File | null): Promise<void> {
+    if (!file) {
+      clearSpectrumImportState();
+      status = "idle";
+      message = "Spectrum cleared. FormulaM single m/z search remains available.";
+      return;
+    }
+
+    try {
+      clearImportedSpectrumData();
+      spectrumImportError = "";
+      status = "running";
+      message = `Loading preview for ${file.name}...`;
+
+      spectrumImportSource = await loadSpectrumImportSource(file);
+      spectrumFileName = file.name;
+
+      const firstSheet = spectrumImportSource.sheets[0];
+      if (!firstSheet) throw new Error(`Spectrum import failed: ${file.name} does not contain any readable tables.`);
+
+      applySuggestedSpectrumSelection(firstSheet);
+      handleApplySpectrumSelection(firstSheet);
+    } catch (error) {
+      console.error(error);
+      clearSpectrumImportState();
+      spectrumImportError = error instanceof Error ? error.message : String(error);
+      status = "error";
+      message = spectrumImportError;
+    }
+  }
+
+  function handlePeakSelect(peak: SpectrumPeak): void {
+    selectedPeakId = peak.id;
+    updateForm({ mz: peak.mz.toFixed(6) });
+    status = "idle";
+    message = `Selected peak ${peak.mz.toFixed(6)}. Adjust charge/tolerance if needed, then run formula search.`;
+  }
+
+  function handleAssign(hit: FormulaHit): void {
+    if (!selectedPeak) return;
+    spectrumAssignments = upsertAssignment(spectrumAssignments, buildPeakAssignment(selectedPeak, hit));
+    status = "success";
+    message = `Assigned ${hit.formula} to peak ${selectedPeak.mz.toFixed(6)}.`;
+  }
+
+  function handleRemoveAssignment(peakId: string): void {
+    const previous = getAssignment(spectrumAssignments, peakId);
+    spectrumAssignments = removeAssignment(spectrumAssignments, peakId);
+    if (previous) {
+      status = "success";
+      message = `Removed assignment ${previous.formula} from peak ${previous.mz.toFixed(6)}.`;
+    }
+  }
+
+  function handleExportAssignments(): void {
+    if (!canExportAssignmentCsv) return;
+    downloadAssignmentsCsv(spectrumPeaks, includeUnassignedInAssignmentCsv);
+    status = "success";
+    message = "Downloaded spectrum assignment CSV.";
+  }
+
+  async function handleExportPng(): Promise<void> {
+    if (!rawSpectrumPeaks.length) return;
+    try {
+      status = "running";
+      message = "Exporting annotated spectrum PNG...";
+      await downloadAnnotatedSpectrumPng(spectrumPeaks, plotSettings, theme);
+      status = "success";
+      message = "Downloaded annotated spectrum PNG.";
+    } catch (error) {
+      console.error(error);
+      status = "error";
+      message = error instanceof Error ? error.message : String(error);
+    }
+  }
+
   onMount(async () => {
     syncThemeWithSystem();
 
@@ -220,8 +478,42 @@
 <main class="page-shell">
   <TopBar {theme} onToggleTheme={toggleTheme} />
   <Hero />
+  <MessageBanner {status} {message} />
 
-  <!-- <MessageBanner {status} {message} /> -->
+  <SpectrumImport
+    activeSheetName={spectrumActiveSheetName}
+    disabled={isBusy}
+    hasHeaderRow={spectrumHasHeaderRow}
+    importSource={spectrumImportSource}
+    intensityColumnIndex={spectrumIntensityColumnIndex}
+    intensityColumnName={spectrumIntensityColumn}
+    peakCount={rawSpectrumPeaks.length}
+    previewTable={spectrumPreview}
+    sourceName={spectrumFileName}
+    mzColumnIndex={spectrumMzColumnIndex}
+    mzColumnName={spectrumMzColumn}
+    importError={spectrumImportError}
+    onApplySelection={handleApplySpectrumSelection}
+    onImportFile={handleSpectrumImport}
+    onSelectHasHeaderRow={handleSpectrumHasHeaderRowSelect}
+    onSelectIntensityColumn={handleSpectrumIntensityColumnSelect}
+    onSelectMzColumn={handleSpectrumMzColumnSelect}
+    onSelectSheet={handleSpectrumSheetSelect}
+  />
+
+  <SpectrumPlot
+    peaks={spectrumPeaks}
+    settings={plotSettings}
+    {theme}
+    {selectedPeakId}
+    onSelectPeak={handlePeakSelect}
+    onResetView={resetPlotView}
+  />
+
+  {#if rawSpectrumPeaks.length > 0}
+    <PlotSettingsPanel settings={plotSettings} disabled={isBusy} onChange={updatePlotSettings} />
+    <PeakInspector selectedPeak={selectedPeak} assignment={selectedAssignment} onRemoveAssignment={handleRemoveAssignment} />
+  {/if}
 
   <SearchInputs {form} disabled={isBusy} onChange={updateForm} />
 
@@ -238,11 +530,29 @@
 
   <section class="my-4 flex flex-wrap gap-3">
     <button type="button" class="primary-action" disabled={isBusy || !massIndex} on:click={runSearch}>Find candidate formulas</button>
-    <button id="downloadCsv" type="button" class="secondary-action" disabled={isBusy || results.length === 0} on:click={downloadCsv}>Download CSV</button>
+    <button id="downloadCsv" type="button" class="secondary-action" disabled={isBusy || results.length === 0} on:click={downloadCsv}>Download formula hits CSV</button>
   </section>
 
   {#if hasSearched}
-    <ResultsTable {results} />
+    <ResultsTable
+      {results}
+      selectedPeakLabel={selectedPeakLabel}
+      selectedPeakHasAssignment={Boolean(selectedAssignment)}
+      onAssign={rawSpectrumPeaks.length > 0 ? handleAssign : null}
+    />
+  {/if}
+
+  {#if rawSpectrumPeaks.length > 0}
+    <ExportPanel
+      includeUnassigned={includeUnassignedInAssignmentCsv}
+      canExportAssignments={canExportAssignmentCsv}
+      disabled={isBusy}
+      totalPeaks={rawSpectrumPeaks.length}
+      {assignedCount}
+      onIncludeUnassignedChange={(value) => (includeUnassignedInAssignmentCsv = value)}
+      onExportAssignments={handleExportAssignments}
+      onExportPng={handleExportPng}
+    />
   {/if}
 
   <ExamplesPanel />

@@ -55,16 +55,4 @@ button, input, select {
   appearance: none;
 }
 
-select.field-control {
-  background-image:
-    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
-    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
-  background-position:
-    calc(100% - 18px) 50%,
-    calc(100% - 12px) 50%;
-  background-repeat: no-repeat;
-  background-size: 6px 6px;
-  padding-right: 40px;
-}
-
 dialog::backdrop { background: rgba(2, 6, 23, 0.45); }

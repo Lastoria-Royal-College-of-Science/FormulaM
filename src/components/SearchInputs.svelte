@@ -41,7 +41,7 @@
     <label class="block">
       <span class="field-title">Tolerance mode</span>
       <select
-        class="field-control"
+        class="field-control field-select"
         value={form.toleranceMode}
         disabled={disabled}
         on:change={(event) => onChange({ toleranceMode: (event.currentTarget as HTMLSelectElement).value as SearchFormState["toleranceMode"] })}
