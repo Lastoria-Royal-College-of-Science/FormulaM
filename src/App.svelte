@@ -4,7 +4,6 @@
   import Hero from "./components/Hero.svelte";
   import SearchInputs from "./components/SearchInputs.svelte";
   import FormulaSpaceTable from "./components/FormulaSpaceTable.svelte";
-  import MessageBanner from "./components/MessageBanner.svelte";
   import ResultsTable from "./components/ResultsTable.svelte";
   import SpectrumImport from "./components/SpectrumImport.svelte";
   import SpectrumPlot from "./components/SpectrumPlot.svelte";
@@ -58,7 +57,6 @@
     maxResults: 100,
   };
   let status: AppStatus = "loading";
-  let message = "Loading mass database...";
   let hasSearched = false;
   let worker: Worker | null = null;
   let activeRequestId: string | null = null;
@@ -225,11 +223,9 @@
       results = response.hits;
       hasSearched = true;
       status = "success";
-      message = `Found ${response.hits.length} candidate formula(s).`;
       return;
     }
     status = "error";
-    message = response.message;
   }
 
   function runSearch(): void {
@@ -238,7 +234,6 @@
       const requestId = crypto.randomUUID();
       activeRequestId = requestId;
       status = "running";
-      message = "Searching candidate formulas...";
 
       if (worker) {
         worker.postMessage({ type: "search", requestId, payload: request });
@@ -250,11 +245,9 @@
       results = hits;
       hasSearched = true;
       status = "success";
-      message = `Found ${hits.length} candidate formula(s).`;
     } catch (error) {
       console.error(error);
       status = "error";
-      message = error instanceof Error ? error.message : String(error);
     }
   }
 
@@ -316,13 +309,11 @@
       const label = importSourceLabel(resolvedSheet.name);
       applySpectrumImportResult(label, resolvedSheet);
       status = "success";
-      message = `Imported ${rawSpectrumPeaks.length} peaks from ${label}. Adjust worksheet or column mapping if needed.`;
     } catch (error) {
       console.error(error);
       clearImportedSpectrumData();
       spectrumImportError = error instanceof Error ? error.message : String(error);
       status = "error";
-      message = spectrumImportError;
     }
   }
 
@@ -355,7 +346,6 @@
     if (!file) {
       clearSpectrumImportState();
       status = "idle";
-      message = "Spectrum cleared. FormulaM single m/z search remains available.";
       return;
     }
 
@@ -363,7 +353,6 @@
       clearImportedSpectrumData();
       spectrumImportError = "";
       status = "running";
-      message = `Loading preview for ${file.name}...`;
 
       spectrumImportSource = await loadSpectrumImportSource(file);
       spectrumFileName = file.name;
@@ -378,7 +367,6 @@
       clearSpectrumImportState();
       spectrumImportError = error instanceof Error ? error.message : String(error);
       status = "error";
-      message = spectrumImportError;
     }
   }
 
@@ -386,14 +374,12 @@
     selectedPeakId = peak.id;
     updateForm({ mz: peak.mz.toFixed(6) });
     status = "idle";
-    message = `Selected peak ${peak.mz.toFixed(6)}. Adjust charge/tolerance if needed, then run formula search.`;
   }
 
   function handleAssign(hit: FormulaHit): void {
     if (!selectedPeak) return;
     spectrumAssignments = upsertAssignment(spectrumAssignments, buildPeakAssignment(selectedPeak, hit));
     status = "success";
-    message = `Assigned ${hit.formula} to peak ${selectedPeak.mz.toFixed(6)}.`;
   }
 
   function handleRemoveAssignment(peakId: string): void {
@@ -401,7 +387,6 @@
     spectrumAssignments = removeAssignment(spectrumAssignments, peakId);
     if (previous) {
       status = "success";
-      message = `Removed assignment ${previous.formula} from peak ${previous.mz.toFixed(6)}.`;
     }
   }
 
@@ -409,21 +394,17 @@
     if (!canExportAssignmentCsv) return;
     downloadAssignmentsCsv(spectrumPeaks, includeUnassignedInAssignmentCsv);
     status = "success";
-    message = "Downloaded spectrum assignment CSV.";
   }
 
   async function handleExportPng(): Promise<void> {
     if (!rawSpectrumPeaks.length) return;
     try {
       status = "running";
-      message = "Exporting annotated spectrum PNG...";
       await downloadAnnotatedSpectrumPng(spectrumPeaks, plotSettings, theme);
       status = "success";
-      message = "Downloaded annotated spectrum PNG.";
     } catch (error) {
       console.error(error);
       status = "error";
-      message = error instanceof Error ? error.message : String(error);
     }
   }
 
@@ -454,11 +435,9 @@
       rows = initial.rows;
       nextRowId = initial.nextRowId;
       status = "idle";
-      message = `Loaded mass database from ${url}.`;
     } catch (error) {
       console.error(error);
       status = "error";
-      message = error instanceof Error ? error.message : String(error);
     }
   });
 
@@ -479,7 +458,6 @@
 
   <main class="page-shell">
     <Hero />
-    <MessageBanner {status} {message} />
 
     <SpectrumImport
       activeSheetName={spectrumActiveSheetName}
