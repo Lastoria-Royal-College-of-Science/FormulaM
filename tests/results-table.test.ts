@@ -28,6 +28,20 @@ const sampleAssignment: PeakAssignment = {
   source: "formula-search",
 };
 
+function makeHit(index: number): FormulaHit {
+  return {
+    formula: `F${index}`,
+    composition: { C: index },
+    mass: `${180 + index}.000000000`,
+    mz: `${180 + index}.500000000`,
+    error_da: `${index}.000000000`,
+    error_ppm: `${index}.000000`,
+    charge: 1,
+    charge_state: "+",
+    ion_formula: `[F${index}]+`,
+  };
+}
+
 describe("ResultsTable", () => {
   it("shows only the merged formula column for candidate hits", () => {
     const { body } = render(ResultsTable, { props: { results: [sampleHit] } });
@@ -73,11 +87,28 @@ describe("ResultsTable", () => {
     expect(body).toContain('Remove [C6H12O6]+ from the selected peak');
   });
 
+  it("renders pagination controls and shows the first 10 rows by default", () => {
+    const results = Array.from({ length: 12 }, (_, index) => makeHit(index + 1));
+    const { body } = render(ResultsTable, { props: { results } });
+
+    expect(body).toContain('aria-label="Rows per page"');
+    expect(body).toContain('>All<');
+    expect(body).toContain("Showing 1-10 of 12");
+    expect(body).toContain("Page 1 of 2");
+    expect(body).toContain("Go to previous results page");
+    expect(body).toContain("Go to next results page");
+    expect(body).toContain("[F10]+");
+    expect(body).not.toContain("[F11]+");
+    expect(body).not.toContain("[F12]+");
+  });
+
   it("updates the empty-state colspan to match the visible columns", () => {
     const withoutAssign = render(ResultsTable, { props: { results: [] } }).body;
     const withAssign = render(ResultsTable, { props: { results: [], onToggleAssignment: () => undefined } }).body;
 
     expect(withoutAssign).toContain('colspan="5"');
     expect(withAssign).toContain('colspan="6"');
+    expect(withoutAssign).toContain("Showing 0 results");
+    expect(withoutAssign).toContain("Page 1 of 1");
   });
 });

@@ -10,17 +10,45 @@
   import { matchesAssignmentHit } from "../core/assignments";
   import type { FormulaHit, PeakAssignment } from "../core/types";
 
+  type ResultsPageSizeValue = "10" | "20" | "50" | "all";
+
+  const pageSizeOptions: Array<{ label: string; value: ResultsPageSizeValue }> = [
+    { label: "10", value: "10" },
+    { label: "20", value: "20" },
+    { label: "50", value: "50" },
+    { label: "All", value: "all" },
+  ];
+
   export let results: FormulaHit[] = [];
   export let selectedPeakLabel = "";
   export let activeAssignment: PeakAssignment | null = null;
   export let onToggleAssignment: ((hit: FormulaHit) => void) | null = null;
 
   let sortState: ResultSortState | null = null;
+  let pageSizeValue: ResultsPageSizeValue = "10";
+  let currentPage = 1;
+  let previousResults: FormulaHit[] = results;
 
   $: sortedResults = sortFormulaHits(results, sortState);
+  $: if (results !== previousResults) {
+    previousResults = results;
+    currentPage = 1;
+  }
+  $: resolvedPageSize = pageSizeValue === "all" ? null : Number(pageSizeValue);
+  $: totalResults = sortedResults.length;
+  $: totalPages = resolvedPageSize === null || totalResults === 0 ? 1 : Math.ceil(totalResults / resolvedPageSize);
+  $: if (currentPage > totalPages) currentPage = totalPages;
+  $: pageStart = resolvedPageSize === null ? 0 : (currentPage - 1) * resolvedPageSize;
+  $: pageEnd = resolvedPageSize === null ? totalResults : Math.min(totalResults, pageStart + resolvedPageSize);
+  $: visibleResults = sortedResults.slice(pageStart, pageEnd);
+  $: paginationSummary = totalResults === 0 ? "Showing 0 results" : `Showing ${pageStart + 1}-${pageEnd} of ${totalResults}`;
 
   function toggleSort(column: ResultSortColumn): void {
     sortState = cycleResultSortState(sortState, column);
+  }
+
+  function goToPage(nextPage: number): void {
+    currentPage = Math.min(Math.max(nextPage, 1), totalPages);
   }
 
   function toggleAssignment(hit: FormulaHit): void {
@@ -45,6 +73,20 @@
           {/if}
         </p>
       {/if}
+    </div>
+    <div class="flex flex-wrap items-center gap-2 text-sm text-muted">
+      <label for="results-page-size">Rows per page</label>
+      <select
+        id="results-page-size"
+        class="field-control field-select min-h-9 min-w-[4.75rem] w-[4.75rem] pl-3 pr-11 py-1.5 text-sm"
+        aria-label="Rows per page"
+        bind:value={pageSizeValue}
+        on:change={() => (currentPage = 1)}
+      >
+        {#each pageSizeOptions as option}
+          <option value={option.value}>{option.label}</option>
+        {/each}
+      </select>
     </div>
   </div>
   <div class="w-full overflow-x-auto">
@@ -114,7 +156,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each sortedResults as hit}
+        {#each visibleResults as hit}
           {@const isAssigned = matchesAssignmentHit(activeAssignment, hit)}
           <tr class={isAssigned ? "results-row-active" : "odd:bg-row"}>
             <td class="table-cell">{hit.ion_formula}</td>
@@ -144,5 +186,29 @@
         {/each}
       </tbody>
     </table>
+  </div>
+  <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+    <div class="text-sm text-muted" aria-live="polite">{paginationSummary}</div>
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="text-sm text-muted">Page {currentPage} of {totalPages}</span>
+      <button
+        type="button"
+        class="secondary-action min-h-9 rounded-[10px] px-3 py-1.5 text-sm"
+        aria-label="Go to previous results page"
+        disabled={currentPage <= 1}
+        on:click={() => goToPage(currentPage - 1)}
+      >
+        Previous
+      </button>
+      <button
+        type="button"
+        class="secondary-action min-h-9 rounded-[10px] px-3 py-1.5 text-sm"
+        aria-label="Go to next results page"
+        disabled={currentPage >= totalPages}
+        on:click={() => goToPage(currentPage + 1)}
+      >
+        Next
+      </button>
+    </div>
   </div>
 </section>
