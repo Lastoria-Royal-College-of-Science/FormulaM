@@ -16,7 +16,7 @@ import {
   normalizeSpeciesLabel,
   parseCharge,
 } from "./formula";
-import type { FindFormulaRequest, FormulaHit, SearchElements } from "./types";
+import type { FindFormulaRequest, FormulaHit, FormulaSearchRequest, SearchElements } from "./types";
 
 type ElementBound = number | [number, number] | { min?: number | string; max?: number | string | null } | null | undefined;
 type InternalHit = FormulaHit & { _sort_abs_error: bigint; _sort_mass: bigint };
@@ -237,7 +237,62 @@ export function findFormulas({
   return candidates.map(stripInternalFields);
 }
 
+export function findFormulasForCharges({
+  mz,
+  elements,
+  charges,
+  toleranceDa = null,
+  tolerancePpm = "5",
+  maxResults = null,
+  massIndex,
+  massDigits = 9,
+}: FormulaSearchRequest): FormulaHit[] {
+  if (!Array.isArray(charges) || charges.length === 0) {
+    throw new Error("at least one charge is required");
+  }
+
+  const limit = maxResults === null || maxResults === undefined ? null : Number(maxResults);
+  if (limit !== null && (!Number.isInteger(limit) || limit < 0)) {
+    throw new Error("max_results must be a non-negative integer");
+  }
+
+  const seenCharges = new Set<number>();
+  const uniqueCharges = charges.filter((charge) => {
+    const resolved = parseCharge(charge);
+    if (seenCharges.has(resolved)) return false;
+    seenCharges.add(resolved);
+    return true;
+  });
+
+  const hits = uniqueCharges.flatMap((charge) => findFormulas({
+    mz,
+    elements,
+    charge,
+    toleranceDa,
+    tolerancePpm,
+    maxResults: limit,
+    massIndex,
+    massDigits,
+  }));
+
+  hits.sort(compareFormulaHits);
+  return limit === null ? hits : hits.slice(0, limit);
+}
+
 function stripInternalFields(hit: InternalHit): FormulaHit {
   const { _sort_abs_error: _unusedAbs, _sort_mass: _unusedMass, ...publicHit } = hit;
   return publicHit;
+}
+
+function compareFormulaHits(a: FormulaHit, b: FormulaHit): number {
+  const errorDiff = Math.abs(Number(a.error_da)) - Math.abs(Number(b.error_da));
+  if (errorDiff !== 0) return errorDiff;
+
+  const massDiff = Number(a.mass) - Number(b.mass);
+  if (massDiff !== 0) return massDiff;
+
+  const formulaDiff = a.formula.localeCompare(b.formula);
+  if (formulaDiff !== 0) return formulaDiff;
+
+  return a.ion_formula.localeCompare(b.ion_formula);
 }

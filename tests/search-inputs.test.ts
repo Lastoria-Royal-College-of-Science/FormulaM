@@ -3,22 +3,60 @@ import { render } from "svelte/server";
 import SearchInputs from "../src/components/SearchInputs.svelte";
 import { createDefaultSearchForm } from "../src/core/searchForm";
 
+const baseProps = {
+  onChange: () => undefined,
+  onChargeInputTextChange: () => undefined,
+  onChargeEditTextChange: () => undefined,
+  onCommitChargeInput: () => undefined,
+  onCommitChargeEdit: () => undefined,
+  onCancelChargeEdit: () => undefined,
+  onRemoveChargeEntry: () => undefined,
+  onStartChargeEdit: () => undefined,
+};
+
 describe("SearchInputs", () => {
-  it("replaces tolerance mode with independent ppm and Da toggles", () => {
+  it("renders the expanded explicit-charge editor and keeps tolerance toggles", () => {
     const form = createDefaultSearchForm();
     const { body } = render(SearchInputs, {
       props: {
         form,
-        onChange: () => undefined,
+        ...baseProps,
       },
     });
 
     expect(body).not.toContain("Tolerance mode");
-    expect(body).not.toContain("Enabled");
-    expect(body.match(/type="checkbox"/g)).toHaveLength(2);
+    expect(body).toContain('class="block col-span-2 lt-md:col-span-1"');
+    expect(body).toContain('role="switch"');
+    expect(body).toContain("charge-polarity-thumb");
+    expect(body).toContain('aria-label="Selected charges"');
+    expect(body).toContain('placeholder="n or min-max"');
+    expect(body).toContain("i-codex-cross");
+    expect(body).toContain("i-mdi-minus");
+    expect(body).toContain("i-mdi-add");
+    expect(body.match(/i-mdi-help/g)).toHaveLength(2);
+    expect(body).not.toContain("i-codex-check");
+    expect(body).not.toContain(">+1<");
+    expect(body.match(/role="switch"/g)).toHaveLength(3);
+    expect(body.match(/class="toggle-switch/g)).toHaveLength(2);
     expect(body).toContain('value="0.01"');
     expect(body).not.toMatch(/<input[^>]*id="tolerancePpm"[^>]*disabled/);
     expect(body).toMatch(/<input[^>]*id="toleranceDa"[^>]*disabled/);
+  });
+
+  it("shows the draft confirm button only when the user is typing a charge", () => {
+    const form = {
+      ...createDefaultSearchForm(),
+      chargeInputText: "2-",
+    };
+    const { body } = render(SearchInputs, {
+      props: {
+        form,
+        ...baseProps,
+      },
+    });
+
+    expect(body).toContain("i-codex-check");
+    expect(body).toContain('aria-label="Confirm new positive charge"');
   });
 
   it("disables both tolerance inputs when their toggles are off", () => {
@@ -30,7 +68,7 @@ describe("SearchInputs", () => {
     const { body } = render(SearchInputs, {
       props: {
         form,
-        onChange: () => undefined,
+        ...baseProps,
       },
     });
 

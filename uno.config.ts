@@ -1,12 +1,12 @@
 import { defineConfig, presetIcons, presetUno } from "unocss";
 
 const noNativeOutline = "[outline:none] focus:[outline:none] focus-visible:[outline:none] active:[outline:none]";
-const interactiveBorder = `hover:border-accent active:border-accent focus:border-accent focus-visible:border-accent ${noNativeOutline}`;
-const blueButtonBorder = `hover:border-control-border active:border-accent focus-visible:border-accent ${noNativeOutline}`;
-const disabledState = "disabled:cursor-not-allowed disabled:opacity-55";
-const buttonInteraction = `${interactiveBorder} active:shadow-control-glow focus-visible:shadow-control-glow`;
-const blueButtonInteraction = `${blueButtonBorder} active:shadow-control-glow focus-visible:shadow-control-glow`;
-const fieldInteraction = `${interactiveBorder} focus:shadow-control-glow focus-visible:shadow-control-glow`;
+const interactiveBorder = `active:border-accent focus:border-accent focus-visible:border-accent ${noNativeOutline}`;
+const blueButtonBorder = `active:border-accent focus-visible:border-accent ${noNativeOutline}`;
+const disabledState = "disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:filter-none disabled:active:filter-none disabled:hover:shadow-none disabled:active:shadow-none";
+const buttonInteraction = `${interactiveBorder} active:shadow-control-glow focus-visible:shadow-control-glow disabled:shadow-none disabled:focus:shadow-none disabled:focus-visible:shadow-none`;
+const blueButtonInteraction = `${blueButtonBorder} active:shadow-control-glow focus-visible:shadow-control-glow disabled:shadow-none disabled:focus:shadow-none disabled:focus-visible:shadow-none`;
+const fieldInteraction = `${interactiveBorder} focus:shadow-control-glow focus-visible:shadow-control-glow disabled:hover:border-control-border disabled:active:border-control-border disabled:focus:border-control-border disabled:focus-visible:border-control-border disabled:shadow-none disabled:focus:shadow-none disabled:focus-visible:shadow-none`;
 
 export default defineConfig({
   presets: [presetUno(), presetIcons()],
@@ -15,6 +15,8 @@ export default defineConfig({
     "i-typcn-arrow-unsorted",
     "i-typcn-arrow-sorted-up",
     "i-typcn-arrow-sorted-down",
+    "i-codex-check",
+    "i-codex-cross",
   ],
   theme: {
     colors: {
@@ -54,17 +56,45 @@ export default defineConfig({
     "round-control": `inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-solid border-control-border bg-control-bg p-0 text-text shadow-app ${buttonInteraction}`,
     "field-title": "mb-1.5 block font-[650]",
     "field-hint": "mt-1.25 block text-muted",
-    "field-control": `w-full min-h-[42px] rounded-[10px] border border-solid border-control-border bg-control-bg px-3 py-2.5 text-text ${fieldInteraction} ${disabledState}`,
+    "field-control": `h-[42px] min-h-[42px] w-full rounded-[10px] border border-solid border-control-border bg-control-bg px-3 py-2.5 text-text ${fieldInteraction} ${disabledState}`,
+    "field-control-file": `min-h-[42px] w-full rounded-[10px] border border-solid border-control-border bg-control-bg px-3 py-2 text-text ${fieldInteraction} ${disabledState}`,
     "field-select": "bg-no-repeat bg-[length:6px_6px] [background-image:linear-gradient(45deg,transparent_50%,var(--muted)_50%),linear-gradient(135deg,var(--muted)_50%,transparent_50%)] [background-position:calc(100%-18px)_50%,calc(100%-12px)_50%] pr-10",
-    "help-button": `ml-1.25 inline-flex h-[18px] w-[18px] cursor-pointer items-center justify-center rounded-full border border-solid border-control-border bg-surface-2 p-0 text-xs text-muted ${buttonInteraction}`,
+    "charge-field-shell": "flex h-[42px] min-h-[42px] items-center gap-1.5 rounded-[10px] border border-solid border-control-border bg-control-bg px-1.5 transition-[border-color,box-shadow,filter] duration-150 hover:[filter:var(--interactive-hover-filter)] active:[filter:var(--interactive-active-filter)] focus-within:border-accent focus-within:shadow-control-glow",
+    "charge-field-shell-disabled": "hover:[filter:none] active:[filter:none] focus-within:border-control-border focus-within:shadow-none",
+    "charge-entry-flow": "flex min-w-0 flex-1 items-center gap-2",
+    "charge-polarity-switch": `relative inline-flex h-7 w-12 shrink-0 items-center overflow-hidden rounded-full border border-solid border-control-border bg-surface-2 p-0 text-text shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] ${buttonInteraction} ${disabledState}`,
+    "charge-polarity-thumb": "pointer-events-none absolute left-[3px] top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-accent shadow-[0_2px_8px_rgba(15,23,42,0.28)] transition-transform duration-200 ease-out",
+    "charge-polarity-thumb-positive": "translate-x-[22px]",
+    "charge-polarity-mark": "pointer-events-none absolute top-1/2 z-1 flex h-5 w-5 -translate-y-1/2 items-center justify-center transition-colors duration-200 ease-out",
+    "charge-polarity-mark-negative": "left-[3px]",
+    "charge-polarity-mark-positive": "left-[25px]",
+    "charge-polarity-mark-active": "text-accent-contrast",
+    "charge-polarity-mark-inactive": "text-muted",
+    "charge-polarity-icon": "h-4 w-4 shrink-0",
+    "charge-chip-list": "flex min-w-0 w-max max-w-[calc(100%-11rem)] items-center gap-2 overflow-x-auto overflow-y-hidden py-[2px] [scrollbar-width:thin] lt-sm:max-w-[calc(100%-9.75rem)]",
+    "charge-chip": "inline-flex h-7 min-w-12 shrink-0 items-stretch gap-[3px] rounded-full border border-solid border-control-border bg-surface-2 px-[3px] text-sm text-text",
+    "charge-chip-editing": "border-accent bg-[color:color-mix(in_srgb,var(--accent),transparent_92%)]",
+    "charge-chip-target": "flex h-full min-w-0 flex-1 items-center rounded-full border-none bg-surface-2 px-2.5 pr-2 text-left text-inherit shadow-none [appearance:none]",
+    "charge-chip-editor": "cursor-text pr-1.5",
+    "charge-chip-value": "min-w-0 whitespace-nowrap text-sm text-inherit",
+    "charge-chip-input": "min-w-[2ch] border-none bg-transparent p-0 text-sm text-text shadow-none [outline:none]",
+    "charge-chip-action": `inline-flex h-5 w-5 shrink-0 self-center items-center justify-center rounded-full border border-solid border-transparent bg-surface-2 p-0 text-muted ${buttonInteraction} ${disabledState}`,
+    "charge-chip-icon": "h-3.5 w-3.5 shrink-0",
+    "charge-draft-shell": "flex min-w-[11rem] flex-1 items-center gap-1.5 lt-sm:min-w-[9.75rem]",
+    "charge-draft-input": "min-w-[7ch] flex-1 border-none bg-transparent p-0 text-text shadow-none [outline:none] placeholder:text-muted",
+    "charge-draft-action": `inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-solid border-transparent bg-surface-2 p-0 text-text ${buttonInteraction} ${disabledState}`,
+    "help-button": `inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border border-solid border-control-border bg-surface-2 p-0 text-muted ${buttonInteraction}`,
+    "help-button-icon": "h-3.5 w-3.5 shrink-0",
     "primary-action": `min-h-[42px] cursor-pointer rounded-2 border border-solid border-transparent bg-accent px-4 py-2.5 font-[750] text-accent-contrast ${blueButtonInteraction} ${disabledState}`,
     "secondary-action": `min-h-[42px] cursor-pointer rounded-2 border border-solid border-control-border bg-surface-2 px-4 py-2.5 text-text ${buttonInteraction} ${disabledState}`,
     "icon-action": `inline-flex h-[42px] min-h-[42px] w-11 items-center justify-center cursor-pointer rounded-2 border border-solid border-transparent bg-accent p-0 text-accent-contrast ${blueButtonInteraction} ${disabledState}`,
     "danger-icon-action": `inline-flex h-10 w-10 items-center justify-center cursor-pointer rounded-[10px] border border-solid border-control-border bg-surface-2 p-0 text-danger ${buttonInteraction} ${disabledState}`,
-    "toggle-control": "inline-flex cursor-pointer select-none items-center gap-3.5 text-text",
-    "toggle-control-disabled": "cursor-not-allowed opacity-70",
-    "toggle-input": "sr-only",
-    "toggle-track": "relative h-7 w-12 shrink-0 rounded-full border border-solid border-[var(--toggle-track-border)] bg-[var(--toggle-track-bg)] shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] transition-all duration-200 ease-out peer-checked:border-[var(--toggle-track-active-border)] peer-checked:bg-[var(--toggle-track-active)] peer-focus-visible:shadow-control-glow after:absolute after:left-[3px] after:top-1/2 after:h-5 after:w-5 after:-translate-y-1/2 after:rounded-full after:border after:border-solid after:border-[var(--toggle-thumb-border)] after:bg-[var(--toggle-thumb-bg)] after:shadow-[0_2px_8px_rgba(15,23,42,0.28)] after:transition-all after:duration-200 after:ease-out after:content-[''] peer-checked:after:translate-x-5 peer-checked:after:border-[var(--toggle-thumb-active-border)] peer-checked:after:bg-[var(--toggle-thumb-active-bg)]",
+    "toggle-control": "inline-flex select-none items-center gap-3.5 text-text",
+    "toggle-control-disabled": "text-muted",
+    "toggle-switch": `relative inline-flex h-7 w-12 shrink-0 items-center overflow-hidden rounded-full border border-solid border-[var(--toggle-track-border)] bg-[var(--toggle-track-bg)] p-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] ${buttonInteraction} ${disabledState}`,
+    "toggle-switch-checked": "border-[var(--toggle-track-active-border)] bg-[var(--toggle-track-active)]",
+    "toggle-switch-thumb": "pointer-events-none absolute left-[3px] top-1/2 h-5 w-5 -translate-y-1/2 rounded-full border border-solid border-[var(--toggle-thumb-border)] bg-[var(--toggle-thumb-bg)] shadow-[0_2px_8px_rgba(15,23,42,0.28)] transition-all duration-200 ease-out",
+    "toggle-switch-thumb-checked": "translate-x-[22px] border-[var(--toggle-thumb-active-border)] bg-[var(--toggle-thumb-active-bg)]",
     "toggle-copy": "text-[0.98rem] leading-[1.4]",
     "results-sort-button": `inline-flex w-full cursor-pointer items-center justify-between gap-2 rounded-[10px] border-none bg-transparent px-1 py-1 text-left text-inherit shadow-none [appearance:none] transition-colors duration-150 hover:text-text focus-visible:text-text focus-visible:shadow-control-glow ${noNativeOutline}`,
     "results-sort-icon": "inline-block h-4 w-4 shrink-0",
@@ -76,6 +106,6 @@ export default defineConfig({
     "table-cell": "border-t border-border [border-top-style:solid] px-2 py-2 align-middle",
     "formula-table-head": "border-b border-border [border-bottom-style:solid] px-2 py-2 text-left text-[0.9rem] text-muted",
     "formula-table-cell": "px-2 py-2 align-middle",
-    "inline-code": "rounded-1.5 border border-solid border-border bg-surface-2 px-1.25 py-px",
+    "inline-code": "align-middle rounded-md border border-solid border-border bg-surface-2 px-1.5 py-0.5 font-mono text-[0.86em] text-text",
   },
 });

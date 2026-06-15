@@ -1,4 +1,5 @@
 export type ChargeSpec = string | number;
+export type ChargeSign = "+" | "-";
 export type CountBound = [number, number];
 export type ElementBounds = Record<string, CountBound>;
 export type SearchElements = ElementBounds;
@@ -7,9 +8,18 @@ export type AppStatus = "loading" | "idle" | "running" | "success" | "error";
 export type PlotLabelMode = "formula" | "mz" | "formula+mz";
 export type PlotLabelFilter = "assigned-only" | "threshold";
 
+export interface ChargeEntry {
+  id: string;
+  text: string;
+}
+
 export interface SearchFormState {
   mz: string;
-  charge: string;
+  chargeEntries: ChargeEntry[];
+  chargeSign: ChargeSign;
+  chargeInputText: string;
+  chargeEditId: string | null;
+  chargeEditText: string;
   tolerancePpmEnabled: boolean;
   toleranceDaEnabled: boolean;
   tolerancePpm: string;
@@ -156,6 +166,17 @@ export interface FindFormulaRequest {
   mz: string | number;
   elements: SearchElements | string[];
   charge: ChargeSpec;
+  toleranceDa?: string | number | null;
+  tolerancePpm?: string | number | null;
+  maxResults?: number | null;
+  massIndex: MassIndex;
+  massDigits?: number;
+}
+
+export interface FormulaSearchRequest {
+  mz: string | number;
+  elements: SearchElements | string[];
+  charges: ChargeSpec[];
   toleranceDa?: string | number | null;
   tolerancePpm?: string | number | null;
   maxResults?: number | null;

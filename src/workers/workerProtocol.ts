@@ -1,7 +1,7 @@
-import type { FindFormulaRequest, FormulaHit } from "../core/types";
+import type { FormulaHit, FormulaSearchRequest } from "../core/types";
 
 export type WorkerRequest =
-  | { type: "search"; requestId: string; payload: FindFormulaRequest }
+  | { type: "search"; requestId: string; payload: FormulaSearchRequest }
   | { type: "cancel"; requestId: string };
 
 export type WorkerResponse =

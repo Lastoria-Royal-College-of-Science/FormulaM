@@ -23,13 +23,14 @@
   import { getAssignment, attachAssignmentsToPeaks, buildPeakAssignment, matchesAssignmentHit, removeAssignment, upsertAssignment } from "./core/assignments";
   import { downloadAnnotatedSpectrumPng, downloadAssignmentsCsv } from "./core/exportSpectrum";
   import { createPlotSettings, DEFAULT_PLOT_SETTINGS } from "./core/plotTicks";
-  import { findFormulas } from "./core/search";
-  import { createDefaultSearchForm, hasEnabledTolerance, selectedTolerance } from "./core/searchForm";
+  import { canCommitChargeEntryText, createChargeEntry, isChargeDraftText } from "./core/chargeInput";
+  import { findFormulasForCharges } from "./core/search";
+  import { createDefaultSearchForm, hasCommittedCharges, hasEnabledTolerance, selectedCharges, selectedTolerance } from "./core/searchForm";
   import { loadSpectrumImportSource } from "./core/spectrumImport";
   import { buildSpectrumPreview, normalizeSpectrumTable, suggestSpectrumSelection } from "./core/spectrumNormalize";
   import type {
     AppStatus,
-    FindFormulaRequest,
+    FormulaSearchRequest,
     FormulaHit,
     FormulaSpaceRow,
     MassIndex,
@@ -48,6 +49,7 @@
   let massIndex: MassIndex | null = null;
   let rows: FormulaSpaceRow[] = [];
   let nextRowId = 0;
+  let nextChargeEntryId = 1;
   let results: FormulaHit[] = [];
   let form: SearchFormState = createDefaultSearchForm();
   let status: AppStatus = "loading";
@@ -113,6 +115,71 @@
 
   function updatePlotSettings(patch: Partial<PlotSettings>): void {
     plotSettings = { ...plotSettings, ...patch };
+  }
+
+  function createChargeEntryId(): string {
+    const id = `charge-${nextChargeEntryId}`;
+    nextChargeEntryId += 1;
+    return id;
+  }
+
+  function updateChargeInputText(value: string): void {
+    if (!isChargeDraftText(value)) return;
+    updateForm({ chargeInputText: value });
+  }
+
+  function updateChargeEditText(value: string): void {
+    if (!isChargeDraftText(value)) return;
+    updateForm({ chargeEditText: value });
+  }
+
+  function commitChargeInput(): void {
+    if (!canCommitChargeEntryText(form.chargeInputText)) return;
+    const entry = createChargeEntry(createChargeEntryId(), form.chargeInputText);
+    updateForm({
+      chargeEntries: [...form.chargeEntries, entry],
+      chargeInputText: "",
+    });
+  }
+
+  function removeChargeEntry(entryId: string): void {
+    const nextEntries = form.chargeEntries.filter((entry) => entry.id !== entryId);
+    if (form.chargeEditId === entryId) {
+      updateForm({
+        chargeEntries: nextEntries,
+        chargeEditId: null,
+        chargeEditText: "",
+      });
+      return;
+    }
+    updateForm({ chargeEntries: nextEntries });
+  }
+
+  function startChargeEdit(entryId: string): void {
+    const entry = form.chargeEntries.find((candidate) => candidate.id === entryId);
+    if (!entry) return;
+    updateForm({
+      chargeEditId: entry.id,
+      chargeEditText: entry.text,
+    });
+  }
+
+  function cancelChargeEdit(): void {
+    if (!form.chargeEditId) return;
+    updateForm({
+      chargeEditId: null,
+      chargeEditText: "",
+    });
+  }
+
+  function commitChargeEdit(): void {
+    if (!form.chargeEditId || !canCommitChargeEntryText(form.chargeEditText)) return;
+    const updatedEntry = createChargeEntry(form.chargeEditId, form.chargeEditText);
+    updateForm({
+      chargeEntries: form.chargeEntries.map((entry) => (entry.id === updatedEntry.id ? updatedEntry : entry)),
+      chargeEditId: null,
+      chargeEditText: "",
+    });
   }
 
   function clearImportedSpectrumData(): void {
@@ -182,16 +249,17 @@
     rows = rows.filter((row) => row.id !== rowId);
   }
 
-  function buildRequest(): FindFormulaRequest {
+  function buildRequest(): FormulaSearchRequest {
     if (!massIndex) throw new Error("Mass database is not loaded yet.");
     const maxResults = Number(form.maxResults);
     if (!Number.isInteger(maxResults) || maxResults < 1) throw new Error("Max results must be a positive integer.");
     const elements = validateAndBuildElements(rows, massIndex);
+    const charges = selectedCharges(form);
     const { tolerancePpm, toleranceDa } = selectedTolerance(form);
     return {
       mz: form.mz,
       elements,
-      charge: form.charge,
+      charges,
       tolerancePpm,
       toleranceDa,
       maxResults,
@@ -224,7 +292,7 @@
       }
 
       // Fallback for unusual environments where Web Worker construction fails.
-      const hits = findFormulas(request);
+      const hits = findFormulasForCharges(request);
       results = hits;
       hasSearched = true;
       status = "success";
@@ -490,7 +558,18 @@
       <PeakInspector selectedPeak={selectedPeak} assignment={selectedAssignment} onRemoveAssignment={handleRemoveAssignment} />
     {/if}
 
-    <SearchInputs {form} disabled={isBusy} onChange={updateForm} />
+    <SearchInputs
+      {form}
+      disabled={isBusy}
+      onChange={updateForm}
+      onChargeInputTextChange={updateChargeInputText}
+      onChargeEditTextChange={updateChargeEditText}
+      onCommitChargeInput={commitChargeInput}
+      onCommitChargeEdit={commitChargeEdit}
+      onCancelChargeEdit={cancelChargeEdit}
+      onRemoveChargeEntry={removeChargeEntry}
+      onStartChargeEdit={startChargeEdit}
+    />
 
     {#if massIndex}
       <FormulaSpaceTable
@@ -504,7 +583,7 @@
     {/if}
 
     <section class="my-4 flex flex-wrap gap-3">
-      <button type="button" class="primary-action" disabled={isBusy || !massIndex || !hasEnabledTolerance(form)} on:click={runSearch}>Find candidate formulas</button>
+      <button type="button" class="primary-action" disabled={isBusy || !massIndex || !hasCommittedCharges(form) || !hasEnabledTolerance(form)} on:click={runSearch}>Find candidate formulas</button>
       <button id="downloadCsv" type="button" class="secondary-action" disabled={isBusy || results.length === 0} on:click={downloadCsv}>Download formula hits CSV</button>
     </section>
 

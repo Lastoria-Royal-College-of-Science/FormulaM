@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ToggleSwitch from "./ToggleSwitch.svelte";
   import type { PlotLabelFilter, PlotLabelMode, PlotSettings } from "../core/types";
 
   export let settings: PlotSettings;
@@ -111,11 +112,15 @@
   </div>
 
   <div class="mt-4 grid grid-cols-4 gap-4 lt-lg:grid-cols-2 lt-md:grid-cols-1">
-    <label class:toggle-control-disabled={disabled} class="toggle-control">
-      <input class="toggle-input peer" type="checkbox" checked={settings.autoTicks} disabled={disabled} on:change={(event) => onChange({ autoTicks: (event.currentTarget as HTMLInputElement).checked })} />
-      <span class="toggle-track" aria-hidden="true"></span>
+    <div class:toggle-control-disabled={disabled} class="toggle-control">
+      <ToggleSwitch
+        ariaLabel="Auto ticks"
+        checked={settings.autoTicks}
+        disabled={disabled}
+        onChange={(value) => onChange({ autoTicks: value })}
+      />
       <span class="field-title m-0">Auto ticks</span>
-    </label>
+    </div>
     <label class="block">
       <span class="field-title">Major tick spacing</span>
       <input
@@ -128,11 +133,15 @@
         on:input={(event) => onChange({ majorTickSpacing: parseOptionalNumber((event.currentTarget as HTMLInputElement).value) })}
       />
     </label>
-    <label class:toggle-control-disabled={disabled} class="toggle-control">
-      <input class="toggle-input peer" type="checkbox" checked={settings.thresholdEnabled} disabled={disabled} on:change={(event) => onChange({ thresholdEnabled: (event.currentTarget as HTMLInputElement).checked })} />
-      <span class="toggle-track" aria-hidden="true"></span>
+    <div class:toggle-control-disabled={disabled} class="toggle-control">
+      <ToggleSwitch
+        ariaLabel="Threshold"
+        checked={settings.thresholdEnabled}
+        disabled={disabled}
+        onChange={(value) => onChange({ thresholdEnabled: value })}
+      />
       <span class="field-title m-0">Threshold</span>
-    </label>
+    </div>
     <label class="block">
       <span class="field-title">Threshold %</span>
       <input
@@ -149,11 +158,15 @@
   </div>
 
   <div class="mt-4 grid grid-cols-3 gap-4 lt-lg:grid-cols-2 lt-md:grid-cols-1">
-    <label class:toggle-control-disabled={disabled} class="toggle-control">
-      <input class="toggle-input peer" type="checkbox" checked={settings.showLabels} disabled={disabled} on:change={(event) => onChange({ showLabels: (event.currentTarget as HTMLInputElement).checked })} />
-      <span class="toggle-track" aria-hidden="true"></span>
+    <div class:toggle-control-disabled={disabled} class="toggle-control">
+      <ToggleSwitch
+        ariaLabel="Show labels"
+        checked={settings.showLabels}
+        disabled={disabled}
+        onChange={(value) => onChange({ showLabels: value })}
+      />
       <span class="field-title m-0">Show labels</span>
-    </label>
+    </div>
     <label class="block">
       <span class="field-title">Label content</span>
       <select class="field-control field-select" value={settings.labelMode} disabled={disabled || !settings.showLabels} on:change={(event) => updateLabelMode((event.currentTarget as HTMLSelectElement).value as PlotLabelMode)}>

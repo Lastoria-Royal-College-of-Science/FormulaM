@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ToggleSwitch from "./ToggleSwitch.svelte";
   import type { SpectrumImportSource, SpectrumPreviewTable } from "../core/types";
 
   export let activeSheetName = "";
@@ -49,7 +50,7 @@
   <div class="flex flex-wrap items-start justify-between gap-3">
     <div>
       <h2 class="mt-0">Spectrum import</h2>
-      <p class="mb-0 mt-1 text-sm text-muted">Load local `.csv`, `.xlsx`, or `.xls` peak lists, preview the table, then choose the worksheet and columns to import.</p>
+      <p class="mb-0 mt-1 text-sm text-muted">Load local <code class="inline-code">.csv</code>, <code class="inline-code">.xlsx</code>, or <code class="inline-code">.xls</code> peak lists, preview the table, then choose the worksheet and columns to import.</p>
     </div>
     <button type="button" class="secondary-action" disabled={disabled || (!importSource && peakCount === 0)} on:click={clearSelection}>Clear spectrum</button>
   </div>
@@ -58,7 +59,7 @@
     <span class="field-title">Peak list file</span>
     <input
       bind:this={fileInput}
-      class="field-control"
+      class="field-control-file"
       type="file"
       accept=".csv,.xlsx,.xls"
       disabled={disabled}
@@ -89,17 +90,15 @@
         </label>
       {/if}
 
-      <label class:toggle-control-disabled={disabled} class="toggle-control pt-7">
-        <input
-          class="toggle-input peer"
-          type="checkbox"
+      <div class:toggle-control-disabled={disabled} class="toggle-control pt-7">
+        <ToggleSwitch
+          ariaLabel="First non-empty row is a header"
           checked={hasHeaderRow}
           disabled={disabled}
-          on:change={(event) => onSelectHasHeaderRow((event.currentTarget as HTMLInputElement).checked)}
+          onChange={onSelectHasHeaderRow}
         />
-        <span class="toggle-track" aria-hidden="true"></span>
         <span class="toggle-copy">First non-empty row is a header</span>
-      </label>
+      </div>
 
       <label class="block">
         <span class="field-title">m/z column</span>

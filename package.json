@@ -23,6 +23,7 @@
   ],
   "license": "MIT",
   "devDependencies": {
+    "@iconify-json/codex": "^1.2.0",
     "@iconify-json/mdi": "^1.2.3",
     "@iconify-json/typcn": "^1.2.2",
     "@sveltejs/vite-plugin-svelte": "^5.0.0",

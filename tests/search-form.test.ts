@@ -1,14 +1,32 @@
 import { describe, expect, it } from "vitest";
-import { createDefaultSearchForm, hasEnabledTolerance, selectedTolerance } from "../src/core/searchForm";
+import { createDefaultSearchForm, hasCommittedCharges, hasEnabledTolerance, selectedCharges, selectedTolerance } from "../src/core/searchForm";
 
 describe("search form tolerance helpers", () => {
-  it("defaults to ppm enabled and seeds the Da value", () => {
+  it("defaults to a committed +1 charge and seeds the Da value", () => {
     const form = createDefaultSearchForm();
 
+    expect(form.chargeEntries).toEqual([
+      { id: "charge-0", text: "1" },
+    ]);
+    expect(form.chargeSign).toBe("+");
+    expect(form.chargeInputText).toBe("");
+    expect(selectedCharges(form)).toEqual([1]);
+    expect(hasCommittedCharges(form)).toBe(true);
     expect(form.tolerancePpmEnabled).toBe(true);
     expect(form.toleranceDaEnabled).toBe(false);
     expect(form.tolerancePpm).toBe("5");
     expect(form.toleranceDa).toBe("0.01");
+  });
+
+  it("expands charge ranges with the shared charge sign", () => {
+    const form = createDefaultSearchForm();
+    form.chargeEntries = [
+      { id: "charge-1", text: "2-4" },
+      { id: "charge-2", text: "1" },
+    ];
+    form.chargeSign = "-";
+
+    expect(selectedCharges(form)).toEqual([-2, -3, -4, -1]);
   });
 
   it("returns only enabled tolerance constraints", () => {
@@ -57,5 +75,13 @@ describe("search form tolerance helpers", () => {
     form.toleranceDa = "";
 
     expect(() => selectedTolerance(form)).toThrow("Enter a Da tolerance or switch it off.");
+  });
+
+  it("requires at least one committed charge", () => {
+    const form = createDefaultSearchForm();
+    form.chargeEntries = [];
+
+    expect(hasCommittedCharges(form)).toBe(false);
+    expect(() => selectedCharges(form)).toThrow("Add at least one charge.");
   });
 });

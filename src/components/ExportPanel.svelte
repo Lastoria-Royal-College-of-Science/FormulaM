@@ -1,4 +1,6 @@
 <script lang="ts">
+  import ToggleSwitch from "./ToggleSwitch.svelte";
+
   export let includeUnassigned = false;
   export let canExportAssignments = false;
   export let disabled = false;
@@ -20,11 +22,15 @@
     </div>
   </div>
 
-  <label class:toggle-control-disabled={disabled} class="toggle-control mt-4">
-    <input class="toggle-input peer" type="checkbox" checked={includeUnassigned} disabled={disabled} on:change={(event) => onIncludeUnassignedChange((event.currentTarget as HTMLInputElement).checked)} />
-    <span class="toggle-track" aria-hidden="true"></span>
+  <div class:toggle-control-disabled={disabled} class="toggle-control mt-4">
+    <ToggleSwitch
+      ariaLabel="Include unassigned peaks in assignment CSV"
+      checked={includeUnassigned}
+      disabled={disabled}
+      onChange={onIncludeUnassignedChange}
+    />
     <span class="toggle-copy text-muted">Include unassigned peaks in assignment CSV</span>
-  </label>
+  </div>
 
   <div class="mt-4 flex flex-wrap gap-3">
     <button type="button" class="primary-action" disabled={disabled || !canExportAssignments} on:click={onExportAssignments}>Download assignments CSV</button>
