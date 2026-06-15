@@ -63,7 +63,7 @@
 <section class="ui-card">
   <div class="mb-3 flex flex-wrap items-start justify-between gap-3">
     <div>
-      <h2 class="mt-0">Candidate formulas</h2>
+      <h2 class="mt-0">Candidate formulae</h2>
       {#if onToggleAssignment}
         <p class="mb-0 mt-1 text-sm text-muted">
           {#if selectedPeakLabel}
@@ -181,7 +181,7 @@
           </tr>
         {:else}
           <tr>
-            <td colspan={onToggleAssignment ? 6 : 5} class="table-cell px-2 py-4.5 text-center text-muted">No candidate formulas matched the current search.</td>
+            <td colspan={onToggleAssignment ? 6 : 5} class="table-cell px-2 py-4.5 text-center text-muted">No candidate formulae matched the current search.</td>
           </tr>
         {/each}
       </tbody>

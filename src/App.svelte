@@ -24,7 +24,7 @@
   import { downloadAnnotatedSpectrumPng, downloadAssignmentsCsv } from "./core/exportSpectrum";
   import { createPlotSettings, DEFAULT_PLOT_SETTINGS } from "./core/plotTicks";
   import { canCommitChargeEntryText, createChargeEntry, isChargeDraftText } from "./core/chargeInput";
-  import { findFormulasForCharges } from "./core/search";
+  import { findFormulaeForCharges } from "./core/search";
   import { createDefaultSearchForm, hasCommittedCharges, hasEnabledTolerance, selectedCharges, selectedTolerance } from "./core/searchForm";
   import { loadSpectrumImportSource } from "./core/spectrumImport";
   import { buildSpectrumPreview, normalizeSpectrumTable, suggestSpectrumSelection } from "./core/spectrumNormalize";
@@ -292,7 +292,7 @@
       }
 
       // Fallback for unusual environments where Web Worker construction fails.
-      const hits = findFormulasForCharges(request);
+      const hits = findFormulaeForCharges(request);
       results = hits;
       hasSearched = true;
       status = "success";
@@ -583,7 +583,7 @@
     {/if}
 
     <section class="my-4 flex flex-wrap gap-3">
-      <button type="button" class="primary-action" disabled={isBusy || !massIndex || !hasCommittedCharges(form) || !hasEnabledTolerance(form)} on:click={runSearch}>Find candidate formulas</button>
+      <button type="button" class="primary-action" disabled={isBusy || !massIndex || !hasCommittedCharges(form) || !hasEnabledTolerance(form)} on:click={runSearch}>Find candidate formulae</button>
       <button id="downloadCsv" type="button" class="secondary-action" disabled={isBusy || results.length === 0} on:click={downloadCsv}>Download formula hits CSV</button>
     </section>
 

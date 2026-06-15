@@ -121,7 +121,7 @@ function buildCandidate({
   };
 }
 
-export function findFormulas({
+export function findFormulae({
   mz,
   elements,
   charge,
@@ -237,7 +237,7 @@ export function findFormulas({
   return candidates.map(stripInternalFields);
 }
 
-export function findFormulasForCharges({
+export function findFormulaeForCharges({
   mz,
   elements,
   charges,
@@ -264,7 +264,7 @@ export function findFormulasForCharges({
     return true;
   });
 
-  const hits = uniqueCharges.flatMap((charge) => findFormulas({
+  const hits = uniqueCharges.flatMap((charge) => findFormulae({
     mz,
     elements,
     charge,

@@ -1,4 +1,4 @@
-import { findFormulasForCharges } from "../core/search";
+import { findFormulaeForCharges } from "../core/search";
 import type { WorkerRequest, WorkerResponse } from "./workerProtocol";
 
 const cancelled = new Set<string>();
@@ -12,7 +12,7 @@ self.onmessage = (event: MessageEvent<WorkerRequest>): void => {
 
   try {
     if (cancelled.has(message.requestId)) return;
-    const hits = findFormulasForCharges(message.payload);
+    const hits = findFormulaeForCharges(message.payload);
     if (cancelled.has(message.requestId)) return;
     const response: WorkerResponse = { type: "result", requestId: message.requestId, hits };
     self.postMessage(response);
