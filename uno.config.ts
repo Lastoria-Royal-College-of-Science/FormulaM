@@ -113,7 +113,7 @@ export default defineConfig({
     "table-cell": "border-t border-border [border-top-style:solid] px-2 py-2 align-middle",
     "formula-table-head": "border-b border-border [border-bottom-style:solid] px-2 py-2 text-left text-[0.9rem] text-muted",
     "formula-table-cell": "px-2 py-2 align-middle",
-    "chemical-formula": "whitespace-nowrap font-mono text-[0.95em]",
+    "chemical-formula": "whitespace-nowrap text-[0.95em]",
     "inline-code": "align-middle rounded-md border border-solid border-border bg-surface-2 px-1.5 py-0.5 font-mono text-[0.86em] text-text",
   },
 });
