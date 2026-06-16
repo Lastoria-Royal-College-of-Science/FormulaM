@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render } from "svelte/server";
 import SpectrumImport from "../src/components/SpectrumImport.svelte";
+import { shouldIgnoreFilePickerCancel } from "../src/components/SpectrumImport.svelte";
 import type { SpectrumImportSource, SpectrumPreviewTable } from "../src/core/types";
 
 const sampleImportSource: SpectrumImportSource = {
@@ -34,6 +35,11 @@ const samplePreviewTable: SpectrumPreviewTable = {
 };
 
 describe("SpectrumImport", () => {
+  it("keeps the current import when the file picker closes without a new file", () => {
+    expect(shouldIgnoreFilePickerCancel(null)).toBe(true);
+    expect(shouldIgnoreFilePickerCancel(new File(["mz,intensity"], "replacement.csv", { type: "text/csv" }))).toBe(false);
+  });
+
   it("renders the peak-list file input without the fixed-height text-field class", () => {
     const { body } = render(SpectrumImport, {
       props: {

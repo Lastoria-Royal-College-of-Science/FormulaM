@@ -1,3 +1,9 @@
+<script context="module" lang="ts">
+  export function shouldIgnoreFilePickerCancel(file: File | null): boolean {
+    return file === null;
+  }
+</script>
+
 <script lang="ts">
   import ToggleSwitch from "./ToggleSwitch.svelte";
   import type { SpectrumImportSource, SpectrumPreviewTable } from "../core/types";
@@ -31,6 +37,7 @@
 
   function handleFileChange(event: Event): void {
     const file = (event.currentTarget as HTMLInputElement).files?.[0] ?? null;
+    if (shouldIgnoreFilePickerCancel(file)) return;
     onImportFile(file);
   }
 
