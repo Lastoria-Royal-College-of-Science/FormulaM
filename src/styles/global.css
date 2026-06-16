@@ -17,6 +17,16 @@
   --control-glow: 0 0 0 3px color-mix(in srgb, var(--accent), transparent 58%);
   --focus-ring: color-mix(in srgb, var(--accent), transparent 70%);
   --row-odd: color-mix(in srgb, var(--surface-2), transparent 35%);
+  --toggle-track-bg: #2d3846;
+  --toggle-track-border: #617083;
+  --toggle-track-active: var(--accent);
+  --toggle-track-active-border: var(--toggle-track-active);
+  --toggle-thumb-bg: #dce6f2;
+  --toggle-thumb-border: #9bacbf;
+  --toggle-thumb-active-bg: #ffffff;
+  --toggle-thumb-active-border: color-mix(in srgb, var(--toggle-track-active), white 34%);
+  --interactive-hover-filter: brightness(1.08);
+  --interactive-active-filter: brightness(0.96);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
@@ -37,9 +47,18 @@ html[data-theme="light"] {
   --info: #175cd3;
   --shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
   --control-glow: 0 0 0 3px color-mix(in srgb, var(--accent), transparent 68%);
+  --toggle-track-bg: color-mix(in srgb, var(--surface-2), var(--surface) 18%);
+  --toggle-track-border: #c5d0dd;
+  --toggle-thumb-bg: #ffffff;
+  --toggle-thumb-border: #b4c1d1;
+  --toggle-thumb-active-bg: #ffffff;
+  --toggle-thumb-active-border: color-mix(in srgb, var(--toggle-track-active), white 26%);
+  --interactive-hover-filter: brightness(0.98);
+  --interactive-active-filter: brightness(0.95);
 }
 
 html[data-theme="dark"] { color-scheme: dark; }
+html, body { overflow-x: clip; }
 * { box-sizing: border-box; }
 
 body {
@@ -55,16 +74,82 @@ button, input, select {
   appearance: none;
 }
 
-select.field-control {
-  background-image:
-    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
-    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
-  background-position:
-    calc(100% - 18px) 50%,
-    calc(100% - 12px) 50%;
-  background-repeat: no-repeat;
-  background-size: 6px 6px;
-  padding-right: 40px;
+input[type="file"] {
+  appearance: auto;
+}
+
+:where(
+  button,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
+  select,
+  textarea,
+  summary
+) {
+  transition:
+    background-color 150ms ease-out,
+    border-color 150ms ease-out,
+    box-shadow 150ms ease-out,
+    color 150ms ease-out,
+    filter 150ms ease-out;
+}
+
+:where(button, select, summary, input[type="button"], input[type="submit"], input[type="reset"], input[type="file"]):not(:disabled) {
+  cursor: pointer;
+}
+
+:where(
+  button,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
+  select,
+  textarea,
+  summary
+):disabled {
+  cursor: not-allowed;
+}
+
+:where(
+  input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="file"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
+  textarea
+):not(:disabled) {
+  cursor: text;
+}
+
+:where(
+  button,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
+  select,
+  textarea,
+  summary
+):not(:disabled):hover {
+  filter: var(--interactive-hover-filter);
+}
+
+:where(
+  button,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
+  select,
+  textarea,
+  summary
+):not(:disabled):active {
+  filter: var(--interactive-active-filter);
+}
+
+:where(
+  button,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
+  select,
+  textarea,
+  summary
+):disabled:hover,
+:where(
+  button,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
+  select,
+  textarea,
+  summary
+):disabled:active {
+  filter: none;
+  box-shadow: none;
 }
 
 dialog::backdrop { background: rgba(2, 6, 23, 0.45); }

@@ -77,4 +77,4 @@ npm run sync:masses -- /path/to/FormulaM/data/masses.json
 
 ## Scientific disclaimer
 
-FormulaM enumerates candidate formulas from exact-mass constraints. A returned formula is not a confirmed molecular identity or structure. Confirm candidates with isotope-pattern agreement, MS/MS fragmentation, retention time, ionization behavior, sample context, and chemical plausibility.
+FormulaM enumerates candidate formulae from exact-mass constraints. A returned formula is not a confirmed molecular identity or structure. Confirm candidates with isotope-pattern agreement, MS/MS fragmentation, retention time, ionization behavior, sample context, and chemical plausibility.

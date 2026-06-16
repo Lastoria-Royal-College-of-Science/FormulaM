@@ -37,7 +37,7 @@
           <tr>
             <td class="formula-table-cell min-w-[130px]">
               <select
-                class="field-control"
+                class="field-control field-select"
                 value={row.element}
                 disabled={disabled}
                 aria-label="Element"
@@ -50,7 +50,7 @@
             </td>
             <td class="formula-table-cell min-w-[180px]">
               <select
-                class="field-control"
+                class="field-control field-select"
                 value={row.isotope}
                 disabled={disabled}
                 aria-label="Isotope"

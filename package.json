@@ -23,7 +23,9 @@
   ],
   "license": "MIT",
   "devDependencies": {
+    "@iconify-json/codex": "^1.2.0",
     "@iconify-json/mdi": "^1.2.3",
+    "@iconify-json/typcn": "^1.2.2",
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
     "@tsconfig/svelte": "^5.0.4",
     "@types/node": "^22.0.0",
@@ -34,6 +36,7 @@
   },
   "dependencies": {
     "svelte": "^5.0.0",
-    "unocss": "^66.7.2"
+    "unocss": "^66.7.2",
+    "xlsx": "^0.18.5"
   }
 }

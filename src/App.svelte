@@ -4,9 +4,12 @@
   import Hero from "./components/Hero.svelte";
   import SearchInputs from "./components/SearchInputs.svelte";
   import FormulaSpaceTable from "./components/FormulaSpaceTable.svelte";
-  import MessageBanner from "./components/MessageBanner.svelte";
   import ResultsTable from "./components/ResultsTable.svelte";
-  import ExamplesPanel from "./components/ExamplesPanel.svelte";
+  import SpectrumImport from "./components/SpectrumImport.svelte";
+  import SpectrumPlot from "./components/SpectrumPlot.svelte";
+  import PlotSettingsPanel from "./components/PlotSettingsPanel.svelte";
+  import PeakInspector from "./components/PeakInspector.svelte";
+  import ExportPanel from "./components/ExportPanel.svelte";
   import { downloadHitsCsv } from "./core/csv";
   import { buildMassIndex, loadMassPayload } from "./core/massData";
   import {
@@ -17,31 +20,73 @@
     makeRow,
     validateAndBuildElements,
   } from "./core/searchSpace";
-  import type { AppStatus, FindFormulaRequest, FormulaHit, FormulaSpaceRow, MassIndex, SearchFormState, ThemeName } from "./core/types";
+  import { getAssignment, attachAssignmentsToPeaks, buildPeakAssignment, matchesAssignmentHit, removeAssignment, upsertAssignment } from "./core/assignments";
+  import { downloadAnnotatedSpectrumPdf, downloadAnnotatedSpectrumPng, downloadAssignmentsCsv } from "./core/exportSpectrum";
+  import { createPlotSettings, DEFAULT_PLOT_SETTINGS } from "./core/plotTicks";
+  import { canCommitChargeEntryText, createChargeEntry, isChargeDraftText } from "./core/chargeInput";
+  import { findFormulaeForCharges } from "./core/search";
+  import { createDefaultSearchForm, hasCommittedCharges, hasEnabledTolerance, selectedCharges, selectedTolerance } from "./core/searchForm";
+  import { loadSpectrumImportSource } from "./core/spectrumImport";
+  import { buildSpectrumPreview, normalizeSpectrumTable, suggestSpectrumSelection } from "./core/spectrumNormalize";
+  import type {
+    AppStatus,
+    FormulaSearchRequest,
+    FormulaHit,
+    FormulaSpaceRow,
+    MassIndex,
+    PeakAssignment,
+    PlotSettings,
+    SearchFormState,
+    SpectrumImportSheet,
+    SpectrumImportSource,
+    SpectrumPeak,
+    SpectrumPreviewTable,
+    ThemeName,
+  } from "./core/types";
   import type { WorkerResponse } from "./workers/workerProtocol";
-  import { findFormulas } from "./core/search";
 
   let theme: ThemeName = "dark";
   let massIndex: MassIndex | null = null;
   let rows: FormulaSpaceRow[] = [];
   let nextRowId = 0;
+  let nextChargeEntryId = 1;
   let results: FormulaHit[] = [];
-  let form: SearchFormState = {
-    mz: "180.062839518",
-    charge: "+1",
-    toleranceMode: "ppm",
-    tolerancePpm: "5",
-    toleranceDa: "",
-    maxResults: 100,
-  };
+  let form: SearchFormState = createDefaultSearchForm();
   let status: AppStatus = "loading";
-  let message = "Loading mass database...";
   let hasSearched = false;
   let worker: Worker | null = null;
   let activeRequestId: string | null = null;
   let colorSchemeMediaQuery: MediaQueryList | null = null;
 
+  let rawSpectrumPeaks: SpectrumPeak[] = [];
+  let spectrumPeaks: SpectrumPeak[] = [];
+  let spectrumAssignments: PeakAssignment[] = [];
+  let selectedPeakId: string | null = null;
+  let selectedPeak: SpectrumPeak | null = null;
+  let selectedAssignment: PeakAssignment | null = null;
+  let spectrumImportSource: SpectrumImportSource | null = null;
+  let currentSpectrumImportSheet: SpectrumImportSheet | null = null;
+  let spectrumPreview: SpectrumPreviewTable | null = null;
+  let spectrumFileName = "";
+  let spectrumMzColumn = "";
+  let spectrumIntensityColumn = "";
+  let spectrumActiveSheetName = "";
+  let spectrumHasHeaderRow = true;
+  let spectrumMzColumnIndex: number | null = null;
+  let spectrumIntensityColumnIndex: number | null = null;
+  let spectrumImportError = "";
+  let includeUnassignedInAssignmentCsv = false;
+  let plotSettings: PlotSettings = { ...DEFAULT_PLOT_SETTINGS };
+
   $: isBusy = status === "loading" || status === "running";
+  $: spectrumPeaks = attachAssignmentsToPeaks(rawSpectrumPeaks, spectrumAssignments, selectedPeakId);
+  $: selectedPeak = spectrumPeaks.find((peak) => peak.id === selectedPeakId) ?? null;
+  $: selectedAssignment = getAssignment(spectrumAssignments, selectedPeakId);
+  $: assignedCount = spectrumAssignments.length;
+  $: selectedPeakLabel = selectedPeak ? selectedPeak.mz.toFixed(6) : "";
+  $: canExportAssignmentCsv = rawSpectrumPeaks.length > 0 && (includeUnassignedInAssignmentCsv || assignedCount > 0);
+  $: currentSpectrumImportSheet = spectrumImportSource?.sheets.find((sheet) => sheet.name === spectrumActiveSheetName) ?? spectrumImportSource?.sheets[0] ?? null;
+  $: spectrumPreview = currentSpectrumImportSheet ? buildSpectrumPreview(currentSpectrumImportSheet.table, spectrumHasHeaderRow) : null;
 
   function applyTheme(nextTheme: ThemeName): void {
     theme = nextTheme;
@@ -66,6 +111,112 @@
 
   function updateForm(patch: Partial<SearchFormState>): void {
     form = { ...form, ...patch };
+  }
+
+  function updatePlotSettings(patch: Partial<PlotSettings>): void {
+    plotSettings = { ...plotSettings, ...patch };
+  }
+
+  function createChargeEntryId(): string {
+    const id = `charge-${nextChargeEntryId}`;
+    nextChargeEntryId += 1;
+    return id;
+  }
+
+  function updateChargeInputText(value: string): void {
+    if (!isChargeDraftText(value)) return;
+    updateForm({ chargeInputText: value });
+  }
+
+  function updateChargeEditText(value: string): void {
+    if (!isChargeDraftText(value)) return;
+    updateForm({ chargeEditText: value });
+  }
+
+  function commitChargeInput(): void {
+    if (!canCommitChargeEntryText(form.chargeInputText)) return;
+    const entry = createChargeEntry(createChargeEntryId(), form.chargeInputText);
+    updateForm({
+      chargeEntries: [...form.chargeEntries, entry],
+      chargeInputText: "",
+    });
+  }
+
+  function removeChargeEntry(entryId: string): void {
+    const nextEntries = form.chargeEntries.filter((entry) => entry.id !== entryId);
+    if (form.chargeEditId === entryId) {
+      updateForm({
+        chargeEntries: nextEntries,
+        chargeEditId: null,
+        chargeEditText: "",
+      });
+      return;
+    }
+    updateForm({ chargeEntries: nextEntries });
+  }
+
+  function startChargeEdit(entryId: string): void {
+    const entry = form.chargeEntries.find((candidate) => candidate.id === entryId);
+    if (!entry) return;
+    updateForm({
+      chargeEditId: entry.id,
+      chargeEditText: entry.text,
+    });
+  }
+
+  function cancelChargeEdit(): void {
+    if (!form.chargeEditId) return;
+    updateForm({
+      chargeEditId: null,
+      chargeEditText: "",
+    });
+  }
+
+  function commitChargeEdit(): void {
+    if (!form.chargeEditId || !canCommitChargeEntryText(form.chargeEditText)) return;
+    const updatedEntry = createChargeEntry(form.chargeEditId, form.chargeEditText);
+    updateForm({
+      chargeEntries: form.chargeEntries.map((entry) => (entry.id === updatedEntry.id ? updatedEntry : entry)),
+      chargeEditId: null,
+      chargeEditText: "",
+    });
+  }
+
+  function clearImportedSpectrumData(): void {
+    rawSpectrumPeaks = [];
+    spectrumAssignments = [];
+    selectedPeakId = null;
+    spectrumMzColumn = "";
+    spectrumIntensityColumn = "";
+    includeUnassignedInAssignmentCsv = false;
+    plotSettings = { ...DEFAULT_PLOT_SETTINGS };
+    results = [];
+    hasSearched = false;
+  }
+
+  function clearSpectrumImportState(): void {
+    spectrumImportSource = null;
+    spectrumFileName = "";
+    spectrumActiveSheetName = "";
+    spectrumHasHeaderRow = true;
+    spectrumMzColumnIndex = null;
+    spectrumIntensityColumnIndex = null;
+    spectrumImportError = "";
+    clearImportedSpectrumData();
+  }
+
+  function resetPlotView(): void {
+    if (!rawSpectrumPeaks.length) {
+      plotSettings = { ...DEFAULT_PLOT_SETTINGS };
+      return;
+    }
+
+    const nextView = createPlotSettings(rawSpectrumPeaks);
+    plotSettings = {
+      ...plotSettings,
+      xMin: nextView.xMin,
+      xMax: nextView.xMax,
+    };
   }
 
   function updateRow(rowId: number, patch: Partial<FormulaSpaceRow>): void {
@@ -98,27 +249,17 @@
     rows = rows.filter((row) => row.id !== rowId);
   }
 
-  function selectedTolerance(): { tolerancePpm: string | null; toleranceDa: string | null } {
-    const ppmText = form.tolerancePpm.trim();
-    const daText = form.toleranceDa.trim();
-    const tolerancePpm = (form.toleranceMode === "ppm" || form.toleranceMode === "both") && ppmText ? ppmText : null;
-    const toleranceDa = (form.toleranceMode === "Da" || form.toleranceMode === "both") && daText ? daText : null;
-    if (tolerancePpm === null && toleranceDa === null) {
-      throw new Error("Provide a ppm tolerance, a Da tolerance, or both.");
-    }
-    return { tolerancePpm, toleranceDa };
-  }
-
-  function buildRequest(): FindFormulaRequest {
+  function buildRequest(): FormulaSearchRequest {
     if (!massIndex) throw new Error("Mass database is not loaded yet.");
     const maxResults = Number(form.maxResults);
     if (!Number.isInteger(maxResults) || maxResults < 1) throw new Error("Max results must be a positive integer.");
     const elements = validateAndBuildElements(rows, massIndex);
-    const { tolerancePpm, toleranceDa } = selectedTolerance();
+    const charges = selectedCharges(form);
+    const { tolerancePpm, toleranceDa } = selectedTolerance(form);
     return {
       mz: form.mz,
       elements,
-      charge: form.charge,
+      charges,
       tolerancePpm,
       toleranceDa,
       maxResults,
@@ -133,11 +274,9 @@
       results = response.hits;
       hasSearched = true;
       status = "success";
-      message = `Found ${response.hits.length} candidate formula(s).`;
       return;
     }
     status = "error";
-    message = response.message;
   }
 
   function runSearch(): void {
@@ -146,7 +285,6 @@
       const requestId = crypto.randomUUID();
       activeRequestId = requestId;
       status = "running";
-      message = "Searching candidate formulas...";
 
       if (worker) {
         worker.postMessage({ type: "search", requestId, payload: request });
@@ -154,20 +292,196 @@
       }
 
       // Fallback for unusual environments where Web Worker construction fails.
-      const hits = findFormulas(request);
+      const hits = findFormulaeForCharges(request);
       results = hits;
       hasSearched = true;
       status = "success";
-      message = `Found ${hits.length} candidate formula(s).`;
     } catch (error) {
       console.error(error);
       status = "error";
-      message = error instanceof Error ? error.message : String(error);
     }
   }
 
   function downloadCsv(): void {
     if (results.length) downloadHitsCsv(results);
+  }
+
+  function importSourceLabel(sheetName: string): string {
+    return spectrumImportSource && spectrumImportSource.sheets.length > 1 ? `${spectrumFileName} / ${sheetName}` : spectrumFileName;
+  }
+
+  function isSpectrumImportSheet(candidate: unknown): candidate is SpectrumImportSheet {
+    return Boolean(
+      candidate
+      && typeof candidate === "object"
+      && "name" in candidate
+      && "table" in candidate
+      && Array.isArray((candidate as SpectrumImportSheet).table),
+    );
+  }
+
+  function applySpectrumImportResult(sourceName: string, sheet: SpectrumImportSheet): void {
+    if (!sheet) {
+      throw new Error("Spectrum import failed: no active worksheet is selected.");
+    }
+
+    const imported = normalizeSpectrumTable(sheet.table, {
+      sourceName,
+      hasHeaderRow: spectrumHasHeaderRow,
+      mzColumnIndex: spectrumMzColumnIndex,
+      intensityColumnIndex: spectrumIntensityColumnIndex,
+    });
+
+    rawSpectrumPeaks = imported.peaks;
+    spectrumAssignments = [];
+    selectedPeakId = null;
+    spectrumMzColumn = imported.mzColumn;
+    spectrumIntensityColumn = imported.intensityColumn;
+    includeUnassignedInAssignmentCsv = false;
+    plotSettings = createPlotSettings(imported.peaks);
+    results = [];
+    hasSearched = false;
+  }
+
+  function applySuggestedSpectrumSelection(sheet: SpectrumImportSheet): void {
+    const suggestion = suggestSpectrumSelection(sheet.table, sheet.suggestedHasHeaderRow);
+    spectrumActiveSheetName = sheet.name;
+    spectrumHasHeaderRow = suggestion.hasHeaderRow;
+    spectrumMzColumnIndex = suggestion.mzColumnIndex;
+    spectrumIntensityColumnIndex = suggestion.intensityColumnIndex;
+  }
+
+  function handleApplySpectrumSelection(sheet: SpectrumImportSheet | Event | null = currentSpectrumImportSheet): void {
+    const resolvedSheet = isSpectrumImportSheet(sheet) ? sheet : currentSpectrumImportSheet;
+    if (!resolvedSheet) return;
+
+    try {
+      spectrumImportError = "";
+      const label = importSourceLabel(resolvedSheet.name);
+      applySpectrumImportResult(label, resolvedSheet);
+      status = "success";
+    } catch (error) {
+      console.error(error);
+      clearImportedSpectrumData();
+      spectrumImportError = error instanceof Error ? error.message : String(error);
+      status = "error";
+    }
+  }
+
+  function handleSpectrumSheetSelect(sheetName: string): void {
+    if (!spectrumImportSource) return;
+    const sheet = spectrumImportSource.sheets.find((candidate) => candidate.name === sheetName);
+    if (!sheet) return;
+    applySuggestedSpectrumSelection(sheet);
+    handleApplySpectrumSelection(sheet);
+  }
+
+  function handleSpectrumHasHeaderRowSelect(value: boolean): void {
+    spectrumHasHeaderRow = value;
+    if (!currentSpectrumImportSheet) return;
+
+    const suggestion = suggestSpectrumSelection(currentSpectrumImportSheet.table, value);
+    if (spectrumMzColumnIndex === null) spectrumMzColumnIndex = suggestion.mzColumnIndex;
+    if (spectrumIntensityColumnIndex === null) spectrumIntensityColumnIndex = suggestion.intensityColumnIndex;
+  }
+
+  function handleSpectrumMzColumnSelect(index: number | null): void {
+    spectrumMzColumnIndex = index;
+  }
+
+  function handleSpectrumIntensityColumnSelect(index: number | null): void {
+    spectrumIntensityColumnIndex = index;
+  }
+
+  async function handleSpectrumImport(file: File | null): Promise<void> {
+    if (!file) {
+      clearSpectrumImportState();
+      status = "idle";
+      return;
+    }
+
+    try {
+      clearImportedSpectrumData();
+      spectrumImportError = "";
+      status = "running";
+
+      spectrumImportSource = await loadSpectrumImportSource(file);
+      spectrumFileName = file.name;
+
+      const firstSheet = spectrumImportSource.sheets[0];
+      if (!firstSheet) throw new Error(`Spectrum import failed: ${file.name} does not contain any readable tables.`);
+
+      applySuggestedSpectrumSelection(firstSheet);
+      handleApplySpectrumSelection(firstSheet);
+    } catch (error) {
+      console.error(error);
+      clearSpectrumImportState();
+      spectrumImportError = error instanceof Error ? error.message : String(error);
+      status = "error";
+    }
+  }
+
+  function handlePeakSelect(peak: SpectrumPeak): void {
+    selectedPeakId = peak.id;
+    updateForm({ mz: peak.mz.toFixed(6) });
+    status = "idle";
+  }
+
+  function handleAssign(hit: FormulaHit): void {
+    if (!selectedPeak) return;
+    spectrumAssignments = upsertAssignment(spectrumAssignments, buildPeakAssignment(selectedPeak, hit));
+    status = "success";
+  }
+
+  function isAssignedHitForSelectedPeak(hit: FormulaHit): boolean {
+    return matchesAssignmentHit(selectedAssignment, hit);
+  }
+
+  function handleToggleAssignment(hit: FormulaHit): void {
+    if (!selectedPeak) return;
+    if (isAssignedHitForSelectedPeak(hit)) {
+      handleRemoveAssignment(selectedPeak.id);
+      return;
+    }
+    handleAssign(hit);
+  }
+
+  function handleRemoveAssignment(peakId: string): void {
+    const previous = getAssignment(spectrumAssignments, peakId);
+    spectrumAssignments = removeAssignment(spectrumAssignments, peakId);
+    if (previous) {
+      status = "success";
+    }
+  }
+
+  function handleExportAssignments(): void {
+    if (!canExportAssignmentCsv) return;
+    downloadAssignmentsCsv(spectrumPeaks, includeUnassignedInAssignmentCsv);
+    status = "success";
+  }
+
+  async function handleExportPng(): Promise<void> {
+    if (!rawSpectrumPeaks.length) return;
+    try {
+      status = "running";
+      await downloadAnnotatedSpectrumPng(spectrumPeaks, plotSettings, theme);
+      status = "success";
+    } catch (error) {
+      console.error(error);
+      status = "error";
+    }
+  }
+
+  async function handleExportPdf(): Promise<void> {
+    if (!rawSpectrumPeaks.length) return;
+    try {
+      status = "running";
+      await downloadAnnotatedSpectrumPdf(spectrumPeaks, plotSettings, theme);
+      status = "success";
+    } catch (error) {
+      console.error(error);
+      status = "error";
+    }
   }
 
   onMount(async () => {
@@ -197,11 +511,9 @@
       rows = initial.rows;
       nextRowId = initial.nextRowId;
       status = "idle";
-      message = `Loaded mass database from ${url}.`;
     } catch (error) {
       console.error(error);
       status = "error";
-      message = error instanceof Error ? error.message : String(error);
     }
   });
 
@@ -217,37 +529,101 @@
   });
 </script>
 
-<main class="page-shell">
+<div id="top" class="min-h-screen">
   <TopBar {theme} onToggleTheme={toggleTheme} />
-  <Hero {theme} />
 
-  <!-- <MessageBanner {status} {message} /> -->
+  <main class="page-shell">
+    <Hero />
 
-  <SearchInputs {form} disabled={isBusy} onChange={updateForm} />
-
-  {#if massIndex}
-    <FormulaSpaceTable
-      {rows}
-      {massIndex}
+    <SpectrumImport
+      activeSheetName={spectrumActiveSheetName}
       disabled={isBusy}
-      onAddRow={addRow}
-      onRemoveRow={removeRow}
-      onUpdateRow={updateRow}
+      hasHeaderRow={spectrumHasHeaderRow}
+      importSource={spectrumImportSource}
+      intensityColumnIndex={spectrumIntensityColumnIndex}
+      intensityColumnName={spectrumIntensityColumn}
+      peakCount={rawSpectrumPeaks.length}
+      previewTable={spectrumPreview}
+      sourceName={spectrumFileName}
+      mzColumnIndex={spectrumMzColumnIndex}
+      mzColumnName={spectrumMzColumn}
+      importError={spectrumImportError}
+      onApplySelection={handleApplySpectrumSelection}
+      onImportFile={handleSpectrumImport}
+      onSelectHasHeaderRow={handleSpectrumHasHeaderRowSelect}
+      onSelectIntensityColumn={handleSpectrumIntensityColumnSelect}
+      onSelectMzColumn={handleSpectrumMzColumnSelect}
+      onSelectSheet={handleSpectrumSheetSelect}
     />
-  {/if}
 
-  <section class="my-4 flex flex-wrap gap-3">
-    <button type="button" class="primary-action" disabled={isBusy || !massIndex} on:click={runSearch}>Find candidate formulas</button>
-    <button id="downloadCsv" type="button" class="secondary-action" disabled={isBusy || results.length === 0} on:click={downloadCsv}>Download CSV</button>
-  </section>
+    <SpectrumPlot
+      peaks={spectrumPeaks}
+      settings={plotSettings}
+      {theme}
+      {selectedPeakId}
+      onSelectPeak={handlePeakSelect}
+      onResetView={resetPlotView}
+    />
 
-  {#if hasSearched}
-    <ResultsTable {results} />
-  {/if}
+    {#if rawSpectrumPeaks.length > 0}
+      <PlotSettingsPanel settings={plotSettings} peaks={spectrumPeaks} disabled={isBusy} onChange={updatePlotSettings} />
+      <PeakInspector selectedPeak={selectedPeak} assignment={selectedAssignment} onRemoveAssignment={handleRemoveAssignment} />
+    {/if}
 
-  <ExamplesPanel />
+    <SearchInputs
+      {form}
+      disabled={isBusy}
+      onChange={updateForm}
+      onChargeInputTextChange={updateChargeInputText}
+      onChargeEditTextChange={updateChargeEditText}
+      onCommitChargeInput={commitChargeInput}
+      onCommitChargeEdit={commitChargeEdit}
+      onCancelChargeEdit={cancelChargeEdit}
+      onRemoveChargeEntry={removeChargeEntry}
+      onStartChargeEdit={startChargeEdit}
+    />
 
-  <footer class="pt-5.5 text-center text-[0.92rem] text-muted">
-    © 2026 The Regents of the United Colleges, Lastoria Royal College of Science
-  </footer>
-</main>
+    {#if massIndex}
+      <FormulaSpaceTable
+        {rows}
+        {massIndex}
+        disabled={isBusy}
+        onAddRow={addRow}
+        onRemoveRow={removeRow}
+        onUpdateRow={updateRow}
+      />
+    {/if}
+
+    <section class="my-4 flex flex-wrap gap-3">
+      <button type="button" class="primary-action" disabled={isBusy || !massIndex || !hasCommittedCharges(form) || !hasEnabledTolerance(form)} on:click={runSearch}>Find candidate formulae</button>
+      <button id="downloadCsv" type="button" class="secondary-action" disabled={isBusy || results.length === 0} on:click={downloadCsv}>Download formula hits CSV</button>
+    </section>
+
+    {#if hasSearched}
+      <ResultsTable
+        {results}
+        selectedPeakLabel={selectedPeakLabel}
+        activeAssignment={selectedAssignment}
+        onToggleAssignment={rawSpectrumPeaks.length > 0 ? handleToggleAssignment : null}
+      />
+    {/if}
+
+    {#if rawSpectrumPeaks.length > 0}
+      <ExportPanel
+        includeUnassigned={includeUnassignedInAssignmentCsv}
+        canExportAssignments={canExportAssignmentCsv}
+        disabled={isBusy}
+        totalPeaks={rawSpectrumPeaks.length}
+        {assignedCount}
+        onIncludeUnassignedChange={(value) => (includeUnassignedInAssignmentCsv = value)}
+        onExportAssignments={handleExportAssignments}
+        onExportPng={handleExportPng}
+        onExportPdf={handleExportPdf}
+      />
+    {/if}
+
+    <footer class="pt-5.5 text-center text-[0.92rem] text-muted">
+      © 2026 The Regents of the United Colleges, Lastoria Royal College of Science
+    </footer>
+  </main>
+</div>
