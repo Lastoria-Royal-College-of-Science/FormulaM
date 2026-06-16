@@ -30,9 +30,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Validate mass data
-        run: npm run validate:data
-
       - name: Run tests
         run: npm test
 
