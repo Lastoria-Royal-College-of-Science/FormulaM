@@ -61,7 +61,7 @@ Add or update focused regression tests when changing:
 - result sorting, filtering, table rendering, CSV output, error messages, mass-data loading, or data-shape assumptions
 - spectrum import, sheet/column detection, peak normalization, assignment behavior, exports, plot rendering, worker protocol, cancellation, busy/loading state, or error propagation
 
-Do not weaken assertions to make tests pass. When browser testing needs an imported spectrum/CSV fixture, prefer an existing fixture under `tests/` and state which fixture was used.
+Do not weaken assertions to make tests pass. When debugging or testing needs real data, use `tests\Kaempferol.csv`. When browser testing needs an imported spectrum/CSV fixture, prefer an existing fixture under `tests/` and state which fixture was used.
 
 ## Style and dependencies
 

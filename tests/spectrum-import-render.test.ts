@@ -5,7 +5,7 @@ import { shouldIgnoreFilePickerCancel } from "../src/components/SpectrumImport.s
 import type { SpectrumImportSource, SpectrumPreviewTable } from "../src/core/types";
 
 const sampleImportSource: SpectrumImportSource = {
-  sourceName: "melatonin.csv",
+  sourceName: "Kaempferol.csv",
   sheets: [
     {
       name: "Sheet1",
@@ -89,7 +89,7 @@ describe("SpectrumImport", () => {
         onSelectSheet: () => undefined,
         peakCount: 1,
         previewTable: samplePreviewTable,
-        sourceName: "melatonin.csv",
+        sourceName: "Kaempferol.csv",
       },
     });
 
