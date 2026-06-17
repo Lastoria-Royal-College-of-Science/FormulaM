@@ -1,4 +1,4 @@
-import { defineConfig, presetIcons, presetUno } from "unocss";
+import { defineConfig, presetIcons, presetWind3 } from "unocss";
 
 const noNativeOutline = "[outline:none] focus:[outline:none] focus-visible:[outline:none] active:[outline:none]";
 const interactiveBorder = `enabled:active:border-accent enabled:focus:border-accent enabled:focus-visible:border-accent ${noNativeOutline}`;
@@ -10,7 +10,7 @@ const fieldInteraction = `${interactiveBorder} enabled:focus:shadow-control-glow
 const linkControlInteraction = `hover:[filter:var(--interactive-hover-filter)] active:[filter:var(--interactive-active-filter)] active:border-accent focus:border-accent focus-visible:border-accent active:shadow-control-glow focus-visible:shadow-control-glow ${noNativeOutline}`;
 
 export default defineConfig({
-  presets: [presetUno(), presetIcons()],
+  presets: [presetWind3(), presetIcons()],
   safelist: [
     "topbar-shell-scrolled",
     "i-typcn-arrow-unsorted",
