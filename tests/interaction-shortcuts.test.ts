@@ -24,6 +24,14 @@ describe("Uno interaction shortcuts", () => {
     expect(shortcuts["round-link-control"]).toContain("active:shadow-control-glow");
   });
 
+  it("keeps the native file input on an explicit height separate from text fields", () => {
+    expect(shortcuts["field-control-file"]).toContain("h-[46px]");
+    expect(shortcuts["field-control-file"]).toContain("min-h-[46px]");
+    expect(shortcuts["field-control-file"]).toContain("py-[6px]");
+    expect(shortcuts["field-control-file"]).not.toContain("h-[42px]");
+    expect(shortcuts["field-control-file"]).not.toContain("min-h-[42px]");
+  });
+
   it("keeps theme-aware brand coloring in reusable shortcuts", () => {
     expect(shortcuts["hero-logo"]).toContain("object-contain");
     expect(shortcuts["topbar-brand-mark"]).toContain("transition-[filter]");

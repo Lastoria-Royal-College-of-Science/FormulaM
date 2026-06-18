@@ -23,7 +23,7 @@ export const shortcuts = {
   "field-title": "mb-1.5 block font-[650]",
   "field-hint": "mt-1.25 block text-muted",
   "field-control": `h-[42px] min-h-[42px] w-full rounded-[10px] border border-solid border-control-border bg-control-bg px-3 py-2.5 text-text ${fieldInteraction} ${disabledState}`,
-  "field-control-file": `min-h-[42px] w-full rounded-[10px] border border-solid border-control-border bg-control-bg px-3 py-2 text-text ${fieldInteraction} ${disabledState}`,
+  "field-control-file": `h-[46px] min-h-[46px] w-full rounded-[10px] border border-solid border-control-border bg-control-bg px-3 py-[6px] text-text ${fieldInteraction} ${disabledState}`,
   "field-select": "bg-no-repeat bg-[length:6px_6px] [background-image:linear-gradient(45deg,transparent_50%,var(--muted)_50%),linear-gradient(135deg,var(--muted)_50%,transparent_50%)] [background-position:calc(100%-18px)_50%,calc(100%-12px)_50%] pr-10",
   "help-button": `inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border border-solid border-control-border bg-surface-2 p-0 text-muted ${buttonInteraction}`,
   "help-button-icon": "h-3.5 w-3.5 shrink-0",

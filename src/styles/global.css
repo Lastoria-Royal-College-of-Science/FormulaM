@@ -59,16 +59,35 @@ html[data-theme="light"] {
 
 html[data-theme="dark"] { color-scheme: dark; }
 html, body { overflow-x: clip; }
-* { box-sizing: border-box; }
 
 body {
-  margin: 0;
   min-height: 100vh;
   background: radial-gradient(circle at top left, color-mix(in srgb, var(--accent), transparent 88%), transparent 30rem), var(--bg);
   color: var(--text);
 }
 
-button, input, select { font: inherit; }
+h1,
+h2,
+h3 {
+  color: var(--text);
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+h1 {
+  margin-block: 0.67em;
+  font-size: 2em;
+}
+
+h2 {
+  margin-block: 0.83em;
+  font-size: 1.5em;
+}
+
+h3 {
+  margin-block: 1em;
+  font-size: 1.17em;
+}
 
 button, input, select {
   appearance: none;
@@ -76,6 +95,25 @@ button, input, select {
 
 input[type="file"] {
   appearance: auto;
+}
+
+input[type="file"]::file-selector-button {
+  margin: 0 0.75rem 0 0;
+  height: 2rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--control-border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-weight: 650;
+  line-height: 1.2;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+input[type="file"]:disabled::file-selector-button {
+  cursor: not-allowed;
 }
 
 :where(

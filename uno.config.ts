@@ -6,7 +6,11 @@ export default defineConfig({
   presets: [
     presetWind4({
       preflights: {
-        reset: false,
+        reset: true,
+        theme: {
+          mode: "on-demand",
+        },
+        property: true,
       },
     }),
     presetIcons(),
