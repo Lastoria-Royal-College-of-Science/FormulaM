@@ -11,11 +11,12 @@ The current implementation is Vite + TypeScript + Svelte. Preserve existing scie
 ## Repository map
 
 - `src/core/`: framework-independent scientific logic, search-space handling, mass data loading, formula formatting, export helpers, spectrum normalization, assignments, and plot calculations.
-- `src/components/`: Svelte rendering, input state, events, accessibility, and user interaction. Delegate scientific/data-transformation logic to `src/core/`.
+- `src/components/`: Svelte rendering, input state, events, accessibility, user interaction, and component-local scoped structural styles. Delegate scientific/data-transformation logic to `src/core/`.
 - `src/workers/`: worker protocol and long-running search execution.
 - `public/data/masses.json`: scientific input data for runtime loading and tests.
 - `tests/`: Vitest regression coverage for search, charge input, formula display, sorting, spectrum import/rendering, results tables, plot settings, inline-code copy behavior, and related UI/data flows.
-- `uno.config.ts`: UnoCSS shortcuts, safelist, theme tokens, and design-system utilities.
+- `uno.config.ts`: UnoCSS preset assembly, safelist, theme token mapping, and shortcuts wiring.
+- `src/styles/uno-*.ts`: UnoCSS theme token aliases, shared interaction fragments, and semantic shortcut definitions.
 - `src/styles/global.css`: design tokens, resets, and truly global element-level styles only.
 
 ## Commands
@@ -70,7 +71,7 @@ Do not weaken assertions to make tests pass. When debugging or testing needs rea
 - Put reusable parsing, validation, formatting, search, export, and normalization logic in `src/core/` with typed inputs and outputs.
 - Prefer explicit error messages over silent fallback behavior for scientific inputs and data-loading failures.
 - Follow nearby naming and formatting conventions before introducing new patterns.
-- Keep UnoCSS for shortcuts, layout utilities, theme tokens, and design-system rules. Do not move semantic component styling into `src/styles/global.css`.
+- Keep UnoCSS for reusable shortcuts, layout utilities, theme tokens, and design-system rules. Component `<style>` blocks are allowed only for component-private structural CSS tightly coupled to that component's markup, such as pseudo-elements, scroll-state shells, browser-specific selectors, or complex selector relationships that are awkward to maintain as shortcuts. Do not use scoped styles as a replacement for reusable semantic component styling, and do not move such styling into `src/styles/global.css`.
 - Keep `global.css` limited to design tokens, resets, and truly global element-level behavior.
 - Keep dependencies small and browser-compatible. Explain any new runtime dependency, especially for parsing, export, or plotting behavior.
 - Add dependencies with `npm install <package>` or `npm install --save-dev <package>` so `package-lock.json` stays synchronized.

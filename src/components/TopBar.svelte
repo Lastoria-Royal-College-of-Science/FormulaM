@@ -50,7 +50,9 @@
 
     <nav class="topbar-actions" aria-label="Page controls">
       <a
-        class={`round-control round-link-control no-underline font-[650] ${isBrandVisible ? "topbar-control-solid" : "topbar-control-glass"}`}
+        class="round-control round-link-control no-underline font-[650]"
+        class:topbar-control-solid={isBrandVisible}
+        class:topbar-control-glass={!isBrandVisible}
         href="https://github.com/Lastoria-Royal-College-of-Science/FormulaM"
         target="_blank"
         rel="noopener noreferrer"
@@ -60,7 +62,9 @@
       </a>
       <button
         type="button"
-        class={`round-control cursor-pointer ${isBrandVisible ? "topbar-control-solid" : "topbar-control-glass"}`}
+        class="round-control cursor-pointer"
+        class:topbar-control-solid={isBrandVisible}
+        class:topbar-control-glass={!isBrandVisible}
         aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
         aria-pressed={isDark}
         on:click={onToggleTheme}
@@ -74,3 +78,66 @@
     </nav>
   </div>
 </header>
+
+<style>
+  .topbar-shell {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    width: 100%;
+    overflow-x: clip;
+    background: transparent;
+  }
+
+  .topbar-shell::before,
+  .topbar-shell::after {
+    pointer-events: none;
+    position: absolute;
+    opacity: 0;
+    transition: opacity 200ms ease-out;
+    content: "";
+  }
+
+  .topbar-shell::before {
+    top: -1.5rem;
+    right: -2rem;
+    bottom: 0;
+    left: -2rem;
+    background: color-mix(in srgb, var(--surface), transparent 28%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    backdrop-filter: blur(24px) saturate(150%);
+  }
+
+  .topbar-shell::after {
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 1px;
+    background: color-mix(in srgb, var(--border), transparent 14%);
+  }
+
+  .topbar-shell-scrolled::before,
+  .topbar-shell-scrolled::after {
+    opacity: 1;
+  }
+
+  .topbar-control-solid,
+  .topbar-control-glass {
+    transition:
+      background-color 200ms ease-out,
+      border-color 200ms ease-out,
+      backdrop-filter 200ms ease-out;
+  }
+
+  .topbar-control-solid {
+    border-color: var(--control-border);
+    background: var(--control-bg);
+  }
+
+  .topbar-control-glass {
+    border-color: color-mix(in srgb, var(--border), transparent 14%);
+    background-color: color-mix(in srgb, var(--surface), transparent 40%);
+    -webkit-backdrop-filter: blur(10px) saturate(135%);
+    backdrop-filter: blur(10px) saturate(135%);
+  }
+</style>

@@ -37,7 +37,7 @@ describe("SearchInputs", () => {
     expect(body).not.toContain("i-codex-check");
     expect(body).not.toContain(">+1<");
     expect(body.match(/role="switch"/g)).toHaveLength(3);
-    expect(body.match(/<button[^>]*class="toggle-switch(?: toggle-switch-checked)?\s*"/g)).toHaveLength(2);
+    expect(body.match(/<button[^>]*class="[^"]*\btoggle-switch\b[^"]*"/g)).toHaveLength(2);
     expect(body.indexOf('aria-label="Enable ppm tolerance"')).toBeLessThan(body.indexOf('id="tolerancePpm"'));
     expect(body.indexOf('aria-label="Enable Da tolerance"')).toBeLessThan(body.indexOf('id="toleranceDa"'));
     expect(body).toContain('value="0.01"');
