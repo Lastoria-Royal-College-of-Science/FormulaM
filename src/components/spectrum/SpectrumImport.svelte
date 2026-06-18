@@ -5,8 +5,8 @@
 </script>
 
 <script lang="ts">
-  import ToggleSwitch from "./ToggleSwitch.svelte";
-  import type { SpectrumImportSource, SpectrumPreviewTable } from "../core/types";
+  import ToggleSwitch from "../ui/ToggleSwitch.svelte";
+  import type { SpectrumImportSource, SpectrumPreviewTable } from "../../core/types";
 
   export let activeSheetName = "";
   export let disabled = false;

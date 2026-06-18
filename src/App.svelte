@@ -1,17 +1,17 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
-  import TopBar from "./components/TopBar.svelte";
-  import Hero from "./components/Hero.svelte";
-  import SearchInputs from "./components/SearchInputs.svelte";
-  import FormulaSpaceTable from "./components/FormulaSpaceTable.svelte";
-  import ResultsTable from "./components/ResultsTable.svelte";
-  import SpectrumImport from "./components/SpectrumImport.svelte";
-  import SpectrumPlot from "./components/SpectrumPlot.svelte";
-  import PlotSettingsPanel from "./components/PlotSettingsPanel.svelte";
-  import PeakInspector from "./components/PeakInspector.svelte";
-  import ExportPanel from "./components/ExportPanel.svelte";
-  import { downloadHitsCsv } from "./core/csv";
-  import { buildMassIndex, loadMassPayload } from "./core/massData";
+  import TopBar from "./components/layout/TopBar.svelte";
+  import Hero from "./components/layout/Hero.svelte";
+  import SearchInputs from "./components/search/SearchInputs.svelte";
+  import FormulaSpaceTable from "./components/search/FormulaSpaceTable.svelte";
+  import ResultsTable from "./components/results/ResultsTable.svelte";
+  import SpectrumImport from "./components/spectrum/SpectrumImport.svelte";
+  import SpectrumPlot from "./components/spectrum/SpectrumPlot.svelte";
+  import PlotSettingsPanel from "./components/spectrum/PlotSettingsPanel.svelte";
+  import PeakInspector from "./components/spectrum/PeakInspector.svelte";
+  import ExportPanel from "./components/spectrum/ExportPanel.svelte";
+  import { downloadHitsCsv } from "./core/export/csv";
+  import { buildMassIndex, loadMassPayload } from "./core/chemistry/massData";
   import {
     chooseUnusedIsotope,
     createInitialRows,
@@ -19,15 +19,17 @@
     firstAvailableElement,
     makeRow,
     validateAndBuildElements,
-  } from "./core/searchSpace";
-  import { getAssignment, attachAssignmentsToPeaks, buildPeakAssignment, matchesAssignmentHit, removeAssignment, upsertAssignment } from "./core/assignments";
-  import { downloadAnnotatedSpectrumPdf, downloadAnnotatedSpectrumPng, downloadAssignmentsCsv } from "./core/exportSpectrum";
-  import { createPlotSettings, DEFAULT_PLOT_SETTINGS } from "./core/plotTicks";
-  import { canCommitChargeEntryText, createChargeEntry, isChargeDraftText } from "./core/chargeInput";
-  import { findFormulaeForCharges } from "./core/search";
-  import { createDefaultSearchForm, hasCommittedCharges, hasEnabledTolerance, selectedCharges, selectedTolerance } from "./core/searchForm";
-  import { loadSpectrumImportSource } from "./core/spectrumImport";
-  import { buildSpectrumPreview, normalizeSpectrumTable, suggestSpectrumSelection } from "./core/spectrumNormalize";
+  } from "./core/search/searchSpace";
+  import { getAssignment, attachAssignmentsToPeaks, buildPeakAssignment, matchesAssignmentHit, removeAssignment, upsertAssignment } from "./core/spectrum/assignments";
+  import { downloadAnnotatedSpectrumPdf } from "./core/export/spectrumPdf";
+  import { downloadAnnotatedSpectrumPng } from "./core/export/spectrumPng";
+  import { downloadAssignmentsCsv } from "./core/export/spectrumCsv";
+  import { createPlotSettings, DEFAULT_PLOT_SETTINGS } from "./core/plot/plotTicks";
+  import { canCommitChargeEntryText, createChargeEntry, isChargeDraftText } from "./core/search/chargeInput";
+  import { findFormulaeForCharges } from "./core/search/search";
+  import { createDefaultSearchForm, hasCommittedCharges, hasEnabledTolerance, selectedCharges, selectedTolerance } from "./core/search/searchForm";
+  import { loadSpectrumImportSource } from "./core/spectrum/spectrumImport";
+  import { buildSpectrumPreview, normalizeSpectrumTable, suggestSpectrumSelection } from "./core/spectrum/spectrumNormalize";
   import type {
     AppStatus,
     FormulaSearchRequest,

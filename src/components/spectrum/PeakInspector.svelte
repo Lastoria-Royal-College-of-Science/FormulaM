@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { PeakAssignment, SpectrumPeak } from "../core/types";
+  import type { PeakAssignment, SpectrumPeak } from "../../core/types";
 
   export let selectedPeak: SpectrumPeak | null = null;
   export let assignment: PeakAssignment | null = null;

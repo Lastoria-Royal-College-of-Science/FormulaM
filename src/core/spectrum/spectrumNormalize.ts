@@ -1,4 +1,4 @@
-import type { SpectrumImportResult, SpectrumPreviewTable, SpectrumPeak } from "./types";
+import type { SpectrumImportResult, SpectrumPreviewTable, SpectrumPeak } from "../types";
 
 const MZ_HEADER_TOKENS = ["mz", "moverz", "masstocharge", "mtoz", "mass"];
 const INTENSITY_HEADER_TOKENS = ["abund", "abundance", "intensity", "signal", "area", "height"];

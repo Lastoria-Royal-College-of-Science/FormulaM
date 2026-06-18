@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render } from "svelte/server";
-import ExportPanel from "../src/components/ExportPanel.svelte";
+import ExportPanel from "../src/components/spectrum/ExportPanel.svelte";
 
 describe("ExportPanel", () => {
   it("renders PNG and PDF export actions in the final export section", () => {

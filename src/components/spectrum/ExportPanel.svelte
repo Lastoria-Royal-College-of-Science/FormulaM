@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ToggleSwitch from "./ToggleSwitch.svelte";
+  import ToggleSwitch from "../ui/ToggleSwitch.svelte";
 
   export let includeUnassigned = false;
   export let canExportAssignments = false;

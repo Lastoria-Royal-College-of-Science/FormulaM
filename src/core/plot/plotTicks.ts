@@ -1,4 +1,4 @@
-import type { PlotSettings, SpectrumPeak } from "./types";
+import type { PlotSettings, SpectrumPeak } from "../types";
 
 export const DEFAULT_PLOT_SETTINGS: PlotSettings = {
   yScale: "auto",

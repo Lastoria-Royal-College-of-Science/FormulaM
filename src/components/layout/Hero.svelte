@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ThemeName } from "../core/types";
+  import type { ThemeName } from "../../core/types";
 
   export let theme: ThemeName = "dark";
   const logoSrc = `${import.meta.env.BASE_URL}logo.svg`;

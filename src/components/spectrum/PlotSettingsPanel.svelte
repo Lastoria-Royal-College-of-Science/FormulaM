@@ -1,7 +1,7 @@
 <script lang="ts">
-  import ToggleSwitch from "./ToggleSwitch.svelte";
-  import { resolvePlotAutoValues } from "../core/plotTicks";
-  import type { PlotLabelFilter, PlotLabelMode, PlotSettings, SpectrumPeak } from "../core/types";
+  import ToggleSwitch from "../ui/ToggleSwitch.svelte";
+  import { resolvePlotAutoValues } from "../../core/plot/plotTicks";
+  import type { PlotLabelFilter, PlotLabelMode, PlotSettings, SpectrumPeak } from "../../core/types";
 
   export let settings: PlotSettings;
   export let peaks: SpectrumPeak[] = [];

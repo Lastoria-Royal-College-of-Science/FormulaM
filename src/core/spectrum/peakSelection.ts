@@ -1,4 +1,4 @@
-import type { SpectrumPeak } from "./types";
+import type { SpectrumPeak } from "../types";
 
 function lowerBound(peaks: readonly SpectrumPeak[], targetMz: number): number {
   let low = 0;

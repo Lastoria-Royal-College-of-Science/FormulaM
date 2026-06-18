@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { tokenizeFormulaDisplay } from "../core/formulaDisplay";
+  import { tokenizeFormulaDisplay } from "../../core/chemistry/formulaDisplay";
 
   export let formula: string;
 

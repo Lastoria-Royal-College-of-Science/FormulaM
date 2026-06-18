@@ -1,5 +1,5 @@
 import { normalizeSpeciesLabel } from "./formula";
-import type { AliasRecord, IsotopeRecord, MassIndex, MassPayload } from "./types";
+import type { AliasRecord, IsotopeRecord, MassIndex, MassPayload } from "../types";
 
 export const MASS_DATA_CANDIDATES = [
   "data/masses.json",

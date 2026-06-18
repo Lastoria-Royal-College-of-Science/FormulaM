@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ChemicalFormula from "./ChemicalFormula.svelte";
+  import ChemicalFormula from "../ui/ChemicalFormula.svelte";
   import {
     cycleResultSortState,
     getResultSortAria,
@@ -7,9 +7,9 @@
     sortFormulaHits,
     type ResultSortColumn,
     type ResultSortState,
-  } from "../core/resultsSort";
-  import { matchesAssignmentHit } from "../core/assignments";
-  import type { FormulaHit, PeakAssignment } from "../core/types";
+  } from "../../core/search/resultsSort";
+  import { matchesAssignmentHit } from "../../core/spectrum/assignments";
+  import type { FormulaHit, PeakAssignment } from "../../core/types";
 
   type ResultsPageSizeValue = "10" | "20" | "50" | "all";
 

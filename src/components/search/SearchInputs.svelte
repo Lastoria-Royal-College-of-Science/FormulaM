@@ -1,8 +1,8 @@
 <script lang="ts">
   import { tick } from "svelte";
-  import ToggleSwitch from "./ToggleSwitch.svelte";
-  import { canCommitChargeEntryText, formatChargeEntry, formatSignedChargeText, isChargeDraftText } from "../core/chargeInput";
-  import type { SearchFormState } from "../core/types";
+  import ToggleSwitch from "../ui/ToggleSwitch.svelte";
+  import { canCommitChargeEntryText, formatChargeEntry, formatSignedChargeText, isChargeDraftText } from "../../core/search/chargeInput";
+  import type { SearchFormState } from "../../core/types";
 
   export let form: SearchFormState;
   export let disabled = false;

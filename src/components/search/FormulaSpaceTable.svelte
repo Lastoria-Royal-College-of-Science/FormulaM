@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { elementOptionsForRow } from "../core/searchSpace";
-  import { formatIsotopeOption } from "../core/massData";
-  import type { FormulaSpaceRow, MassIndex } from "../core/types";
+  import { elementOptionsForRow } from "../../core/search/searchSpace";
+  import { formatIsotopeOption } from "../../core/chemistry/massData";
+  import type { FormulaSpaceRow, MassIndex } from "../../core/types";
 
   export let rows: FormulaSpaceRow[] = [];
   export let massIndex: MassIndex;

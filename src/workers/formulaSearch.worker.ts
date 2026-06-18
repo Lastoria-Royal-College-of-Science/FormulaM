@@ -1,4 +1,4 @@
-import { findFormulaeForCharges } from "../core/search";
+import { findFormulaeForCharges } from "../core/search/search";
 import type { WorkerRequest, WorkerResponse } from "./workerProtocol";
 
 const cancelled = new Set<string>();
