@@ -25,9 +25,12 @@ describe("Uno interaction shortcuts", () => {
   });
 
   it("keeps the native file input on an explicit height separate from text fields", () => {
-    expect(shortcuts["field-control-file"]).toContain("h-[46px]");
-    expect(shortcuts["field-control-file"]).toContain("min-h-[46px]");
+    expect(shortcuts["field-control-file"]).toContain("h-[48px]");
+    expect(shortcuts["field-control-file"]).toContain("min-h-[48px]");
     expect(shortcuts["field-control-file"]).toContain("py-[6px]");
+    expect(shortcuts["field-control-file"]).toContain("leading-[32px]");
+    expect(shortcuts["field-control-file"]).not.toContain("h-[46px]");
+    expect(shortcuts["field-control-file"]).not.toContain("min-h-[46px]");
     expect(shortcuts["field-control-file"]).not.toContain("h-[42px]");
     expect(shortcuts["field-control-file"]).not.toContain("min-h-[42px]");
   });
