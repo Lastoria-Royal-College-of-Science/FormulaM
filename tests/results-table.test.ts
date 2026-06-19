@@ -54,7 +54,8 @@ describe("ResultsTable", () => {
     expect(body.match(/<th class="table-head">Formula<\/th>/g)).toHaveLength(1);
     expect(body).not.toContain(">ion_formula<");
     expect(body).not.toContain(">charge<");
-    expect(body).toContain(`class="math-tex chemical-formula" aria-label="${sampleHit.ion_formula}"`);
+    expect(body).toContain("class=\"math-tex chemical-formula");
+    expect(body).toContain(`aria-label="${sampleHit.ion_formula}"`);
     expect(body).toContain(texAnnotation("\\ce{[C5{}^{13}CH12O6]+}"));
     expect(body).not.toContain("formula-isotope");
     expect(body).not.toMatch(/<sub\b/);
