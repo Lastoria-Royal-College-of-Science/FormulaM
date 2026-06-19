@@ -50,6 +50,7 @@ Do not invent missing scripts. If a document mentions a script absent from `pack
 - Treat observed input mass as `m/z`, not neutral mass.
 - Keep charge explicit. FormulaM applies bare-ion electron-mass correction for charged species; do not add adduct behavior unless explicitly requested.
 - Preserve semantics for formula, mass, `m/z`, Da error, ppm error, charge state, sorting, filtering, CSV export, spectrum assignment, and plot annotation unless the task changes them.
+- Preserve raw formula encoding, but render isotope-local bracket notation such as `[13C]` without the isotope brackets in visible formula displays. Show isotope mass numbers as left superscripts next to the element, keep ion wrapper brackets such as `[C6H12O6]+`, and follow the same visible convention in future KaTeX/mhchem rendering.
 - Treat `public/data/masses.json` as scientific source data. Do not replace, regenerate, reformat, or normalize it unless explicitly asked.
 - Keep deployment base intentional. FormulaM uses a custom domain, so Vite `base` should remain `/` unless the deployment target changes. Do not change it to `/FormulaM/` merely because the repository is hosted on GitHub Pages; use `/FormulaM/` only for project-site deployment without the custom domain.
 

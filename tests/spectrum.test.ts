@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { attachAssignmentsToPeaks, buildPeakAssignment, upsertAssignment } from "../src/core/spectrum/assignments";
 import { assignmentsToCsv } from "../src/core/export/spectrumCsv";
 import { annotatedSpectrumPdfBytes } from "../src/core/export/spectrumPdf";
-import { createSpectrumPlotScene, formulaToPlotTextRuns } from "../src/core/plot/plotScene";
+import { PLOT_RICH_TEXT_ISOTOPE_GAP_EM, createSpectrumPlotScene, formulaToPlotTextRuns, renderSpectrumPlot } from "../src/core/plot/plotScene";
 import { DEFAULT_PLOT_SETTINGS, computeAutoMajorTickSpacing, computeMinorTicks, createPlotSettings, resolvePlotDomain } from "../src/core/plot/plotTicks";
 import { loadSpectrumImportSource, parseCsvText } from "../src/core/spectrum/spectrumImport";
 import { buildSpectrumPreview, normalizeSpectrumTable } from "../src/core/spectrum/spectrumNormalize";
@@ -201,9 +201,13 @@ describe("spectrum plot formula labels", () => {
       { text: "6", script: "sub" },
     ]);
     expect(formulaToPlotTextRuns("[C6H12O6]+")).toContainEqual({ text: "+", script: "sup" });
-    expect(formulaToPlotTextRuns("[C5[13C]H12O6]2+")).toContainEqual({ text: "13", script: "sup" });
+    expect(formulaToPlotTextRuns("[C5[13C]H12O6]2+")).toContainEqual({
+      text: "13",
+      script: "sup",
+      leadingGap: PLOT_RICH_TEXT_ISOTOPE_GAP_EM,
+    });
     expect(formulaToPlotTextRuns("[C5[13C]H12O6]2+")).toContainEqual({ text: "2+", script: "sup" });
-    expect(formulaToPlotTextRuns("[C5[13C]H12O6]2+").map((run) => run.text).join("")).toBe("[C5[13C]H12O6]2+");
+    expect(formulaToPlotTextRuns("[C5[13C]H12O6]2+").map((run) => run.text).join("")).toBe("[C513CH12O6]2+");
   });
 
   it("emits rich text for assigned formula labels and keeps numeric labels plain", () => {
@@ -222,8 +226,12 @@ describe("spectrum plot formula labels", () => {
 
     expect(formulaLabel?.kind).toBe("rich-text");
     if (formulaLabel?.kind === "rich-text") {
-      expect(formulaLabel.lines[0].map((run) => run.text).join("")).toBe("[C5[13C]H12O6]+");
-      expect(formulaLabel.lines[0]).toContainEqual({ text: "13", script: "sup" });
+      expect(formulaLabel.lines[0].map((run) => run.text).join("")).toBe("[C513CH12O6]+");
+      expect(formulaLabel.lines[0]).toContainEqual({
+        text: "13",
+        script: "sup",
+        leadingGap: PLOT_RICH_TEXT_ISOTOPE_GAP_EM,
+      });
       expect(formulaLabel.lines[0]).toContainEqual({ text: "+", script: "sup" });
     }
 
@@ -280,6 +288,54 @@ describe("spectrum plot formula labels", () => {
     expect(scene.shapes.some((shape) => shape.kind === "rich-text")).toBe(false);
   });
 
+  it("renders rich isotope labels through the canvas path", () => {
+    const drawnText: string[] = [];
+    const context = {
+      clearRect: () => undefined,
+      fillRect: () => undefined,
+      save: () => undefined,
+      restore: () => undefined,
+      setLineDash: () => undefined,
+      beginPath: () => undefined,
+      moveTo: () => undefined,
+      lineTo: () => undefined,
+      stroke: () => undefined,
+      arc: () => undefined,
+      fill: () => undefined,
+      translate: () => undefined,
+      rotate: () => undefined,
+      fillText: (text: string) => drawnText.push(text),
+      measureText: (text: string) => ({
+        width: text.length * 6,
+        actualBoundingBoxAscent: 8,
+        actualBoundingBoxDescent: 2,
+      }) as TextMetrics,
+      fillStyle: "",
+      font: "",
+      globalAlpha: 1,
+      lineWidth: 1,
+      strokeStyle: "",
+      textAlign: "left",
+      textBaseline: "alphabetic",
+    } as unknown as CanvasRenderingContext2D;
+
+    renderSpectrumPlot(context, {
+      peaks: assignedPeaks,
+      settings: {
+        ...DEFAULT_PLOT_SETTINGS,
+        labelMode: "formula",
+        labelFilter: "assigned-only",
+      },
+      width: 800,
+      height: 450,
+      theme: "light",
+      renderMode: "export",
+    });
+
+    expect(drawnText).toContain("13");
+    expect(drawnText).toContain("C");
+    expect(drawnText).not.toContain("[13C]");
+  });
 });
 
 describe("assignment export", () => {
@@ -341,6 +397,8 @@ describe("assignment export", () => {
     expect(pdf).toContain("/BaseFont /Helvetica");
     expect(pdf).toContain("(2 visible peaks) Tj");
     expect(pdf).not.toContain("Threshold");
+    expect(pdf.match(/\(\[\) Tj/g)).toHaveLength(1);
+    expect(pdf.match(/\(\]\) Tj/g)).toHaveLength(1);
     expect(pdf).toContain("(13) Tj");
     expect(pdf).toContain("(2+) Tj");
     expect(pdf).not.toContain("(?) Tj");

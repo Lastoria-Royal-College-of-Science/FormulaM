@@ -65,6 +65,9 @@
     return offset ? `${-offset}em` : "baseline";
   }
 
+  function runDx(shape: PlotRichText, run: PlotTextRun): number | undefined {
+    return run.leadingGap ? shape.fontSize * run.leadingGap : undefined;
+  }
 
   function eventToMz(event: MouseEvent): number | null {
     if (!plotFrame || !peaks.length) return null;
@@ -229,7 +232,7 @@
                 font-weight={shape.fontWeight === "bold" ? 600 : 400}
                 text-anchor={textAnchor(shape.align)}
                 transform={textRotation(shape)}
-              >{#each shape.lines as line, lineIndex (lineIndex)}<tspan x={shape.x} y={richLineY(shape, lineIndex)}>{#each line as run, runIndex (runIndex)}<tspan font-size={runFontSize(shape, run)} baseline-shift={runBaselineShift(run)}>{run.text}</tspan>{/each}</tspan>{/each}</text>
+              >{#each shape.lines as line, lineIndex (lineIndex)}<tspan x={shape.x} y={richLineY(shape, lineIndex)}>{#each line as run, runIndex (runIndex)}<tspan dx={runDx(shape, run)} font-size={runFontSize(shape, run)} baseline-shift={runBaselineShift(run)}>{run.text}</tspan>{/each}</tspan>{/each}</text>
             {/if}
           {/each}
         </svg>

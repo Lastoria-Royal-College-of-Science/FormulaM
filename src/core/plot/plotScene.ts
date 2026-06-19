@@ -85,6 +85,7 @@ export type PlotText = {
 export type PlotTextRun = {
   text: string;
   script?: "normal" | "sub" | "sup";
+  leadingGap?: number;
 };
 
 export type PlotRichText = {
@@ -114,6 +115,7 @@ export const PLOT_RICH_TEXT_SCRIPT_SCALE = 0.72;
 export const PLOT_RICH_TEXT_SUPERSCRIPT_OFFSET_EM = -0.38;
 export const PLOT_RICH_TEXT_SUBSCRIPT_OFFSET_EM = 0.16;
 export const PLOT_RICH_TEXT_LINE_HEIGHT_EM = 1.28;
+export const PLOT_RICH_TEXT_ISOTOPE_GAP_EM = 0.18;
 
 function themePalette(theme: ThemeName): PlotPalette {
   return theme === "light"
@@ -192,10 +194,19 @@ export function plotRichTextLineOffset(lineIndex: number, lineCount: number, fon
 }
 
 export function formulaToPlotTextRuns(formula: string): PlotTextRun[] {
-  return tokenizeFormulaDisplay(formula).map((token) => ({
-    text: token.text,
-    script: token.kind === "text" ? "normal" : token.kind,
-  }));
+  return tokenizeFormulaDisplay(formula).flatMap((token) => {
+    if (token.kind === "isotope") {
+      return [
+        { text: token.massNumber, script: "sup", leadingGap: PLOT_RICH_TEXT_ISOTOPE_GAP_EM },
+        { text: token.element, script: "normal" },
+      ];
+    }
+
+    return [{
+      text: token.text,
+      script: token.kind === "text" ? "normal" : token.kind,
+    }];
+  });
 }
 
 function shouldShowPeakLabel(peak: SpectrumPeak, settings: PlotSettings): boolean {
@@ -526,7 +537,7 @@ function measureRichTextLine(context: CanvasRenderingContext2D, line: PlotTextRu
   return line.reduce((width, run) => {
     const runFontSize = plotTextRunFontSize(fontSize, run.script);
     context.font = canvasFont(runFontSize, fontWeight);
-    return width + context.measureText(run.text).width;
+    return width + fontSize * (run.leadingGap ?? 0) + context.measureText(run.text).width;
   }, 0);
 }
 
@@ -555,6 +566,7 @@ function drawRichTextLine(
   context.textBaseline = baseline;
 
   for (const run of line) {
+    cursor += fontSize * (run.leadingGap ?? 0);
     const runFontSize = plotTextRunFontSize(fontSize, run.script);
     const runYOffset = plotTextRunBaselineOffset(fontSize, run.script);
     context.font = canvasFont(runFontSize, fontWeight);

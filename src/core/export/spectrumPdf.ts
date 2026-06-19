@@ -179,7 +179,7 @@ function measurePdfRichTextLine(line: PlotTextRun[], fontSize: number, fontWeigh
     const runOffset = plotTextRunBaselineOffset(fontSize, run.script);
     const metrics = measurePdfText(run.text, runFontSize, fontWeight);
     return {
-      width: combined.width + metrics.width,
+      width: combined.width + fontSize * (run.leadingGap ?? 0) + metrics.width,
       ascent: Math.max(combined.ascent, metrics.ascent - runOffset),
       descent: Math.max(combined.descent, metrics.descent + runOffset),
     };
@@ -203,6 +203,7 @@ function buildPdfRichText(shape: PlotRichText, scene: PlotScene): string {
     let cursor = textAlignOffset(lineMetrics.width, shape.align);
 
     for (const run of line) {
+      cursor += shape.fontSize * (run.leadingGap ?? 0);
       const runFontSize = plotTextRunFontSize(shape.fontSize, run.script);
       const runMetrics = measurePdfText(run.text, runFontSize, shape.fontWeight);
       const runYOffset = lineYOffset + plotTextRunBaselineOffset(shape.fontSize, run.script);

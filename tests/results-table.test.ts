@@ -4,7 +4,7 @@ import ResultsTable from "../src/components/results/ResultsTable.svelte";
 import type { FormulaHit, PeakAssignment } from "../src/core/types";
 
 const sampleHit: FormulaHit = {
-  formula: "C6H12O6",
+  formula: "C5[13C]H12O6",
   composition: { C: 6, H: 12, O: 6 },
   mass: "180.063388098",
   mz: "180.062839518",
@@ -12,7 +12,7 @@ const sampleHit: FormulaHit = {
   error_ppm: "0.000000",
   charge: 1,
   charge_state: "+",
-  ion_formula: "[C6H12O6]+",
+  ion_formula: "[C5[13C]H12O6]+",
 };
 
 const sampleAssignment: PeakAssignment = {
@@ -42,6 +42,10 @@ function makeHit(index: number): FormulaHit {
   };
 }
 
+function visibleText(markup: string): string {
+  return markup.replace(/<[^>]+>/g, "");
+}
+
 describe("ResultsTable", () => {
   it("shows only the merged formula column for candidate hits", () => {
     const { body } = render(ResultsTable, { props: { results: [sampleHit] } });
@@ -50,6 +54,9 @@ describe("ResultsTable", () => {
     expect(body).not.toContain(">ion_formula<");
     expect(body).not.toContain(">charge<");
     expect(body).toContain(`<span class="chemical-formula" aria-label="${sampleHit.ion_formula}">`);
+    expect(visibleText(body)).not.toContain("[13C]");
+    expect(body).toContain("formula-isotope");
+    expect(body).toContain(">13</sup>");
     expect(body).toContain("<sub>6</sub>");
     expect(body).toContain("<sub>12</sub>");
     expect(body).toContain("<sup>+</sup>");
@@ -87,7 +94,7 @@ describe("ResultsTable", () => {
     expect(body).toContain('class="results-assign-button-active"');
     expect(body).toContain('aria-pressed="true"');
     expect(body).toContain('i-mdi-minus');
-    expect(body).toContain('Remove [C6H12O6]+ from the selected peak');
+    expect(body).toContain('Remove [C5[13C]H12O6]+ from the selected peak');
   });
 
   it("renders pagination controls and shows the first 10 rows by default", () => {

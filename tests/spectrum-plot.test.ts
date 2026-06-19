@@ -16,8 +16,8 @@ const peaks: SpectrumPeak[] = [
         mz: 100.1,
         intensity: 500,
         relativeIntensity: 100,
-        formula: "C6H12O6",
-        ionFormula: "[C6H12O6]+",
+        formula: "C5[13C]H12O6",
+        ionFormula: "[C5[13C]H12O6]2+",
         source: "manual",
       },
     ],
@@ -53,6 +53,8 @@ describe("SpectrumPlot", () => {
     expect(body).toContain("<tspan");
     expect(body).toContain('baseline-shift="0.38em"');
     expect(body).toContain('baseline-shift="-0.16em"');
+    expect(body).toContain('dx="1.98"');
+    expect(body).not.toContain("[13C]");
     expect(body).not.toContain("<canvas");
   });
 });
