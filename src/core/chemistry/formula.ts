@@ -1,4 +1,4 @@
-import type { ChargeSpec } from "./types";
+import type { ChargeSpec } from "../types";
 
 const ISOTOPE_LABEL_RE = /^(\d+)([A-Z][a-z]?)$/;
 const BRACKETED_ISOTOPE_LABEL_RE = /^\[(\d+)([A-Z][a-z]?)\]$/;

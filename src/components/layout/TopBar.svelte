@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
-  import type { ThemeName } from "../core/types";
+  import type { ThemeName } from "../../core/types";
 
   export let theme: ThemeName = "dark";
   export let onToggleTheme: () => void;

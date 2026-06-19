@@ -4,7 +4,7 @@ import {
   getResultSortAria,
   getResultSortIconClass,
   sortFormulaHits,
-} from "../src/core/resultsSort";
+} from "../src/core/search/resultsSort";
 import type { FormulaHit } from "../src/core/types";
 
 const hits: FormulaHit[] = [

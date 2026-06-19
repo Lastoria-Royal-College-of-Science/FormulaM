@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render } from "svelte/server";
-import PlotSettingsPanel from "../src/components/PlotSettingsPanel.svelte";
-import { DEFAULT_PLOT_SETTINGS, createPlotSettings } from "../src/core/plotTicks";
+import PlotSettingsPanel from "../src/components/spectrum/PlotSettingsPanel.svelte";
+import { DEFAULT_PLOT_SETTINGS, createPlotSettings } from "../src/core/plot/plotTicks";
 import type { SpectrumPeak } from "../src/core/types";
 
 const peaks: SpectrumPeak[] = [

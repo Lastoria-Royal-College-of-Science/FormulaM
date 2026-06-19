@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { render } from "svelte/server";
-import Hero from "../src/components/Hero.svelte";
-import PeakInspector from "../src/components/PeakInspector.svelte";
-import SearchInputs from "../src/components/SearchInputs.svelte";
-import SpectrumImport from "../src/components/SpectrumImport.svelte";
-import SpectrumPlot from "../src/components/SpectrumPlot.svelte";
+import Hero from "../src/components/layout/Hero.svelte";
+import PeakInspector from "../src/components/spectrum/PeakInspector.svelte";
+import SearchInputs from "../src/components/search/SearchInputs.svelte";
+import SpectrumImport from "../src/components/spectrum/SpectrumImport.svelte";
+import SpectrumPlot from "../src/components/spectrum/SpectrumPlot.svelte";
 import type { PeakAssignment, PlotSettings, SearchFormState, SpectrumImportSource, SpectrumPreviewTable, SpectrumPeak } from "../src/core/types";
 
 const inlineMz = '<code class="inline-code">m/z</code>';

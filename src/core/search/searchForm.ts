@@ -1,5 +1,5 @@
 import { createChargeEntry, expandChargeEntries } from "./chargeInput";
-import type { ChargeSpec, SearchFormState } from "./types";
+import type { ChargeSpec, SearchFormState } from "../types";
 
 export function createDefaultSearchForm(): SearchFormState {
   return {

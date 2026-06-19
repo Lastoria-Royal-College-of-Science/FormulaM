@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { attachAssignmentsToPeaks, buildPeakAssignment, upsertAssignment } from "../src/core/assignments";
-import { annotatedSpectrumPdfBytes, assignmentsToCsv, createSpectrumPlotScene } from "../src/core/exportSpectrum";
-import { DEFAULT_PLOT_SETTINGS, computeAutoMajorTickSpacing, computeMinorTicks, createPlotSettings, resolvePlotDomain } from "../src/core/plotTicks";
-import { loadSpectrumImportSource, parseCsvText } from "../src/core/spectrumImport";
-import { buildSpectrumPreview, normalizeSpectrumTable } from "../src/core/spectrumNormalize";
+import { attachAssignmentsToPeaks, buildPeakAssignment, upsertAssignment } from "../src/core/spectrum/assignments";
+import { assignmentsToCsv } from "../src/core/export/spectrumCsv";
+import { annotatedSpectrumPdfBytes } from "../src/core/export/spectrumPdf";
+import { createSpectrumPlotScene } from "../src/core/plot/plotScene";
+import { DEFAULT_PLOT_SETTINGS, computeAutoMajorTickSpacing, computeMinorTicks, createPlotSettings, resolvePlotDomain } from "../src/core/plot/plotTicks";
+import { loadSpectrumImportSource, parseCsvText } from "../src/core/spectrum/spectrumImport";
+import { buildSpectrumPreview, normalizeSpectrumTable } from "../src/core/spectrum/spectrumNormalize";
 import type { FormulaHit, SpectrumPeak } from "../src/core/types";
 
 describe("spectrum import", () => {

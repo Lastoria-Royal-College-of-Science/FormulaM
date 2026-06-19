@@ -1,4 +1,5 @@
-import type { FormulaHit } from "./types";
+import { downloadBlob } from "./download";
+import type { FormulaHit } from "../types";
 
 export function csvEscape(value: unknown): string {
   const text = String(value);
@@ -22,12 +23,5 @@ export function hitsToCsv(hits: FormulaHit[]): string {
 
 export function downloadHitsCsv(hits: FormulaHit[], filename = "formula_hits.csv"): void {
   const blob = new Blob([hitsToCsv(hits)], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.append(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  downloadBlob(blob, filename);
 }

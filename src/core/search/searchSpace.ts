@@ -1,5 +1,5 @@
-import { defaultIsotopeLabel, elementCapacity } from "./massData";
-import type { FormulaSpaceRow, MassIndex, SearchElements } from "./types";
+import { defaultIsotopeLabel, elementCapacity } from "../chemistry/massData";
+import type { FormulaSpaceRow, MassIndex, SearchElements } from "../types";
 
 export const DEFAULT_ROWS = [
   { element: "C", lower: 0, upper: 20 },

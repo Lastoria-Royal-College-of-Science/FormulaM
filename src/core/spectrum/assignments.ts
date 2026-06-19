@@ -1,4 +1,4 @@
-import type { FormulaHit, PeakAssignment, SpectrumPeak } from "./types";
+import type { FormulaHit, PeakAssignment, SpectrumPeak } from "../types";
 
 function parseOptionalNumber(value: unknown): number | undefined {
   const parsed = Number(value);

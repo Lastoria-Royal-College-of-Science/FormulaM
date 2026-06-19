@@ -8,15 +8,15 @@ import {
   maxBigInt,
   nonNegativeDecimalRational,
   rationalToDecimalString,
-} from "./decimal";
+} from "../chemistry/decimal";
 import {
   formatChargeState,
   formatFormula,
   formatIonFormula,
   normalizeSpeciesLabel,
   parseCharge,
-} from "./formula";
-import type { FindFormulaRequest, FormulaHit, FormulaSearchRequest, SearchElements } from "./types";
+} from "../chemistry/formula";
+import type { FindFormulaRequest, FormulaHit, FormulaSearchRequest, SearchElements } from "../types";
 
 type ElementBound = number | [number, number] | { min?: number | string; max?: number | string | null } | null | undefined;
 type InternalHit = FormulaHit & { _sort_abs_error: bigint; _sort_mass: bigint };

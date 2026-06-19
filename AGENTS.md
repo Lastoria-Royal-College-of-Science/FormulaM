@@ -10,8 +10,8 @@ The current implementation is Vite + TypeScript + Svelte. Preserve existing scie
 
 ## Repository map
 
-- `src/core/`: framework-independent scientific logic, search-space handling, mass data loading, formula formatting, export helpers, spectrum normalization, assignments, and plot calculations.
-- `src/components/`: Svelte rendering, input state, events, accessibility, user interaction, and component-local scoped structural styles. Delegate scientific/data-transformation logic to `src/core/`.
+- `src/core/`: framework-independent scientific logic grouped by domain: `chemistry/` for mass data, formula formatting/display, and decimal helpers; `search/` for search-space handling, charge input, search execution, form state, and result sorting; `spectrum/` for import, normalization, assignments, and peak selection; `plot/` for plot calculations and scene construction; `export/` for CSV/download/PNG/PDF export helpers.
+- `src/components/`: Svelte rendering, input state, events, accessibility, user interaction, and component-local scoped structural styles grouped by feature: `layout/`, `ui/`, `search/`, `results/`, and `spectrum/`. Delegate scientific/data-transformation logic to `src/core/`.
 - `src/workers/`: worker protocol and long-running search execution.
 - `public/data/masses.json`: scientific input data for runtime loading and tests.
 - `tests/`: Vitest regression coverage for search, charge input, formula display, sorting, spectrum import/rendering, results tables, plot settings, inline-code copy behavior, and related UI/data flows.

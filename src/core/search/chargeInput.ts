@@ -1,4 +1,4 @@
-import type { ChargeEntry, ChargeSign } from "./types";
+import type { ChargeEntry, ChargeSign } from "../types";
 
 const CHARGE_DRAFT_RE = /^\d*(?:-\d*)?$/;
 const CHARGE_ENTRY_RE = /^(\d+)(?:-(\d+))?$/;

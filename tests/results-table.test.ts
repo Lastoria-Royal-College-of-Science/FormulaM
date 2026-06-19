@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render } from "svelte/server";
-import ResultsTable from "../src/components/ResultsTable.svelte";
+import ResultsTable from "../src/components/results/ResultsTable.svelte";
 import type { FormulaHit, PeakAssignment } from "../src/core/types";
 
 const sampleHit: FormulaHit = {

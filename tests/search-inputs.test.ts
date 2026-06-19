@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render } from "svelte/server";
-import SearchInputs from "../src/components/SearchInputs.svelte";
-import { createDefaultSearchForm } from "../src/core/searchForm";
+import SearchInputs from "../src/components/search/SearchInputs.svelte";
+import { createDefaultSearchForm } from "../src/core/search/searchForm";
 
 const baseProps = {
   onChange: () => undefined,

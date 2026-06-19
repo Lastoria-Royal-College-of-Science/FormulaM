@@ -1,4 +1,4 @@
-import type { FormulaHit } from "./types";
+import type { FormulaHit } from "../types";
 
 export type ResultSortColumn = "mass" | "mz" | "error_da" | "error_ppm";
 export type ResultSortDirection = "asc" | "desc";

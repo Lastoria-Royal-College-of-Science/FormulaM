@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { createSpectrumPlotScene, getPlotMargins } from "../core/exportSpectrum";
-  import { findNearestPeak } from "../core/peakSelection";
-  import { filterPeaksInRange, resolvePlotDomain } from "../core/plotTicks";
-  import type { PlotScene, PlotText } from "../core/exportSpectrum";
-  import type { PlotSettings, SpectrumPeak, ThemeName } from "../core/types";
+  import { createSpectrumPlotScene, getPlotMargins } from "../../core/plot/plotScene";
+  import { findNearestPeak } from "../../core/spectrum/peakSelection";
+  import { filterPeaksInRange, resolvePlotDomain } from "../../core/plot/plotTicks";
+  import type { PlotScene, PlotText } from "../../core/plot/plotScene";
+  import type { PlotSettings, SpectrumPeak, ThemeName } from "../../core/types";
 
   export let peaks: SpectrumPeak[] = [];
   export let settings: PlotSettings;

@@ -1,5 +1,5 @@
 import { columnCountForTable, normalizeSpectrumTable, suggestSpectrumSelection } from "./spectrumNormalize";
-import type { SpectrumImportResult, SpectrumImportSheet, SpectrumImportSource } from "./types";
+import type { SpectrumImportResult, SpectrumImportSheet, SpectrumImportSource } from "../types";
 
 function fileExtension(fileName: string): string {
   const lastDot = fileName.lastIndexOf(".");

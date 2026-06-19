@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render } from "svelte/server";
-import SpectrumImport from "../src/components/SpectrumImport.svelte";
-import { shouldIgnoreFilePickerCancel } from "../src/components/SpectrumImport.svelte";
+import SpectrumImport from "../src/components/spectrum/SpectrumImport.svelte";
+import { shouldIgnoreFilePickerCancel } from "../src/components/spectrum/SpectrumImport.svelte";
 import type { SpectrumImportSource, SpectrumPreviewTable } from "../src/core/types";
 
 const sampleImportSource: SpectrumImportSource = {
