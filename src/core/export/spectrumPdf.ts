@@ -1,6 +1,11 @@
-import { createSpectrumPlotScene } from "../plot/plotScene";
+import {
+  createSpectrumPlotScene,
+  plotRichTextLineOffset,
+  plotTextRunBaselineOffset,
+  plotTextRunFontSize,
+} from "../plot/plotScene";
 import { downloadBlob } from "./download";
-import type { PlotCircle, PlotScene, PlotShape, PlotText } from "../plot/plotScene";
+import type { PlotCircle, PlotRichText, PlotScene, PlotShape, PlotText, PlotTextRun } from "../plot/plotScene";
 import type { PlotSettings, SpectrumPeak, ThemeName } from "../types";
 
 type PdfTextMetrics = {
@@ -168,6 +173,67 @@ function buildPdfText(shape: PlotText, scene: PlotScene): string {
   ].join("\n");
 }
 
+function measurePdfRichTextLine(line: PlotTextRun[], fontSize: number, fontWeight: PlotText["fontWeight"]): PdfTextMetrics {
+  return line.reduce<PdfTextMetrics>((combined, run) => {
+    const runFontSize = plotTextRunFontSize(fontSize, run.script);
+    const runOffset = plotTextRunBaselineOffset(fontSize, run.script);
+    const metrics = measurePdfText(run.text, runFontSize, fontWeight);
+    return {
+      width: combined.width + metrics.width,
+      ascent: Math.max(combined.ascent, metrics.ascent - runOffset),
+      descent: Math.max(combined.descent, metrics.descent + runOffset),
+    };
+  }, { width: 0, ascent: fontSize * 0.8, descent: fontSize * 0.2 });
+}
+
+function buildPdfRichText(shape: PlotRichText, scene: PlotScene): string {
+  const canvasRotation = ((shape.rotation ?? 0) * Math.PI) / 180;
+  const pdfRotation = -canvasRotation;
+  const canvasCosine = Math.cos(canvasRotation);
+  const canvasSine = Math.sin(canvasRotation);
+  const pdfCosine = Math.cos(pdfRotation);
+  const pdfSine = Math.sin(pdfRotation);
+  const fontName = shape.fontWeight === "bold" ? "/F2" : "/F1";
+  const commands = ["q"];
+
+  shape.lines.forEach((line, lineIndex) => {
+    const lineMetrics = measurePdfRichTextLine(line, shape.fontSize, shape.fontWeight);
+    const lineYOffset = plotRichTextLineOffset(lineIndex, shape.lines.length, shape.fontSize, shape.baseline)
+      + textBaselineOffset(lineMetrics, shape.baseline);
+    let cursor = textAlignOffset(lineMetrics.width, shape.align);
+
+    for (const run of line) {
+      const runFontSize = plotTextRunFontSize(shape.fontSize, run.script);
+      const runMetrics = measurePdfText(run.text, runFontSize, shape.fontWeight);
+      const runYOffset = lineYOffset + plotTextRunBaselineOffset(shape.fontSize, run.script);
+      const baselineX = shape.x + cursor * canvasCosine - runYOffset * canvasSine;
+      const baselineY = shape.y + cursor * canvasSine + runYOffset * canvasCosine;
+
+      commands.push(
+        "BT",
+        `${fontName} ${formatPdfNumber(runFontSize)} Tf`,
+        `${pdfColorCommand(shape.fill, scene.pageBackground)} rg`,
+        [
+          formatPdfNumber(pdfCosine),
+          formatPdfNumber(pdfSine),
+          formatPdfNumber(-pdfSine),
+          formatPdfNumber(pdfCosine),
+          formatPdfNumber(baselineX),
+          formatPdfNumber(scene.height - baselineY),
+          "Tm",
+        ].join(" "),
+        `(${escapePdfText(run.text)}) Tj`,
+        "ET",
+      );
+
+      cursor += runMetrics.width;
+    }
+  });
+
+  commands.push("Q");
+  return commands.join("\n");
+}
+
 function buildPdfCircle(shape: PlotCircle, scene: PlotScene): string {
   const c = shape.radius * 0.552284749831;
   const x = shape.x;
@@ -253,6 +319,10 @@ function buildPdfShape(shape: PlotShape, scene: PlotScene): string {
 
   if (shape.kind === "circle") {
     return buildPdfCircle(shape, scene);
+  }
+
+  if (shape.kind === "rich-text") {
+    return buildPdfRichText(shape, scene);
   }
 
   return buildPdfText(shape, scene);

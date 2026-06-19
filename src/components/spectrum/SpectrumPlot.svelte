@@ -1,8 +1,14 @@
 <script lang="ts">
-  import { createSpectrumPlotScene, getPlotMargins } from "../../core/plot/plotScene";
+  import {
+    createSpectrumPlotScene,
+    getPlotMargins,
+    plotRichTextLineOffset,
+    plotTextRunBaselineOffset,
+    plotTextRunFontSize,
+  } from "../../core/plot/plotScene";
   import { findNearestPeak } from "../../core/spectrum/peakSelection";
   import { filterPeaksInRange, resolvePlotDomain } from "../../core/plot/plotTicks";
-  import type { PlotScene, PlotText } from "../../core/plot/plotScene";
+  import type { PlotRichText, PlotScene, PlotText, PlotTextRun } from "../../core/plot/plotScene";
   import type { PlotSettings, SpectrumPeak, ThemeName } from "../../core/types";
 
   export let peaks: SpectrumPeak[] = [];
@@ -42,9 +48,23 @@
     return "alphabetic";
   }
 
-  function textRotation(shape: PlotText): string | undefined {
+  function textRotation(shape: PlotText | PlotRichText): string | undefined {
     return shape.rotation ? `rotate(${shape.rotation} ${shape.x} ${shape.y})` : undefined;
   }
+
+  function richLineY(shape: PlotRichText, lineIndex: number): number {
+    return shape.y + plotRichTextLineOffset(lineIndex, shape.lines.length, shape.fontSize, shape.baseline);
+  }
+
+  function runFontSize(shape: PlotRichText, run: PlotTextRun): number {
+    return plotTextRunFontSize(shape.fontSize, run.script);
+  }
+
+  function runBaselineShift(run: PlotTextRun): string {
+    const offset = plotTextRunBaselineOffset(1, run.script);
+    return offset ? `${-offset}em` : "baseline";
+  }
+
 
   function eventToMz(event: MouseEvent): number | null {
     if (!plotFrame || !peaks.length) return null;
@@ -188,7 +208,7 @@
               ></line>
             {:else if shape.kind === "circle"}
               <circle cx={shape.x} cy={shape.y} r={shape.radius} fill={shape.fill}></circle>
-            {:else}
+            {:else if shape.kind === "text"}
               <text
                 x={shape.x}
                 y={shape.y}
@@ -199,6 +219,17 @@
                 text-anchor={textAnchor(shape.align)}
                 transform={textRotation(shape)}
               >{shape.text}</text>
+            {:else}
+              <text
+                x={shape.x}
+                y={shape.y}
+                dominant-baseline={dominantBaseline(shape.baseline)}
+                fill={shape.fill}
+                font-size={shape.fontSize}
+                font-weight={shape.fontWeight === "bold" ? 600 : 400}
+                text-anchor={textAnchor(shape.align)}
+                transform={textRotation(shape)}
+              >{#each shape.lines as line, lineIndex (lineIndex)}<tspan x={shape.x} y={richLineY(shape, lineIndex)}>{#each line as run, runIndex (runIndex)}<tspan font-size={runFontSize(shape, run)} baseline-shift={runBaselineShift(run)}>{run.text}</tspan>{/each}</tspan>{/each}</text>
             {/if}
           {/each}
         </svg>
