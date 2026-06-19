@@ -5,7 +5,9 @@
 </script>
 
 <script lang="ts">
+  import MathTex from "../ui/MathTex.svelte";
   import ToggleSwitch from "../ui/ToggleSwitch.svelte";
+  import { MZ_TEX } from "../../core/math/tex";
   import type { SpectrumImportSource, SpectrumPreviewTable } from "../../core/types";
 
   export let activeSheetName = "";
@@ -82,7 +84,7 @@
       <div><strong class="text-text">Current columns:</strong> {mzColumnName || "not imported"} / {intensityColumnName || "not imported"}</div>
     </div>
   {:else}
-    <p class="mb-0 mt-3 text-sm text-muted">No spectrum loaded. The original single <code class="inline-code">m/z</code> workflow still works without importing a file.</p>
+    <p class="mb-0 mt-3 text-sm text-muted">No spectrum loaded. The original single <MathTex tex={MZ_TEX} ariaLabel="m/z" fallback="m/z" /> workflow still works without importing a file.</p>
   {/if}
 
   {#if importSource && activeSheet && previewTable}
@@ -109,7 +111,7 @@
       </div>
 
       <div class="block">
-        <span class="field-title"><code class="inline-code">m/z</code> column</span>
+        <span class="field-title"><MathTex tex={MZ_TEX} ariaLabel="m/z" fallback="m/z" /> column</span>
         <select
           class="field-control field-select"
           value={mzColumnIndex ?? ""}

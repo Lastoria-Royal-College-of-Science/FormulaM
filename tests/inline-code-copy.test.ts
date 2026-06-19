@@ -5,9 +5,12 @@ import PeakInspector from "../src/components/spectrum/PeakInspector.svelte";
 import SearchInputs from "../src/components/search/SearchInputs.svelte";
 import SpectrumImport from "../src/components/spectrum/SpectrumImport.svelte";
 import SpectrumPlot from "../src/components/spectrum/SpectrumPlot.svelte";
+import { MZ_TEX, PPM_ERROR_TEX } from "../src/core/math/tex";
 import type { PeakAssignment, PlotSettings, SearchFormState, SpectrumImportSource, SpectrumPreviewTable, SpectrumPeak } from "../src/core/types";
 
-const inlineMz = '<code class="inline-code">m/z</code>';
+function texAnnotation(tex: string): string {
+  return `<annotation encoding="application/x-tex">${tex}</annotation>`;
+}
 
 const form: SearchFormState = {
   mz: "",
@@ -80,9 +83,9 @@ const plotSettings: PlotSettings = {
   labelFilter: "assigned-only",
 };
 
-describe("m/z inline code copy", () => {
-  it("renders inline code for visible m/z labels and helper text", () => {
-    expect(render(Hero).body).toContain(`observed ${inlineMz}`);
+describe("DOM math label rendering", () => {
+  it("renders KaTeX for visible m/z labels and helper text", () => {
+    expect(render(Hero).body).toContain(texAnnotation(MZ_TEX));
 
     const searchInputs = render(SearchInputs, {
       props: {
@@ -97,7 +100,8 @@ describe("m/z inline code copy", () => {
         onStartChargeEdit: () => undefined,
       },
     }).body;
-    expect(searchInputs).toContain(`Observed ${inlineMz}`);
+    expect(searchInputs).toContain(texAnnotation(MZ_TEX));
+    expect(searchInputs).toContain(texAnnotation(PPM_ERROR_TEX));
 
     const peakInspector = render(PeakInspector, {
       props: {
@@ -106,8 +110,9 @@ describe("m/z inline code copy", () => {
         onRemoveAssignment: () => undefined,
       },
     }).body;
-    expect(peakInspector).toContain(`Observed ${inlineMz}:`);
-    expect(peakInspector).toContain(`Predicted ${inlineMz}:`);
+    expect(peakInspector).toContain(texAnnotation(MZ_TEX));
+    expect(peakInspector).toContain(texAnnotation("\\ce{C6H12O6}"));
+    expect(peakInspector).toContain(texAnnotation("\\ce{[C6H12O6]+}"));
 
     const spectrumImport = render(SpectrumImport, {
       props: {
@@ -130,7 +135,7 @@ describe("m/z inline code copy", () => {
         sourceName: "example.csv",
       },
     }).body;
-    expect(spectrumImport).toContain(`${inlineMz} column`);
+    expect(spectrumImport).toContain(texAnnotation(MZ_TEX));
 
     const spectrumPlot = render(SpectrumPlot, {
       props: {
@@ -140,7 +145,10 @@ describe("m/z inline code copy", () => {
         onResetView: () => undefined,
       },
     }).body;
-    expect(spectrumPlot).toContain(`its ${inlineMz} into FormulaM`);
+    expect(spectrumPlot).toContain(texAnnotation(MZ_TEX));
+    expect(searchInputs).toContain('<code class="inline-code">n</code>');
+    expect(searchInputs).toContain('<code class="inline-code">min-max</code>');
+    expect(spectrumImport).toContain('<code class="inline-code">.csv</code>');
   });
 
   it("marks the hero logo for topbar visibility and theme coloring", () => {

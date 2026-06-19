@@ -231,6 +231,7 @@ describe("spectrum plot formula labels", () => {
     expect(formulaLabel?.kind).toBe("rich-text");
     if (formulaLabel?.kind === "rich-text") {
       expect(formulaLabel.lines[0].map((run) => run.text).join("")).toBe("[C513CH12O6]+");
+      expect(formulaLabel.lines[0].map((run) => run.text).join("")).not.toContain("\\ce");
       expect(formulaLabel.lines[0]).toContainEqual({
         text: "13",
         script: "sup",
@@ -404,6 +405,7 @@ describe("assignment export", () => {
     expect(pdf.match(/\(\]\) Tj/g)).toHaveLength(1);
     expect(pdf).toContain("(13) Tj");
     expect(pdf).toContain("(2+) Tj");
+    expect(pdf).not.toContain("\\ce");
     expect(pdf).not.toContain("(?) Tj");
   });
 

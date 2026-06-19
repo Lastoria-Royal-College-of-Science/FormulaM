@@ -1,5 +1,7 @@
 <script lang="ts">
+  import MathTex from "../ui/MathTex.svelte";
   import ToggleSwitch from "../ui/ToggleSwitch.svelte";
+  import { X_MAX_TEX, X_MIN_TEX, Y_MAX_TEX } from "../../core/math/tex";
   import { resolvePlotAutoValues } from "../../core/plot/plotTicks";
   import type { PlotLabelFilter, PlotLabelMode, PlotSettings, SpectrumPeak } from "../../core/types";
 
@@ -71,7 +73,7 @@
 
   <div class="mt-4 grid grid-cols-4 gap-4 lt-lg:grid-cols-2 lt-md:grid-cols-1">
     <div class="block">
-      <span class="field-title">x<sub>min</sub></span>
+      <span class="field-title"><MathTex tex={X_MIN_TEX} ariaLabel="x min" fallback="x min" /></span>
       <input
         class="field-control"
         type="number"
@@ -83,7 +85,7 @@
       />
     </div>
     <div class="block">
-      <span class="field-title">x<sub>max</sub></span>
+      <span class="field-title"><MathTex tex={X_MAX_TEX} ariaLabel="x max" fallback="x max" /></span>
       <input
         class="field-control"
         type="number"
@@ -95,7 +97,7 @@
       />
     </div>
     <div class="block">
-      <span class="field-title">y<sub>max</sub></span>
+      <span class="field-title"><MathTex tex={Y_MAX_TEX} ariaLabel="y max" fallback="y max" /></span>
       <div class="flex items-center gap-3">
         <ToggleSwitch
           ariaLabel="y scale"

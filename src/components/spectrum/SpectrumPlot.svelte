@@ -1,4 +1,5 @@
 <script lang="ts">
+  import MathTex from "../ui/MathTex.svelte";
   import {
     createSpectrumPlotScene,
     getPlotMargins,
@@ -8,6 +9,7 @@
   } from "../../core/plot/plotScene";
   import { findNearestPeak } from "../../core/spectrum/peakSelection";
   import { filterPeaksInRange, resolvePlotDomain } from "../../core/plot/plotTicks";
+  import { MZ_TEX } from "../../core/math/tex";
   import type { PlotRichText, PlotScene, PlotText, PlotTextRun } from "../../core/plot/plotScene";
   import type { PlotSettings, SpectrumPeak, ThemeName } from "../../core/types";
 
@@ -169,7 +171,7 @@
   <div class="mb-3 flex flex-wrap items-start justify-between gap-3">
     <div>
       <h2 class="mt-0">Interactive spectrum</h2>
-      <p class="mb-0 mt-1 text-sm text-muted">Click the nearest peak to load its <code class="inline-code">m/z</code> into FormulaM and prepare a formula assignment.</p>
+      <p class="mb-0 mt-1 text-sm text-muted">Click the nearest peak to load its <MathTex tex={MZ_TEX} ariaLabel="m/z" fallback="m/z" /> into FormulaM and prepare a formula assignment.</p>
     </div>
     <button type="button" class="secondary-action" disabled={peaks.length === 0} on:click={onResetView}>Reset view</button>
   </div>
@@ -243,7 +245,7 @@
           class="pointer-events-none absolute z-10 rounded-2 border border-solid border-border bg-surface px-3 py-2 text-sm shadow-app"
           style={`left: min(${tooltipX}px, calc(100% - 190px)); top: ${tooltipY}px;`}
         >
-          <div><strong class="text-text"><code class="inline-code">m/z</code></strong> {hoveredPeak.mz.toFixed(6)}</div>
+          <div><strong class="text-text"><MathTex tex={MZ_TEX} ariaLabel="m/z" fallback="m/z" /></strong> {hoveredPeak.mz.toFixed(6)}</div>
           <div><strong class="text-text">Intensity</strong> {hoveredPeak.intensity}</div>
           <div><strong class="text-text">Relative</strong> {hoveredPeak.relativeIntensity.toFixed(2)}%</div>
         </div>

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render } from "svelte/server";
 import ResultsTable from "../src/components/results/ResultsTable.svelte";
+import { MZ_TEX } from "../src/core/math/tex";
 import type { FormulaHit, PeakAssignment } from "../src/core/types";
 
 const sampleHit: FormulaHit = {
@@ -42,8 +43,8 @@ function makeHit(index: number): FormulaHit {
   };
 }
 
-function visibleText(markup: string): string {
-  return markup.replace(/<[^>]+>/g, "");
+function texAnnotation(tex: string): string {
+  return `<annotation encoding="application/x-tex">${tex}</annotation>`;
 }
 
 describe("ResultsTable", () => {
@@ -53,13 +54,11 @@ describe("ResultsTable", () => {
     expect(body.match(/<th class="table-head">Formula<\/th>/g)).toHaveLength(1);
     expect(body).not.toContain(">ion_formula<");
     expect(body).not.toContain(">charge<");
-    expect(body).toContain(`<span class="chemical-formula" aria-label="${sampleHit.ion_formula}">`);
-    expect(visibleText(body)).not.toContain("[13C]");
-    expect(body).toContain("formula-isotope");
-    expect(body).toContain(">13</sup>");
-    expect(body).toMatch(/<sub\b[^>]*>6<\/sub>/);
-    expect(body).toMatch(/<sub\b[^>]*>12<\/sub>/);
-    expect(body).toContain("<sup>+</sup>");
+    expect(body).toContain(`class="math-tex chemical-formula" aria-label="${sampleHit.ion_formula}"`);
+    expect(body).toContain(texAnnotation("\\ce{[C5{}^{13}CH12O6]+}"));
+    expect(body).not.toContain("formula-isotope");
+    expect(body).not.toMatch(/<sub\b/);
+    expect(body).not.toMatch(/<sup\b/);
     expect(body).not.toContain(`<td class="table-cell">${sampleHit.formula}</td>`);
     expect(body).not.toContain(">Assign<");
   });
@@ -68,7 +67,7 @@ describe("ResultsTable", () => {
     const { body } = render(ResultsTable, { props: { results: [sampleHit] } });
 
     expect(body).toContain(">Neutral mass<");
-    expect(body).toContain('Predicted <code class="inline-code">m/z</code>');
+    expect(body).toContain(texAnnotation(MZ_TEX));
     expect(body).toContain(">Error (Da)<");
     expect(body).toContain(">Error (ppm)<");
     expect(body).toContain('aria-label="Sort by neutral mass"');

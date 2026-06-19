@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { render } from "svelte/server";
 import PlotSettingsPanel from "../src/components/spectrum/PlotSettingsPanel.svelte";
+import { X_MAX_TEX, X_MIN_TEX, Y_MAX_TEX } from "../src/core/math/tex";
 import { DEFAULT_PLOT_SETTINGS, createPlotSettings } from "../src/core/plot/plotTicks";
 import type { SpectrumPeak } from "../src/core/types";
+
+function texAnnotation(tex: string): string {
+  return `<annotation encoding="application/x-tex">${tex}</annotation>`;
+}
 
 const peaks: SpectrumPeak[] = [
   { id: "peak-1", mz: 79.2234, intensity: 40, relativeIntensity: 40 },
@@ -24,9 +29,12 @@ describe("PlotSettingsPanel", () => {
     });
 
     expect(body).not.toContain("<label");
-    expect(body).toContain("x<sub>min</sub>");
-    expect(body).toContain("x<sub>max</sub>");
-    expect(body).toContain("y<sub>max</sub>");
+    expect(body).toContain(texAnnotation(X_MIN_TEX));
+    expect(body).toContain(texAnnotation(X_MAX_TEX));
+    expect(body).toContain(texAnnotation(Y_MAX_TEX));
+    expect(body).not.toContain("x<sub>min</sub>");
+    expect(body).not.toContain("x<sub>max</sub>");
+    expect(body).not.toContain("y<sub>max</sub>");
     expect(body).not.toContain("Fixed y<sub>max</sub>");
     expect(body).toContain('aria-label="x min"');
     expect(body).toContain('aria-label="x max"');
