@@ -36,6 +36,8 @@ describe("Uno interaction shortcuts", () => {
   });
 
   it("keeps theme-aware brand coloring in reusable shortcuts", () => {
+    expect(shortcuts["hero-logo"]).toContain("mx-auto");
+    expect(shortcuts["hero-logo"]).toContain("[margin-inline:auto]");
     expect(shortcuts["hero-logo"]).toContain("object-contain");
     expect(shortcuts["topbar-brand-mark"]).toContain("transition-[filter]");
     expect(shortcuts["brand-logo-light"]).toContain("filter-none");

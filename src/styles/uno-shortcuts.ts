@@ -15,7 +15,7 @@ export const shortcuts = {
   "topbar-brand-copy": "text-[1.125rem] leading-none font-bold tracking-[0.02em] lt-sm:text-[1rem]",
   "topbar-actions": "flex shrink-0 items-center gap-4 lt-md:gap-[13px]",
   "round-link-control": linkControlInteraction,
-  "hero-logo": "max-h-[140px] w-[min(560px,88vw)] object-contain transition-[filter] duration-200",
+  "hero-logo": "mx-auto [margin-inline:auto] max-h-[140px] w-[min(560px,88vw)] object-contain transition-[filter] duration-200",
   "brand-logo-light": "filter-none",
   "brand-logo-dark": "filter invert hue-rotate-180",
   "ui-card": "my-4.5 rounded-2 border border-solid border-border bg-surface p-5.5 shadow-app lt-md:p-4",
