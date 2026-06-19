@@ -194,19 +194,24 @@ export function plotRichTextLineOffset(lineIndex: number, lineCount: number, fon
 }
 
 export function formulaToPlotTextRuns(formula: string): PlotTextRun[] {
-  return tokenizeFormulaDisplay(formula).flatMap((token) => {
+  const runs: PlotTextRun[] = [];
+
+  for (const token of tokenizeFormulaDisplay(formula)) {
     if (token.kind === "isotope") {
-      return [
-        { text: token.massNumber, script: "sup", leadingGap: PLOT_RICH_TEXT_ISOTOPE_GAP_EM },
-        { text: token.element, script: "normal" },
-      ];
+      const previousRun = runs.at(-1);
+      const massRun: PlotTextRun = { text: token.massNumber, script: "sup" };
+      if (previousRun?.script !== "sub") massRun.leadingGap = PLOT_RICH_TEXT_ISOTOPE_GAP_EM;
+      runs.push(massRun, { text: token.element, script: "normal" });
+      continue;
     }
 
-    return [{
+    runs.push({
       text: token.text,
       script: token.kind === "text" ? "normal" : token.kind,
-    }];
-  });
+    });
+  }
+
+  return runs;
 }
 
 function shouldShowPeakLabel(peak: SpectrumPeak, settings: PlotSettings): boolean {

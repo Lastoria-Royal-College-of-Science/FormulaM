@@ -204,6 +204,10 @@ describe("spectrum plot formula labels", () => {
     expect(formulaToPlotTextRuns("[C5[13C]H12O6]2+")).toContainEqual({
       text: "13",
       script: "sup",
+    });
+    expect(formulaToPlotTextRuns("[C[13C]H12O6]2+")).toContainEqual({
+      text: "13",
+      script: "sup",
       leadingGap: PLOT_RICH_TEXT_ISOTOPE_GAP_EM,
     });
     expect(formulaToPlotTextRuns("[C5[13C]H12O6]2+")).toContainEqual({ text: "2+", script: "sup" });
@@ -230,7 +234,6 @@ describe("spectrum plot formula labels", () => {
       expect(formulaLabel.lines[0]).toContainEqual({
         text: "13",
         script: "sup",
-        leadingGap: PLOT_RICH_TEXT_ISOTOPE_GAP_EM,
       });
       expect(formulaLabel.lines[0]).toContainEqual({ text: "+", script: "sup" });
     }

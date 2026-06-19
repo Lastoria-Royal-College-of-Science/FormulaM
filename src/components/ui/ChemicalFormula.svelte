@@ -27,6 +27,10 @@
     margin-inline-start: 0.14em;
   }
 
+  sub + .formula-isotope {
+    margin-inline-start: 0;
+  }
+
   .formula-isotope-mass {
     margin-inline-end: 0.02em;
   }

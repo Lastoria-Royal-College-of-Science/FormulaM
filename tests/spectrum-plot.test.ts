@@ -53,7 +53,7 @@ describe("SpectrumPlot", () => {
     expect(body).toContain("<tspan");
     expect(body).toContain('baseline-shift="0.38em"');
     expect(body).toContain('baseline-shift="-0.16em"');
-    expect(body).toContain('dx="1.98"');
+    expect(body).not.toContain('dx="1.98"');
     expect(body).not.toContain("[13C]");
     expect(body).not.toContain("<canvas");
   });

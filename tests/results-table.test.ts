@@ -57,8 +57,8 @@ describe("ResultsTable", () => {
     expect(visibleText(body)).not.toContain("[13C]");
     expect(body).toContain("formula-isotope");
     expect(body).toContain(">13</sup>");
-    expect(body).toContain("<sub>6</sub>");
-    expect(body).toContain("<sub>12</sub>");
+    expect(body).toMatch(/<sub\b[^>]*>6<\/sub>/);
+    expect(body).toMatch(/<sub\b[^>]*>12<\/sub>/);
     expect(body).toContain("<sup>+</sup>");
     expect(body).not.toContain(`<td class="table-cell">${sampleHit.formula}</td>`);
     expect(body).not.toContain(">Assign<");
