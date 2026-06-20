@@ -15,7 +15,7 @@ The current implementation is Vite + TypeScript + Svelte. Preserve existing scie
 - `src/workers/`: worker protocol and long-running search execution.
 - `public/data/masses.json`: scientific input data for runtime loading and tests.
 - `tests/`: Vitest regression coverage organized into root smoke tests, `core/` for framework-independent logic, `components/` for Svelte SSR/component output tests, and `integration/` for cross-layer Vitest checks.
-- `e2e/`: Playwright browser-flow tests. Keep Playwright smoke tests at the `e2e/` root so the Playwright config can run them as the gatekeeper project before dependent browser tests.
+- `e2e/`: Playwright browser-flow tests. Keep Playwright smoke tests at the `e2e/` root and tag them with `@smoke` so the Playwright config can run them as the gatekeeper project before dependent browser tests.
 - `examples/`: Shared example and test input files such as `examples/Kaempferol.csv`.
 - `uno.config.ts`: UnoCSS preset assembly, safelist, theme token mapping, and shortcuts wiring.
 - `src/styles/uno-*.ts`: UnoCSS theme token aliases, shared interaction fragments, and semantic shortcut definitions.
@@ -45,6 +45,20 @@ npm run build
 npm run test:e2e
 ```
 
+Vitest uses two config projects: `smoke` for `tests/smoke.test.ts` and `regression` for all non-smoke files under `tests/`. Default `npm test` runs the smoke project first and stops before regression tests if smoke fails. When smoke is already failing and you need diagnostic access to the remaining Vitest suite, run:
+
+```bash
+npm test -- --project regression --bail=0
+```
+
+Playwright also uses `smoke` and `regression` config projects. Playwright smoke tests must include `@smoke` in the test title. Default `npm run test:e2e` runs `@smoke` tests first because `regression` depends on `smoke`. When Playwright smoke is already failing and you need diagnostic access to the remaining browser tests, run:
+
+```bash
+npm run test:e2e -- --project regression --no-deps
+```
+
+Use bypass commands only for diagnosis. Run the relevant default command, `npm test` or `npm run test:e2e`, before marking the change complete.
+
 Do not invent missing scripts. If a document mentions a script absent from `package.json`, such as `npm run validate:data`, report the mismatch and either add the script intentionally or use existing checks.
 
 ## Architecture and scientific behavior
@@ -73,7 +87,7 @@ Add or update focused regression tests when changing:
 
 Do not weaken assertions to make tests pass. When debugging or testing needs real data, use `examples/Kaempferol.csv`. When browser testing needs an imported spectrum/CSV fixture, prefer an existing fixture under `examples/` and state which fixture was used.
 
-Keep smoke tests at each runner root: Vitest smoke tests belong directly under `tests/`, and Playwright smoke tests belong directly under `e2e/`. Configure smoke gatekeeping in the runner configuration files, not by splitting npm scripts into smoke and non-smoke phases.
+Keep smoke tests at each runner root: Vitest smoke tests belong directly under `tests/`, and Playwright smoke tests belong directly under `e2e/` with `@smoke` in the test title. Configure smoke gatekeeping in the runner configuration files, not by splitting npm scripts into smoke and non-smoke phases. The Vitest config should keep the `smoke` project at `sequence.groupOrder: 0` and the parallel `regression` project at `sequence.groupOrder: 1`. The Playwright config should keep the `regression` project dependent on `smoke`, with `smoke` using `grep: /@smoke/` and `regression` using `grepInvert: /@smoke/`.
 
 ## Style and dependencies
 

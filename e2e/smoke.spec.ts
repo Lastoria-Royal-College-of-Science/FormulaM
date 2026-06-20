@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { waitForAppReady } from "./helpers";
 
-test("starts the app and exposes the primary work areas", async ({ page }) => {
+test("starts the app and exposes the primary work areas @smoke", async ({ page }) => {
   await waitForAppReady(page);
 
   await expect(page.getByRole("region", { name: "Search inputs" })).toBeVisible();

@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const baseURL = "http://127.0.0.1:5173";
+const smokeTagPattern = /@smoke/;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -26,12 +27,12 @@ export default defineConfig({
   projects: [
     {
       name: "smoke",
-      testMatch: /.*smoke\.spec\.ts/,
+      grep: smokeTagPattern,
       use: { ...devices["Desktop Chrome"] },
     },
     {
-      name: "chromium",
-      testIgnore: /.*smoke\.spec\.ts/,
+      name: "regression",
+      grepInvert: smokeTagPattern,
       dependencies: ["smoke"],
       use: { ...devices["Desktop Chrome"] },
     },

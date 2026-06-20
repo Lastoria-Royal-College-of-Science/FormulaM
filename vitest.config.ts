@@ -1,35 +1,40 @@
-import { BaseSequencer, type TestSpecification } from "vitest/node";
 import { defineConfig, mergeConfig } from "vitest/config";
 import viteConfig from "./vite.config";
-
-const SMOKE_TEST_PATH = "tests/smoke.test.ts";
-
-function normalizeModuleId(spec: TestSpecification): string {
-  return spec.moduleId.replaceAll("\\", "/");
-}
-
-function isSmokeTest(spec: TestSpecification): boolean {
-  return normalizeModuleId(spec).endsWith(SMOKE_TEST_PATH);
-}
-
-class SmokeFirstSequencer extends BaseSequencer {
-  override async sort(files: TestSpecification[]): Promise<TestSpecification[]> {
-    const sorted = await super.sort(files);
-    return [...sorted].sort((left, right) => Number(isSmokeTest(right)) - Number(isSmokeTest(left)));
-  }
-}
 
 export default mergeConfig(
   viteConfig,
   defineConfig({
     test: {
-      include: ["tests/**/*.test.ts"],
-      fileParallelism: false,
+      bail: 1,
+      fileParallelism: true,
       sequence: {
         concurrent: false,
-        sequencer: SmokeFirstSequencer,
       },
-      bail: 1,
+      projects: [
+        {
+          extends: true,
+          test: {
+            name: "smoke",
+            include: ["tests/smoke.test.ts"],
+            sequence: {
+              concurrent: false,
+              groupOrder: 0,
+            },
+          },
+        },
+        {
+          extends: true,
+          test: {
+            name: "regression",
+            include: ["tests/**/*.test.ts"],
+            exclude: ["tests/smoke.test.ts"],
+            sequence: {
+              concurrent: false,
+              groupOrder: 1,
+            },
+          },
+        },
+      ],
     },
   }),
 );

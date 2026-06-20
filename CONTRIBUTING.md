@@ -27,6 +27,7 @@ FormulaM is built with:
 - Svelte
 - UnoCSS
 - Vitest
+- Playwright
 - Web Workers for long-running formula enumeration
 - GitHub Pages static deployment
 
@@ -42,7 +43,9 @@ Important paths:
 - `src/workers/` Worker protocol and long-running search execution
 - `src/styles/global.css` Design tokens, resets, and truly global styles only
 - `uno.config.ts` UnoCSS shortcuts, safelist, theme tokens, and utilities
-- `tests/` Vitest regression coverage and fixtures
+- `tests/` Vitest coverage with root smoke tests, `core/`, `components/`, and `integration/`
+- `e2e/` Playwright browser-flow tests with root smoke tests tagged `@smoke`
+- `examples/` Shared example and test input files such as `examples/Kaempferol.csv`
 - `.github/workflows/` CI and GitHub Pages deployment
 
 Guidelines:
@@ -95,6 +98,7 @@ npm run build
 npm run preview
 npm run check
 npm test
+npm run test:e2e
 ```
 
 Do not rely on scripts that are not present in `package.json` in your branch. If documentation mentions a missing script, either update the documentation or add the script intentionally with the relevant implementation.
@@ -107,11 +111,26 @@ Run the narrowest relevant check first while developing. Before opening a pull r
 npm test
 npm run check
 npm run build
+npm run test:e2e
 ```
 
 For documentation-only changes, explain in the pull request if code checks were not run.
 
-The GitHub Pages workflow currently installs dependencies with `npm ci`, runs tests with `npm test`, and builds the static site with `npm run build` before deployment.
+Vitest uses two config projects: `smoke` runs `tests/smoke.test.ts` first, and `regression` runs all non-smoke Vitest files under `tests/` after smoke passes. If smoke is already failing and you need diagnostic access to the remaining Vitest suite, run:
+
+```bash
+npm test -- --project regression --bail=0
+```
+
+Playwright also uses `smoke` and `regression` config projects. Playwright smoke tests must include `@smoke` in the test title. Default `npm run test:e2e` runs `@smoke` tests first because `regression` depends on `smoke`. If Playwright smoke is already failing and you need diagnostic access to the remaining browser tests, run:
+
+```bash
+npm run test:e2e -- --project regression --no-deps
+```
+
+Use bypass commands only for diagnosis. The relevant default command, `npm test` or `npm run test:e2e`, remains the final validation command.
+
+The test workflow currently installs dependencies with `npm ci`, runs `npm run check`, `npm test`, `npm run build`, installs Chromium for Playwright, and runs `npm run test:e2e`.
 
 ## Scientific behavior
 
@@ -159,7 +178,9 @@ Add or update focused regression tests when changing:
 
 Do not weaken assertions just to make tests pass.
 
-When debugging or testing needs real data, use existing fixtures under `tests/` where possible. If a fixture is important to the change, state which fixture was used in the pull request.
+When debugging or testing needs real data, use `examples/Kaempferol.csv`. If a fixture is important to the change, state which fixture was used in the pull request.
+
+Keep smoke tests at each runner root: Vitest smoke tests belong directly under `tests/`, and Playwright smoke tests belong directly under `e2e/` with `@smoke` in the test title. Configure smoke gatekeeping in the runner configuration files, not by splitting npm scripts into smoke and non-smoke phases. The Vitest config should keep the `smoke` project before the parallel `regression` project. The Playwright config should route `@smoke` tests to `smoke`, route non-smoke tests to `regression`, and keep `regression` dependent on `smoke`.
 
 ## UI and accessibility
 
@@ -251,6 +272,7 @@ Before opening a pull request, confirm:
 - [ ] `npm test` passes, when relevant.
 - [ ] `npm run check` passes, when relevant.
 - [ ] `npm run build` passes, when relevant.
+- [ ] `npm run test:e2e` passes, when relevant.
 - [ ] Documentation was updated if user-facing behavior changed.
 - [ ] New dependencies are justified and browser-compatible.
 - [ ] `package-lock.json` is updated when dependencies changed.
