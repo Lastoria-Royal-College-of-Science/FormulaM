@@ -18,15 +18,8 @@
 
 <!-- If there is no behavior change, write: No behavior change. -->
 
-## Checks
-
-<!-- Check what you ran. If a check was skipped, briefly explain why. -->
-
-- [ ] `npm run check`
-- [ ] `npm run test`
-- [ ] `npm run build`
-- [ ] `npm run e2e`
-
 ## Reviewer notes
 
 <!-- Optional: fixtures used, known limitations, dependency rationale, deployment/base-path changes, or anything reviewers should focus on. -->
+
+<!-- If there are no additional reviewer notes, write: No notable changes. -->
