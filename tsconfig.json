@@ -20,8 +20,11 @@
     "src/**/*.ts",
     "src/**/*.svelte",
     "tests/**/*.ts",
+    "e2e/**/*.ts",
     "scripts/**/*.ts",
-    "vite.config.ts"
+    "vite.config.ts",
+    "vitest.config.ts",
+    "playwright.config.ts"
   ],
   "references": []
 }

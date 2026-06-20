@@ -14,7 +14,9 @@ The current implementation is Vite + TypeScript + Svelte. Preserve existing scie
 - `src/components/`: Svelte rendering, input state, events, accessibility, user interaction, and component-local scoped structural styles grouped by feature: `layout/`, `ui/`, `search/`, `results/`, and `spectrum/`. Delegate scientific/data-transformation logic to `src/core/`.
 - `src/workers/`: worker protocol and long-running search execution.
 - `public/data/masses.json`: scientific input data for runtime loading and tests.
-- `tests/`: Vitest regression coverage organized into `core/` for framework-independent logic, `components/` for Svelte SSR/component output tests, `integration/` for cross-layer Vitest checks, and `fixtures/` for test input files such as `tests/fixtures/Kaempferol.csv`.
+- `tests/`: Vitest regression coverage organized into root smoke tests, `core/` for framework-independent logic, `components/` for Svelte SSR/component output tests, and `integration/` for cross-layer Vitest checks.
+- `e2e/`: Playwright browser-flow tests. Keep Playwright smoke tests at the `e2e/` root so the Playwright config can run them as the gatekeeper project before dependent browser tests.
+- `examples/`: Shared example and test input files such as `examples/Kaempferol.csv`.
 - `uno.config.ts`: UnoCSS preset assembly, safelist, theme token mapping, and shortcuts wiring.
 - `src/styles/uno-*.ts`: UnoCSS theme token aliases, shared interaction fragments, and semantic shortcut definitions.
 - `src/styles/global.css`: design tokens, resets, and truly global element-level styles only.
@@ -29,6 +31,7 @@ npm run dev
 npm test
 npm run check
 npm run build
+npm run test:e2e
 ```
 
 Use `npm run preview` only to inspect the production build locally.
@@ -39,6 +42,7 @@ Before marking a change complete, run the narrowest relevant check first. Run th
 npm test
 npm run check
 npm run build
+npm run test:e2e
 ```
 
 Do not invent missing scripts. If a document mentions a script absent from `package.json`, such as `npm run validate:data`, report the mismatch and either add the script intentionally or use existing checks.
@@ -67,7 +71,9 @@ Add or update focused regression tests when changing:
 - result sorting, filtering, table rendering, CSV output, error messages, mass-data loading, or data-shape assumptions
 - spectrum import, sheet/column detection, peak normalization, assignment behavior, exports, plot rendering, worker protocol, cancellation, busy/loading state, or error propagation
 
-Do not weaken assertions to make tests pass. When debugging or testing needs real data, use `tests/fixtures/Kaempferol.csv`. When browser testing needs an imported spectrum/CSV fixture, prefer an existing fixture under `tests/fixtures/` and state which fixture was used.
+Do not weaken assertions to make tests pass. When debugging or testing needs real data, use `examples/Kaempferol.csv`. When browser testing needs an imported spectrum/CSV fixture, prefer an existing fixture under `examples/` and state which fixture was used.
+
+Keep smoke tests at each runner root: Vitest smoke tests belong directly under `tests/`, and Playwright smoke tests belong directly under `e2e/`. Configure smoke gatekeeping in the runner configuration files, not by splitting npm scripts into smoke and non-smoke phases.
 
 ## Style and dependencies
 

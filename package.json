@@ -9,7 +9,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "playwright test"
   },
   "keywords": [
     "chemistry",
@@ -26,6 +27,7 @@
     "@iconify-json/codex": "^1.2.0",
     "@iconify-json/mdi": "^1.2.3",
     "@iconify-json/typcn": "^1.2.2",
+    "@playwright/test": "^1.61.0",
     "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@tsconfig/svelte": "^5.0.4",
     "@types/node": "^24.13.2",
