@@ -54,8 +54,12 @@ describe("ResultsTable", () => {
     expect(body.match(/<th class="table-head">Formula<\/th>/g)).toHaveLength(1);
     expect(body).not.toContain(">ion_formula<");
     expect(body).not.toContain(">charge<");
-    expect(body).toContain("class=\"math-tex chemical-formula");
+    expect(body).toContain("math-tex-selectable");
+    expect(body).toContain("chemical-formula");
     expect(body).toContain(`aria-label="${sampleHit.ion_formula}"`);
+    expect(body).toContain('data-selectable-formula="true"');
+    expect(body).toContain('tabindex="0"');
+    expect(body.match(/data-selectable-formula="true"/g)).toHaveLength(1);
     expect(body).toContain(texAnnotation("\\ce{[C5{}^{13}CH12O6]+}"));
     expect(body).not.toContain("formula-isotope");
     expect(body).not.toMatch(/<sub\b/);
@@ -65,10 +69,11 @@ describe("ResultsTable", () => {
   });
 
   it("renders sorting controls for the numeric result columns", () => {
-    const { body } = render(ResultsTable, { props: { results: [sampleHit] } });
+    const { body } = render(ResultsTable, { props: { results: [] } });
 
     expect(body).toContain(">Neutral mass<");
     expect(body).toContain(texAnnotation(MZ_TEX));
+    expect(body).not.toContain('data-selectable-formula="true"');
     expect(body).toContain(">Error (Da)<");
     expect(body).toContain(">Error (ppm)<");
     expect(body).toContain('aria-label="Sort by neutral mass"');
@@ -95,6 +100,7 @@ describe("ResultsTable", () => {
     expect(body).toContain('aria-pressed="true"');
     expect(body).toContain('i-mdi-minus');
     expect(body).toContain('Remove [C5[13C]H12O6]+ from the selected peak');
+    expect(body).toContain('data-selectable-formula="true"');
   });
 
   it("renders pagination controls and shows the first 10 rows by default", () => {

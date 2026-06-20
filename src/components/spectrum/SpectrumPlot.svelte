@@ -245,7 +245,7 @@
           class="pointer-events-none absolute z-10 rounded-2 border border-solid border-border bg-surface px-3 py-2 text-sm shadow-app"
           style={`left: min(${tooltipX}px, calc(100% - 190px)); top: ${tooltipY}px;`}
         >
-          <div><strong class="text-text"><MathTex tex={MZ_TEX} ariaLabel="m/z" fallback="m/z" /></strong> {hoveredPeak.mz.toFixed(6)}</div>
+          <div><strong class="text-text"><MathTex tex={MZ_TEX} ariaLabel="m/z" fallback="m/z" selectable={false} /></strong> {hoveredPeak.mz.toFixed(6)}</div>
           <div><strong class="text-text">Intensity</strong> {hoveredPeak.intensity}</div>
           <div><strong class="text-text">Relative</strong> {hoveredPeak.relativeIntensity.toFixed(2)}%</div>
         </div>

@@ -118,7 +118,7 @@
               aria-label="Sort by predicted m/z"
               on:click={() => toggleSort("mz")}
             >
-              <span>Predicted <MathTex tex={MZ_TEX} ariaLabel="m/z" fallback="m/z" /></span>
+              <span>Predicted <MathTex tex={MZ_TEX} ariaLabel="m/z" fallback="m/z" selectable={false} /></span>
               <span
                 aria-hidden="true"
                 class={`results-sort-icon ${getResultSortIconClass(sortState, "mz")} ${sortState?.column === "mz" ? "text-accent" : "text-muted"}`}

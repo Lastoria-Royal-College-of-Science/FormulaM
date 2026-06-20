@@ -298,7 +298,7 @@
   <dialog class="max-w-[520px] rounded-2 border border-solid border-border bg-surface p-4 text-text shadow-app" bind:this={ppmHelpDialog}>
     <form method="dialog" class="m-0">
       <h3 class="mt-0">Tolerance ppm</h3>
-      <p class="overflow-x-auto"><MathTex tex={PPM_ERROR_TEX} ariaLabel="ppm error equals predicted m/z minus observed m/z divided by observed m/z times 1,000,000" fallback="ppm error = (predicted_mz - observed_mz) / observed_mz * 1,000,000" /></p>
+      <p class="overflow-x-auto"><MathTex tex={PPM_ERROR_TEX} ariaLabel="ppm error equals predicted m/z minus observed m/z divided by observed m/z times 1,000,000" fallback="ppm error = (predicted_mz - observed_mz) / observed_mz * 1,000,000" selectable={true} selectionLabel="Click to select equation" /></p>
       <p>A formula is accepted if the absolute ppm error is within the selected tolerance.</p>
       <button class="secondary-action">Close</button>
     </form>
