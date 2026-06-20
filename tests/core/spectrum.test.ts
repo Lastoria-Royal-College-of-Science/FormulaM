@@ -229,15 +229,16 @@ describe("spectrum plot formula labels", () => {
     const formulaLabel = formulaScene.shapes.find((shape) => shape.kind === "rich-text");
 
     expect(formulaLabel?.kind).toBe("rich-text");
-    if (formulaLabel?.kind === "rich-text") {
-      expect(formulaLabel.lines[0].map((run) => run.text).join("")).toBe("[C513CH12O6]+");
-      expect(formulaLabel.lines[0].map((run) => run.text).join("")).not.toContain("\\ce");
-      expect(formulaLabel.lines[0]).toContainEqual({
-        text: "13",
-        script: "sup",
-      });
-      expect(formulaLabel.lines[0]).toContainEqual({ text: "+", script: "sup" });
+    if (formulaLabel?.kind !== "rich-text") {
+      throw new Error("Expected an assigned formula rich-text label.");
     }
+    expect(formulaLabel.lines[0].map((run) => run.text).join("")).toBe("[C513CH12O6]+");
+    expect(formulaLabel.lines[0].map((run) => run.text).join("")).not.toContain("\\ce");
+    expect(formulaLabel.lines[0]).toContainEqual({
+      text: "13",
+      script: "sup",
+    });
+    expect(formulaLabel.lines[0]).toContainEqual({ text: "+", script: "sup" });
 
     const mzScene = createSpectrumPlotScene({
       peaks: assignedPeaks,
@@ -433,8 +434,14 @@ describe("assignment export", () => {
 
     expect(rootRect).toBeUndefined();
     expect(axisTitle?.kind).toBe("text");
-    if (axisTitle?.kind === "text") expect(axisTitle.fill).toBe("#000000");
+    if (axisTitle?.kind !== "text") {
+      throw new Error("Expected exported scene to include an m/z axis title.");
+    }
+    expect(axisTitle.fill).toBe("#000000");
     expect(axisLine?.kind).toBe("line");
-    if (axisLine?.kind === "line") expect(axisLine.stroke).toBe("#000000");
+    if (axisLine?.kind !== "line") {
+      throw new Error("Expected exported scene to include a black axis line.");
+    }
+    expect(axisLine.stroke).toBe("#000000");
   });
 });
