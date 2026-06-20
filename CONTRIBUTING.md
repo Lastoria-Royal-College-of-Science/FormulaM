@@ -97,7 +97,7 @@ npm run dev
 npm run build
 npm run preview
 npm run check
-npm test
+npm run test
 npm run test:e2e
 ```
 
@@ -108,8 +108,8 @@ Do not rely on scripts that are not present in `package.json` in your branch. If
 Run the narrowest relevant check first while developing. Before opening a pull request that touches shared TypeScript, scientific logic, data loading, spectrum import/export, worker behavior, deployment configuration, or UI behavior, run the full relevant sequence:
 
 ```bash
-npm test
 npm run check
+npm run test
 npm run build
 npm run test:e2e
 ```
@@ -119,7 +119,7 @@ For documentation-only changes, explain in the pull request if code checks were 
 Vitest uses two config projects: `smoke` runs `tests/smoke.test.ts` first, and `regression` runs all non-smoke Vitest files under `tests/` after smoke passes. If smoke is already failing and you need diagnostic access to the remaining Vitest suite, run:
 
 ```bash
-npm test -- --project regression --bail=0
+npm run test -- --project regression --bail=0
 ```
 
 Playwright also uses `smoke` and `regression` config projects. Playwright smoke tests must include `@smoke` in the test title. Default `npm run test:e2e` runs `@smoke` tests first because `regression` depends on `smoke`. If Playwright smoke is already failing and you need diagnostic access to the remaining browser tests, run:
@@ -128,9 +128,9 @@ Playwright also uses `smoke` and `regression` config projects. Playwright smoke 
 npm run test:e2e -- --project regression --no-deps
 ```
 
-Use bypass commands only for diagnosis. The relevant default command, `npm test` or `npm run test:e2e`, remains the final validation command.
+Use bypass commands only for diagnosis. The relevant default command, `npm run test` or `npm run test:e2e`, remains the final validation command.
 
-The test workflow currently installs dependencies with `npm ci`, runs `npm run check`, `npm test`, `npm run build`, installs Chromium for Playwright, and runs `npm run test:e2e`.
+The test workflow currently installs dependencies with `npm ci`, runs `npm run check`, `npm run test`, `npm run build`, installs Chromium for Playwright, and runs `npm run test:e2e`.
 
 ## Scientific behavior
 
@@ -269,8 +269,8 @@ Before opening a pull request, confirm:
 - [ ] The PR is focused and reviewable.
 - [ ] Scientific behavior changes are explained.
 - [ ] Tests were added or updated when behavior changed.
-- [ ] `npm test` passes, when relevant.
 - [ ] `npm run check` passes, when relevant.
+- [ ] `npm run test` passes, when relevant.
 - [ ] `npm run build` passes, when relevant.
 - [ ] `npm run test:e2e` passes, when relevant.
 - [ ] Documentation was updated if user-facing behavior changed.

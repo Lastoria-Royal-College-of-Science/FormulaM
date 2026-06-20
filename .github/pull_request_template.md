@@ -6,11 +6,11 @@
 
 <!-- Check the main areas affected by this PR. -->
 
-* [ ] Bug fix
-* [ ] Documentation
-* [ ] UI / accessibility
-* [ ] Scientific or calculation behavior
-* [ ] Tests / refactor / build / dependency
+- [ ] Bug fix
+- [ ] Documentation
+- [ ] UI / accessibility
+- [ ] Scientific or calculation behavior
+- [ ] Tests / refactor / build / dependency
 
 ## Behavior notes
 
@@ -22,9 +22,10 @@
 
 <!-- Check what you ran. If a check was skipped, briefly explain why. -->
 
-* [ ] `npm test`
-* [ ] `npm run check`
-* [ ] `npm run build`
+- [ ] `npm run check`
+- [ ] `npm run test`
+- [ ] `npm run build`
+- [ ] `npm run test:e2e`
 
 ## Reviewer notes
 

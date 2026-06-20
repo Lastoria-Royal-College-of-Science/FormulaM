@@ -23,9 +23,10 @@ npm run dev
 ## Checks
 
 ```bash
-npm run validate:data
-npm test
+npm run check
+npm run test
 npm run build
+npm run test:e2e
 ```
 
 ## Scientific disclaimer
