@@ -13,6 +13,7 @@ export default defineConfig({
   singleAttributePerLine: false,
   objectWrap: "preserve",
 
+  endOfLine: "lf",
   insertFinalNewline: true,
 
   proseWrap: "preserve",
