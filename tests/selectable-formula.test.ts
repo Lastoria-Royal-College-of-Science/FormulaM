@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import { render } from "svelte/server";
 import ChemicalFormula from "../src/components/ui/ChemicalFormula.svelte";
 import MathTex from "../src/components/ui/MathTex.svelte";
@@ -11,6 +12,8 @@ import type { SearchFormState } from "../src/core/types";
 function texAnnotation(tex: string): string {
   return `<annotation encoding="application/x-tex">${tex}</annotation>`;
 }
+
+const mathTexSource = readFileSync(new URL("../src/components/ui/MathTex.svelte", import.meta.url), "utf8");
 
 const form: SearchFormState = {
   mz: "",
@@ -77,6 +80,22 @@ describe("selectable formula rendering", () => {
     expect(body).toContain("katex-display");
     expect(body).toContain('data-selectable-formula="true"');
     expect(body).toContain('tabindex="0"');
+  });
+
+  it("keeps hidden and transparent KaTeX helper layers out of visible selection", () => {
+    const { body } = render(MathTex, { props: { tex: MZ_TEX } });
+    const chemicalFormula = render(ChemicalFormula, { props: { formula: "[C6H12O6]+" } }).body;
+
+    expect(body).toContain('class="katex-mathml"');
+    expect(body).toContain('class="katex-html"');
+    expect(chemicalFormula).toContain("color:transparent");
+    expect(mathTexSource).toContain('root.querySelector<HTMLElement>(".katex-html") ?? root');
+    expect(mathTexSource).toContain(".math-tex :global(.katex-mathml)");
+    expect(mathTexSource).toContain("user-select: none;");
+    expect(mathTexSource).toContain(".math-tex :global(.katex-html)");
+    expect(mathTexSource).toContain("user-select: text;");
+    expect(mathTexSource).toContain('[style*="color:transparent"]');
+    expect(mathTexSource).toContain("-webkit-user-select: none;");
   });
 
   it("makes KaTeX chemical formulas selectable", () => {

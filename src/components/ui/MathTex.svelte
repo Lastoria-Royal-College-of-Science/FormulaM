@@ -26,7 +26,7 @@
 
   function selectSelf(): void {
     if (!selectable || !root) return;
-    selectElementContents(root);
+    selectElementContents(root.querySelector<HTMLElement>(".katex-html") ?? root);
   }
 
   function handleKeydown(event: KeyboardEvent): void {
@@ -93,6 +93,22 @@
     border-radius: 4px;
     outline: 2px solid var(--accent);
     outline-offset: 3px;
+  }
+
+  .math-tex :global(.katex-mathml) {
+    user-select: none;
+  }
+
+  .math-tex :global(.katex-html) {
+    user-select: text;
+  }
+
+  .math-tex :global(.katex-html [style*="color:transparent"]),
+  .math-tex :global(.katex-html [style*="color: transparent"]),
+  .math-tex :global(.katex-html [style*="color:transparent"] *),
+  .math-tex :global(.katex-html [style*="color: transparent"] *) {
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   .math-tex-display :global(.katex-display) {
