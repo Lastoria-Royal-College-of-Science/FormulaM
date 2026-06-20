@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { render } from "svelte/server";
-import ResultsTable from "../src/components/results/ResultsTable.svelte";
-import { MZ_TEX } from "../src/core/math/tex";
-import type { FormulaHit, PeakAssignment } from "../src/core/types";
+import ResultsTable from "../../src/components/results/ResultsTable.svelte";
+import { MZ_TEX } from "../../src/core/math/tex";
+import type { FormulaHit, PeakAssignment } from "../../src/core/types";
 
 const sampleHit: FormulaHit = {
   formula: "C5[13C]H12O6",

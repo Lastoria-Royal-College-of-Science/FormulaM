@@ -14,7 +14,7 @@ The current implementation is Vite + TypeScript + Svelte. Preserve existing scie
 - `src/components/`: Svelte rendering, input state, events, accessibility, user interaction, and component-local scoped structural styles grouped by feature: `layout/`, `ui/`, `search/`, `results/`, and `spectrum/`. Delegate scientific/data-transformation logic to `src/core/`.
 - `src/workers/`: worker protocol and long-running search execution.
 - `public/data/masses.json`: scientific input data for runtime loading and tests.
-- `tests/`: Vitest regression coverage for search, charge input, formula display, KaTeX/mhchem DOM rendering, sorting, spectrum import/rendering, results tables, plot settings, inline math labels, and related UI/data flows.
+- `tests/`: Vitest regression coverage organized into `core/` for framework-independent logic, `components/` for Svelte SSR/component output tests, `integration/` for cross-layer Vitest checks, and `fixtures/` for test input files such as `tests/fixtures/Kaempferol.csv`.
 - `uno.config.ts`: UnoCSS preset assembly, safelist, theme token mapping, and shortcuts wiring.
 - `src/styles/uno-*.ts`: UnoCSS theme token aliases, shared interaction fragments, and semantic shortcut definitions.
 - `src/styles/global.css`: design tokens, resets, and truly global element-level styles only.
@@ -67,7 +67,7 @@ Add or update focused regression tests when changing:
 - result sorting, filtering, table rendering, CSV output, error messages, mass-data loading, or data-shape assumptions
 - spectrum import, sheet/column detection, peak normalization, assignment behavior, exports, plot rendering, worker protocol, cancellation, busy/loading state, or error propagation
 
-Do not weaken assertions to make tests pass. When debugging or testing needs real data, use `tests\Kaempferol.csv`. When browser testing needs an imported spectrum/CSV fixture, prefer an existing fixture under `tests/` and state which fixture was used.
+Do not weaken assertions to make tests pass. When debugging or testing needs real data, use `tests/fixtures/Kaempferol.csv`. When browser testing needs an imported spectrum/CSV fixture, prefer an existing fixture under `tests/fixtures/` and state which fixture was used.
 
 ## Style and dependencies
 
@@ -76,6 +76,7 @@ Do not weaken assertions to make tests pass. When debugging or testing needs rea
 - Put reusable parsing, validation, formatting, search, export, and normalization logic in `src/core/` with typed inputs and outputs.
 - Prefer explicit error messages over silent fallback behavior for scientific inputs and data-loading failures.
 - Follow nearby naming and formatting conventions before introducing new patterns.
+- Use forward slashes as path separators in code, documentation, comments, Markdown, and test strings. Use backslashes only in scripts or snippets explicitly intended for Windows command-line behavior.
 - Keep UnoCSS for reusable shortcuts, layout utilities, theme tokens, and design-system rules. Component `<style>` blocks are allowed only for component-private structural CSS tightly coupled to that component's markup, such as pseudo-elements, scroll-state shells, browser-specific selectors, or complex selector relationships that are awkward to maintain as shortcuts. Do not use scoped styles as a replacement for reusable semantic component styling, and do not move such styling into `src/styles/global.css`.
 - Keep `global.css` limited to design tokens, resets, and truly global element-level behavior.
 - Keep dependencies small and browser-compatible. Explain any new runtime dependency, especially for parsing, export, or plotting behavior.

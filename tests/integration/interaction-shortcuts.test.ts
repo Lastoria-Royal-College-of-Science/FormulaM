@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import config from "../uno.config";
+import config from "../../uno.config";
 
 const shortcuts = config.shortcuts as Record<string, string>;
 const theme = config.theme as {

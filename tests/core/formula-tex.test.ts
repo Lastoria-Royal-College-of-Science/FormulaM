@@ -1,7 +1,7 @@
 import katex from "katex";
 import "katex/contrib/mhchem";
 import { describe, expect, it } from "vitest";
-import { formulaToMhchemTex, tryFormulaToMhchemTex } from "../src/core/chemistry/formulaTex";
+import { formulaToMhchemTex, tryFormulaToMhchemTex } from "../../src/core/chemistry/formulaTex";
 
 const examples = [
   ["C6H12O6", "\\ce{C6H12O6}"],

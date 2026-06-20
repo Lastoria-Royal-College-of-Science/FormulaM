@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { render } from "svelte/server";
-import SearchInputs from "../src/components/search/SearchInputs.svelte";
-import { PPM_ERROR_TEX } from "../src/core/math/tex";
-import { createDefaultSearchForm } from "../src/core/search/searchForm";
+import SearchInputs from "../../src/components/search/SearchInputs.svelte";
+import { PPM_ERROR_TEX } from "../../src/core/math/tex";
+import { createDefaultSearchForm } from "../../src/core/search/searchForm";
 
 function texAnnotation(tex: string): string {
   return `<annotation encoding="application/x-tex">${tex}</annotation>`;

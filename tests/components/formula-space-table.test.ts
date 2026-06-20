@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { render } from "svelte/server";
-import FormulaSpaceTable from "../src/components/search/FormulaSpaceTable.svelte";
-import { buildMassIndex, formatIsotopeOption } from "../src/core/chemistry/massData";
-import type { FormulaSpaceRow, MassPayload } from "../src/core/types";
+import FormulaSpaceTable from "../../src/components/search/FormulaSpaceTable.svelte";
+import { buildMassIndex, formatIsotopeOption } from "../../src/core/chemistry/massData";
+import type { FormulaSpaceRow, MassPayload } from "../../src/core/types";
 
 const massPayload: MassPayload = {
   default_isotope_by_symbol: {

@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { attachAssignmentsToPeaks, buildPeakAssignment, upsertAssignment } from "../src/core/spectrum/assignments";
-import { assignmentsToCsv } from "../src/core/export/spectrumCsv";
-import { annotatedSpectrumPdfBytes } from "../src/core/export/spectrumPdf";
-import { PLOT_RICH_TEXT_ISOTOPE_GAP_EM, createSpectrumPlotScene, formulaToPlotTextRuns, renderSpectrumPlot } from "../src/core/plot/plotScene";
-import { DEFAULT_PLOT_SETTINGS, computeAutoMajorTickSpacing, computeMinorTicks, createPlotSettings, resolvePlotDomain } from "../src/core/plot/plotTicks";
-import { loadSpectrumImportSource, parseCsvText } from "../src/core/spectrum/spectrumImport";
-import { buildSpectrumPreview, normalizeSpectrumTable } from "../src/core/spectrum/spectrumNormalize";
-import type { FormulaHit, SpectrumPeak } from "../src/core/types";
+import { attachAssignmentsToPeaks, buildPeakAssignment, upsertAssignment } from "../../src/core/spectrum/assignments";
+import { assignmentsToCsv } from "../../src/core/export/spectrumCsv";
+import { annotatedSpectrumPdfBytes } from "../../src/core/export/spectrumPdf";
+import { PLOT_RICH_TEXT_ISOTOPE_GAP_EM, createSpectrumPlotScene, formulaToPlotTextRuns, renderSpectrumPlot } from "../../src/core/plot/plotScene";
+import { DEFAULT_PLOT_SETTINGS, computeAutoMajorTickSpacing, computeMinorTicks, createPlotSettings, resolvePlotDomain } from "../../src/core/plot/plotTicks";
+import { loadSpectrumImportSource, parseCsvText } from "../../src/core/spectrum/spectrumImport";
+import { buildSpectrumPreview, normalizeSpectrumTable } from "../../src/core/spectrum/spectrumNormalize";
+import type { FormulaHit, SpectrumPeak } from "../../src/core/types";
 
 describe("spectrum import", () => {
   it("normalizes m/z and intensity aliases, sorts peaks, and computes relative intensity", () => {

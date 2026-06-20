@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { tokenizeFormulaDisplay } from "../src/core/chemistry/formulaDisplay";
+import { tokenizeFormulaDisplay } from "../../src/core/chemistry/formulaDisplay";
 
 describe("formula display tokens", () => {
   it("renders element counts as subscripts and charges as superscripts", () => {

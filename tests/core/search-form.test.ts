@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createDefaultSearchForm, hasCommittedCharges, hasEnabledTolerance, selectedCharges, selectedTolerance } from "../src/core/search/searchForm";
+import { createDefaultSearchForm, hasCommittedCharges, hasEnabledTolerance, selectedCharges, selectedTolerance } from "../../src/core/search/searchForm";
 
 describe("search form tolerance helpers", () => {
   it("defaults to a committed +1 charge and seeds the Da value", () => {

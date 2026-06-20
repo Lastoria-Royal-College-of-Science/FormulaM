@@ -7,7 +7,7 @@ import {
   formatSignedChargeText,
   isChargeDraftText,
   parseChargeEntryText,
-} from "../src/core/search/chargeInput";
+} from "../../src/core/search/chargeInput";
 
 describe("charge input helpers", () => {
   it("accepts draft text for partial integers and ranges", () => {
