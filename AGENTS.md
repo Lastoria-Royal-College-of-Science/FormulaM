@@ -23,28 +23,9 @@ The current implementation is Vite + TypeScript + Svelte. Preserve existing scie
 
 ## Commands
 
-Use the package manager already present in the branch. Verified scripts for the current implementation:
+Use the package manager already present in the branch. See `package.json` for the current npm scripts. Use `npm install` locally, or `npm ci` when consistency with `package-lock.json` matters. Use `npm run preview` only to inspect the production build locally. Do not use `npm run lint:fix` to auto-fix; it may break formatting rules.
 
-```bash
-npm install
-npm run dev
-npm run build
-npm run preview
-npm run check
-npm run test
-npm run e2e
-```
-
-Use `npm run preview` only to inspect the production build locally.
-
-Before marking a change complete, run the narrowest relevant check first. Run the full relevant sequence when touching shared TypeScript, search logic, scientific data, spectrum import/export, worker behavior, deployment configuration, or UI behavior:
-
-```bash
-npm run check
-npm run test
-npm run build
-npm run e2e
-```
+Before marking a change complete, run the narrowest relevant check first. When touching shared TypeScript, search logic, scientific data, spectrum import/export, worker behavior, deployment configuration, or UI behavior, follow the full automated check order in `.github/workflows/test.yml`.
 
 Vitest uses two config projects: `smoke` for `tests/smoke.test.ts` and `regression` for all non-smoke files under `tests/`. Default `npm run test` runs the smoke project first and stops before regression tests if smoke fails. When smoke is already failing and you need diagnostic access to the remaining Vitest suite, run:
 
@@ -98,6 +79,7 @@ Keep smoke tests at each runner root: Vitest smoke tests belong directly under `
 - Prefer explicit error messages over silent fallback behavior for scientific inputs and data-loading failures.
 - Follow nearby naming and formatting conventions before introducing new patterns.
 - Use forward slashes as path separators in code, documentation, comments, Markdown, and test strings. Use backslashes only in scripts or snippets explicitly intended for Windows command-line behavior.
+- In top-level Markdown documents intended for human readers, such as `README.md` and `CONTRIBUTING.md`, format repository-relative file and directory references as relative Markdown links whose visible text is the path in inline code. AI-only Markdown documents, including `AGENTS.md` files, should keep repository-relative paths as inline code without Markdown links.
 - Keep UnoCSS for reusable shortcuts, layout utilities, theme tokens, and design-system rules. Component `<style>` blocks are allowed only for component-private structural CSS tightly coupled to that component's markup, such as pseudo-elements, scroll-state shells, browser-specific selectors, or complex selector relationships that are awkward to maintain as shortcuts. Do not use scoped styles as a replacement for reusable semantic component styling, and do not move such styling into `src/styles/global.css`.
 - Keep `global.css` limited to design tokens, resets, and truly global element-level behavior.
 - Keep dependencies small and browser-compatible. Explain any new runtime dependency, especially for parsing, export, or plotting behavior.

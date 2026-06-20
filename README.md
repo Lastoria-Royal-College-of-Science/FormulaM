@@ -15,6 +15,8 @@ The input mass is always observed $m/z$. Charge is required and explicit. Formul
 
 ## Local development
 
+Project scripts are defined in [`package.json`](package.json).
+
 ```bash
 npm install
 npm run dev
@@ -22,12 +24,7 @@ npm run dev
 
 ## Checks
 
-```bash
-npm run check
-npm run test
-npm run build
-npm run e2e
-```
+The full automated check order is defined in [`.github/workflows/test.yml`](.github/workflows/test.yml).
 
 ## Scientific disclaimer
 
