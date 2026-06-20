@@ -32,7 +32,7 @@ npm run build
 npm run preview
 npm run check
 npm run test
-npm run test:e2e
+npm run e2e
 ```
 
 Use `npm run preview` only to inspect the production build locally.
@@ -43,7 +43,7 @@ Before marking a change complete, run the narrowest relevant check first. Run th
 npm run check
 npm run test
 npm run build
-npm run test:e2e
+npm run e2e
 ```
 
 Vitest uses two config projects: `smoke` for `tests/smoke.test.ts` and `regression` for all non-smoke files under `tests/`. Default `npm run test` runs the smoke project first and stops before regression tests if smoke fails. When smoke is already failing and you need diagnostic access to the remaining Vitest suite, run:
@@ -52,13 +52,13 @@ Vitest uses two config projects: `smoke` for `tests/smoke.test.ts` and `regressi
 npm run test -- --project regression --bail=0
 ```
 
-Playwright also uses `smoke` and `regression` config projects. Playwright smoke tests must include `@smoke` in the test title. Default `npm run test:e2e` runs `@smoke` tests first because `regression` depends on `smoke`. When Playwright smoke is already failing and you need diagnostic access to the remaining browser tests, run:
+Playwright also uses `smoke` and `regression` config projects. Playwright smoke tests must include `@smoke` in the test title. Default `npm run e2e` runs `@smoke` tests first because `regression` depends on `smoke`. When Playwright smoke is already failing and you need diagnostic access to the remaining browser tests, run:
 
 ```bash
-npm run test:e2e -- --project regression --no-deps
+npm run e2e -- --project regression --no-deps
 ```
 
-Use bypass commands only for diagnosis. Run the relevant default command, `npm run test` or `npm run test:e2e`, before marking the change complete.
+Use bypass commands only for diagnosis. Run the relevant default command, `npm run test` or `npm run e2e`, before marking the change complete.
 
 Do not invent missing scripts. If a document mentions a script absent from `package.json`, such as `npm run validate:data`, report the mismatch and either add the script intentionally or use existing checks.
 

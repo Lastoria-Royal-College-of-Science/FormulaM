@@ -25,7 +25,7 @@
 - [ ] `npm run check`
 - [ ] `npm run test`
 - [ ] `npm run build`
-- [ ] `npm run test:e2e`
+- [ ] `npm run e2e`
 
 ## Reviewer notes
 

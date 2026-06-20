@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui"
   },
   "keywords": [
     "chemistry",
