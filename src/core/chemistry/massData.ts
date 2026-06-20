@@ -7,9 +7,31 @@ export const MASS_DATA_CANDIDATES = [
   "ms_formula_finder/data/masses.json",
 ] as const;
 
+const SUPERSCRIPT_DIGITS: Record<string, string> = {
+  "0": "⁰",
+  "1": "¹",
+  "2": "²",
+  "3": "³",
+  "4": "⁴",
+  "5": "⁵",
+  "6": "⁶",
+  "7": "⁷",
+  "8": "⁸",
+  "9": "⁹",
+};
+
 function resolveAssetPath(path: string): string {
   const base = import.meta.env.BASE_URL || "/";
   return `${base.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
+}
+
+function superscriptDigits(text: string): string {
+  return text.replace(/\d/g, (digit) => SUPERSCRIPT_DIGITS[digit] ?? digit);
+}
+
+function formatIsotopeDisplayLabel(label: string): string {
+  const match = label.match(/^(\d+)([A-Z][a-z]?)$/);
+  return match ? `${superscriptDigits(match[1])}${match[2]}` : label;
 }
 
 export async function loadMassPayload(urls: readonly string[] = MASS_DATA_CANDIDATES): Promise<{ payload: MassPayload; url: string }> {
@@ -88,8 +110,9 @@ export function defaultIsotopeLabel(massIndex: MassIndex, symbol: string): strin
 export function formatIsotopeOption(massIndex: MassIndex, label: string): string {
   const canonical = normalizeSpeciesLabel(label);
   const record = massIndex.isotopes[canonical];
-  if (!record) return canonical;
-  return massIndex.defaultIsotopeBySymbol[record.symbol] === canonical ? `${canonical} (default)` : canonical;
+  const displayLabel = formatIsotopeDisplayLabel(canonical);
+  if (!record) return displayLabel;
+  return massIndex.defaultIsotopeBySymbol[record.symbol] === canonical ? `${displayLabel} (default)` : displayLabel;
 }
 
 export function elementCapacity(massIndex: MassIndex, symbol: string): number {

@@ -7,6 +7,7 @@ import {
   resolvePlotDomain,
   resolveThresholdPercent,
 } from "./plotTicks";
+import { tokenizeFormulaDisplay } from "../chemistry/formulaDisplay";
 import type { PlotSettings, SpectrumPeak, ThemeName } from "../types";
 
 type PlotPalette = {
@@ -81,7 +82,26 @@ export type PlotText = {
   rotation?: number;
 };
 
-export type PlotShape = PlotRect | PlotLine | PlotCircle | PlotText;
+export type PlotTextRun = {
+  text: string;
+  script?: "normal" | "sub" | "sup";
+  leadingGap?: number;
+};
+
+export type PlotRichText = {
+  kind: "rich-text";
+  x: number;
+  y: number;
+  lines: PlotTextRun[][];
+  fill: string;
+  fontSize: number;
+  fontWeight: "normal" | "bold";
+  align: CanvasTextAlign;
+  baseline: CanvasTextBaseline;
+  rotation?: number;
+};
+
+export type PlotShape = PlotRect | PlotLine | PlotCircle | PlotText | PlotRichText;
 
 export type PlotScene = {
   width: number;
@@ -91,6 +111,11 @@ export type PlotScene = {
 };
 
 const CANVAS_FONT_FAMILY = "Inter, system-ui, sans-serif";
+export const PLOT_RICH_TEXT_SCRIPT_SCALE = 0.72;
+export const PLOT_RICH_TEXT_SUPERSCRIPT_OFFSET_EM = -0.38;
+export const PLOT_RICH_TEXT_SUBSCRIPT_OFFSET_EM = 0.16;
+export const PLOT_RICH_TEXT_LINE_HEIGHT_EM = 1.28;
+export const PLOT_RICH_TEXT_ISOTOPE_GAP_EM = 0.18;
 
 function themePalette(theme: ThemeName): PlotPalette {
   return theme === "light"
@@ -147,20 +172,117 @@ function peakOpacity(peak: SpectrumPeak, settings: PlotSettings): number {
   return settings.thresholdEnabled && peak.relativeIntensity < resolveThresholdPercent(settings) ? 0.32 : 1;
 }
 
-function buildLabelText(peak: SpectrumPeak, settings: PlotSettings): string | null {
-  if (!settings.showLabels) return null;
-  if (settings.labelFilter === "none") return null;
+export function plotTextRunFontSize(fontSize: number, script: PlotTextRun["script"]): number {
+  return script === "sub" || script === "sup" ? fontSize * PLOT_RICH_TEXT_SCRIPT_SCALE : fontSize;
+}
+
+export function plotTextRunBaselineOffset(fontSize: number, script: PlotTextRun["script"]): number {
+  if (script === "sup") return fontSize * PLOT_RICH_TEXT_SUPERSCRIPT_OFFSET_EM;
+  if (script === "sub") return fontSize * PLOT_RICH_TEXT_SUBSCRIPT_OFFSET_EM;
+  return 0;
+}
+
+export function plotRichTextLineHeight(fontSize: number): number {
+  return fontSize * PLOT_RICH_TEXT_LINE_HEIGHT_EM;
+}
+
+export function plotRichTextLineOffset(lineIndex: number, lineCount: number, fontSize: number, baseline: CanvasTextBaseline): number {
+  const lineHeight = plotRichTextLineHeight(fontSize);
+  if (baseline === "top" || baseline === "hanging") return lineIndex * lineHeight;
+  if (baseline === "middle") return (lineIndex - (lineCount - 1) / 2) * lineHeight;
+  return -(lineCount - lineIndex - 1) * lineHeight;
+}
+
+export function formulaToPlotTextRuns(formula: string): PlotTextRun[] {
+  const runs: PlotTextRun[] = [];
+
+  for (const token of tokenizeFormulaDisplay(formula)) {
+    if (token.kind === "isotope") {
+      const previousRun = runs.at(-1);
+      const massRun: PlotTextRun = { text: token.massNumber, script: "sup" };
+      if (previousRun?.script !== "sub") massRun.leadingGap = PLOT_RICH_TEXT_ISOTOPE_GAP_EM;
+      runs.push(massRun, { text: token.element, script: "normal" });
+      continue;
+    }
+
+    runs.push({
+      text: token.text,
+      script: token.kind === "text" ? "normal" : token.kind,
+    });
+  }
+
+  return runs;
+}
+
+function shouldShowPeakLabel(peak: SpectrumPeak, settings: PlotSettings): boolean {
+  if (!settings.showLabels) return false;
+  if (settings.labelFilter === "none") return false;
 
   const hasAssignment = Boolean(peak.assignments?.length);
   const isThresholdPeak = peak.relativeIntensity >= resolveThresholdPercent(settings);
-  if (settings.labelFilter === "assigned-only" && !hasAssignment) return null;
-  if (settings.labelFilter === "threshold" && !isThresholdPeak) return null;
-  if (settings.labelFilter === "both" && !hasAssignment && !isThresholdPeak) return null;
+  if (settings.labelFilter === "assigned-only" && !hasAssignment) return false;
+  if (settings.labelFilter === "threshold" && !isThresholdPeak) return false;
+  if (settings.labelFilter === "both" && !hasAssignment && !isThresholdPeak) return false;
+  return true;
+}
 
+function assignmentLabelFormula(peak: SpectrumPeak): string | null {
   const assignment = peak.assignments?.[0];
-  if (settings.labelMode === "formula") return assignment?.formula ?? null;
-  if (settings.labelMode === "mz") return peak.mz.toFixed(4);
-  return assignment ? `${assignment.formula}\n${peak.mz.toFixed(4)}` : peak.mz.toFixed(4);
+  return assignment?.ionFormula ?? assignment?.formula ?? null;
+}
+
+function buildPeakLabelShapes(
+  peak: SpectrumPeak,
+  settings: PlotSettings,
+  x: number,
+  y: number,
+  plotTop: number,
+  fill: string,
+): PlotShape[] {
+  if (!shouldShowPeakLabel(peak, settings)) return [];
+
+  const formula = assignmentLabelFormula(peak);
+  const mzLabel = peak.mz.toFixed(4);
+  const labelLines: Array<{ kind: "formula"; text: string } | { kind: "text"; text: string }> = [];
+
+  if (settings.labelMode === "formula") {
+    if (formula) labelLines.push({ kind: "formula", text: formula });
+  } else if (settings.labelMode === "mz") {
+    labelLines.push({ kind: "text", text: mzLabel });
+  } else if (formula) {
+    labelLines.push({ kind: "formula", text: formula }, { kind: "text", text: mzLabel });
+  } else {
+    labelLines.push({ kind: "text", text: mzLabel });
+  }
+
+  return labelLines.map((line, lineIndex) => {
+    const lineY = Math.max(plotTop + 10, y - 8 - (labelLines.length - lineIndex - 1) * 14);
+    if (line.kind === "formula") {
+      return {
+        kind: "rich-text",
+        x,
+        y: lineY,
+        lines: [formulaToPlotTextRuns(line.text)],
+        fill,
+        fontSize: 11,
+        fontWeight: "normal",
+        align: "center",
+        baseline: "bottom",
+      };
+    }
+
+    return {
+      kind: "text",
+      x,
+      y: lineY,
+      text: line.text,
+      fill,
+      fontSize: 11,
+      fontWeight: "normal",
+      align: "center",
+      baseline: "bottom",
+    };
+  });
 }
 
 function resolveCoordinates(
@@ -400,23 +522,8 @@ export function createSpectrumPlotScene(options: SpectrumPlotRenderOptions): Plo
   }
 
   for (const peak of visiblePeaks) {
-    const label = buildLabelText(peak, settings);
-    if (!label) continue;
     const { x, y } = resolveCoordinates(peak.mz, peak.relativeIntensity, domain, width, height, margins);
-    const lines = label.split("\n");
-    lines.forEach((line, lineIndex) => {
-      shapes.push({
-        kind: "text",
-        x,
-        y: Math.max(plotTop + 10, y - 8 - (lines.length - lineIndex - 1) * 14),
-        text: line,
-        fill: palette.text,
-        fontSize: 11,
-        fontWeight: "normal",
-        align: "center",
-        baseline: "bottom",
-      });
-    });
+    shapes.push(...buildPeakLabelShapes(peak, settings, x, y, plotTop, palette.text));
   }
 
   return {
@@ -425,6 +532,69 @@ export function createSpectrumPlotScene(options: SpectrumPlotRenderOptions): Plo
     pageBackground: palette.background,
     shapes,
   };
+}
+
+function canvasFont(fontSize: number, fontWeight: PlotText["fontWeight"]): string {
+  return `${fontWeight === "bold" ? 600 : 400} ${fontSize}px ${CANVAS_FONT_FAMILY}`;
+}
+
+function measureRichTextLine(context: CanvasRenderingContext2D, line: PlotTextRun[], fontSize: number, fontWeight: PlotText["fontWeight"]): number {
+  return line.reduce((width, run) => {
+    const runFontSize = plotTextRunFontSize(fontSize, run.script);
+    context.font = canvasFont(runFontSize, fontWeight);
+    return width + fontSize * (run.leadingGap ?? 0) + context.measureText(run.text).width;
+  }, 0);
+}
+
+function textAlignOffset(width: number, align: CanvasTextAlign): number {
+  if (align === "center") return -width / 2;
+  if (align === "right" || align === "end") return -width;
+  return 0;
+}
+
+function drawRichTextLine(
+  context: CanvasRenderingContext2D,
+  line: PlotTextRun[],
+  x: number,
+  y: number,
+  fill: string,
+  fontSize: number,
+  fontWeight: PlotText["fontWeight"],
+  align: CanvasTextAlign,
+  baseline: CanvasTextBaseline,
+): void {
+  const lineWidth = measureRichTextLine(context, line, fontSize, fontWeight);
+  let cursor = x + textAlignOffset(lineWidth, align);
+
+  context.fillStyle = fill;
+  context.textAlign = "left";
+  context.textBaseline = baseline;
+
+  for (const run of line) {
+    cursor += fontSize * (run.leadingGap ?? 0);
+    const runFontSize = plotTextRunFontSize(fontSize, run.script);
+    const runYOffset = plotTextRunBaselineOffset(fontSize, run.script);
+    context.font = canvasFont(runFontSize, fontWeight);
+    context.fillText(run.text, cursor, y + runYOffset);
+    cursor += context.measureText(run.text).width;
+  }
+}
+
+function drawRichText(context: CanvasRenderingContext2D, shape: PlotRichText): void {
+  context.save();
+
+  if (shape.rotation) {
+    context.translate(shape.x, shape.y);
+    context.rotate((shape.rotation * Math.PI) / 180);
+  }
+
+  shape.lines.forEach((line, lineIndex) => {
+    const x = shape.rotation ? 0 : shape.x;
+    const y = (shape.rotation ? 0 : shape.y) + plotRichTextLineOffset(lineIndex, shape.lines.length, shape.fontSize, shape.baseline);
+    drawRichTextLine(context, line, x, y, shape.fill, shape.fontSize, shape.fontWeight, shape.align, shape.baseline);
+  });
+
+  context.restore();
 }
 
 function renderPlotScene(context: CanvasRenderingContext2D, scene: PlotScene): void {
@@ -459,9 +629,14 @@ function renderPlotScene(context: CanvasRenderingContext2D, scene: PlotScene): v
       continue;
     }
 
+    if (shape.kind === "rich-text") {
+      drawRichText(context, shape);
+      continue;
+    }
+
     context.save();
     context.fillStyle = shape.fill;
-    context.font = `${shape.fontWeight === "bold" ? 600 : 400} ${shape.fontSize}px ${CANVAS_FONT_FAMILY}`;
+    context.font = canvasFont(shape.fontSize, shape.fontWeight);
     context.textAlign = shape.align;
     context.textBaseline = shape.baseline;
 

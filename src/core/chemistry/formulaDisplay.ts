@@ -1,7 +1,13 @@
-export type FormulaDisplayToken = {
-  kind: "text" | "sub" | "sup";
-  text: string;
-};
+export type FormulaDisplayToken =
+  | {
+      kind: "text" | "sub" | "sup";
+      text: string;
+    }
+  | {
+      kind: "isotope";
+      massNumber: string;
+      element: string;
+    };
 
 function readElement(text: string, startIndex: number): { value: string; endIndex: number } {
   let endIndex = startIndex + 1;
@@ -37,12 +43,7 @@ export function tokenizeFormulaDisplay(formula: string): FormulaDisplayToken[] {
       if (/^[A-Z]$/.test(body[digits.endIndex] ?? "")) {
         const element = readElement(body, digits.endIndex);
         if (body[element.endIndex] === "]") {
-          tokens.push(
-            { kind: "text", text: "[" },
-            { kind: "sup", text: digits.value },
-            { kind: "text", text: element.value },
-            { kind: "text", text: "]" },
-          );
+          tokens.push({ kind: "isotope", massNumber: digits.value, element: element.value });
           index = element.endIndex + 1;
           continue;
         }

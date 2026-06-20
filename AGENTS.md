@@ -10,11 +10,11 @@ The current implementation is Vite + TypeScript + Svelte. Preserve existing scie
 
 ## Repository map
 
-- `src/core/`: framework-independent scientific logic grouped by domain: `chemistry/` for mass data, formula formatting/display, and decimal helpers; `search/` for search-space handling, charge input, search execution, form state, and result sorting; `spectrum/` for import, normalization, assignments, and peak selection; `plot/` for plot calculations and scene construction; `export/` for CSV/download/PNG/PDF export helpers.
+- `src/core/`: framework-independent scientific logic grouped by domain: `chemistry/` for mass data, formula formatting/display, formula TeX conversion, and decimal helpers; `dom/` for browser-safe DOM utilities; `math/` for shared TeX rendering helpers and math label constants; `search/` for search-space handling, charge input, search execution, form state, and result sorting; `spectrum/` for import, normalization, assignments, and peak selection; `plot/` for plot calculations and scene construction; `export/` for CSV/download/PNG/PDF export helpers.
 - `src/components/`: Svelte rendering, input state, events, accessibility, user interaction, and component-local scoped structural styles grouped by feature: `layout/`, `ui/`, `search/`, `results/`, and `spectrum/`. Delegate scientific/data-transformation logic to `src/core/`.
 - `src/workers/`: worker protocol and long-running search execution.
 - `public/data/masses.json`: scientific input data for runtime loading and tests.
-- `tests/`: Vitest regression coverage for search, charge input, formula display, sorting, spectrum import/rendering, results tables, plot settings, inline-code copy behavior, and related UI/data flows.
+- `tests/`: Vitest regression coverage for search, charge input, formula display, KaTeX/mhchem DOM rendering, sorting, spectrum import/rendering, results tables, plot settings, inline math labels, and related UI/data flows.
 - `uno.config.ts`: UnoCSS preset assembly, safelist, theme token mapping, and shortcuts wiring.
 - `src/styles/uno-*.ts`: UnoCSS theme token aliases, shared interaction fragments, and semantic shortcut definitions.
 - `src/styles/global.css`: design tokens, resets, and truly global element-level styles only.
@@ -50,6 +50,11 @@ Do not invent missing scripts. If a document mentions a script absent from `pack
 - Treat observed input mass as `m/z`, not neutral mass.
 - Keep charge explicit. FormulaM applies bare-ion electron-mass correction for charged species; do not add adduct behavior unless explicitly requested.
 - Preserve semantics for formula, mass, `m/z`, Da error, ppm error, charge state, sorting, filtering, CSV export, spectrum assignment, and plot annotation unless the task changes them.
+- Preserve raw formula encoding, but render isotope-local bracket notation such as `[13C]` without the isotope brackets in visible formula displays. Show isotope mass numbers as left superscripts next to the element, keep ion wrapper brackets such as `[C6H12O6]+`, and follow the same visible convention in future KaTeX/mhchem rendering.
+- Render ordinary DOM chemical formulae through KaTeX with mhchem TeX sources such as `\ce{...}`. Keep FormulaM internal formula strings unchanged, and convert to mhchem only at the display/copy layer.
+- Make whole-expression click/keyboard selection the default at the shared KaTeX component layer. Opt out only when the formula is inside a non-selectable or conflicting interactive surface, such as a sort button or pointer-disabled tooltip.
+- Let DOM KaTeX formulas expand their line boxes vertically instead of clipping or adding height-driven scrollbars. Use display math for standalone equations; reserve horizontal overflow handling for width constraints only.
+- Keep spectrum plot labels and PNG/PDF export labels on the existing rich-text plot renderer rather than DOM KaTeX. Plot/export formula labels should continue to use the shared formula display token stream.
 - Treat `public/data/masses.json` as scientific source data. Do not replace, regenerate, reformat, or normalize it unless explicitly asked.
 - Keep deployment base intentional. FormulaM uses a custom domain, so Vite `base` should remain `/` unless the deployment target changes. Do not change it to `/FormulaM/` merely because the repository is hosted on GitHub Pages; use `/FormulaM/` only for project-site deployment without the custom domain.
 
@@ -58,7 +63,7 @@ Do not invent missing scripts. If a document mentions a script absent from `pack
 Add or update focused regression tests when changing:
 
 - charge parsing, normalization, editing, display, or positive/negative and multi-charge search behavior
-- electron-mass correction, exact-mass calculation, ppm/Da tolerance handling, isotope labels, formula formatting, or display markup
+- electron-mass correction, exact-mass calculation, ppm/Da tolerance handling, isotope labels, formula formatting, display markup, KaTeX/mhchem conversion, or math label rendering
 - result sorting, filtering, table rendering, CSV output, error messages, mass-data loading, or data-shape assumptions
 - spectrum import, sheet/column detection, peak normalization, assignment behavior, exports, plot rendering, worker protocol, cancellation, busy/loading state, or error propagation
 

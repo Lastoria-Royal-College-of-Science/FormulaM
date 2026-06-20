@@ -10,6 +10,17 @@ const peaks: SpectrumPeak[] = [
     mz: 100.1,
     intensity: 500,
     relativeIntensity: 100,
+    assignments: [
+      {
+        peakId: "peak-1",
+        mz: 100.1,
+        intensity: 500,
+        relativeIntensity: 100,
+        formula: "C5[13C]H12O6",
+        ionFormula: "[C5[13C]H12O6]2+",
+        source: "manual",
+      },
+    ],
   },
   {
     id: "peak-2",
@@ -39,6 +50,11 @@ describe("SpectrumPlot", () => {
     expect(body).toContain('aria-label="Spectrum plot.');
     expect(body).toContain("<line");
     expect(body).toContain("<circle");
+    expect(body).toContain("<tspan");
+    expect(body).toContain('baseline-shift="0.38em"');
+    expect(body).toContain('baseline-shift="-0.16em"');
+    expect(body).not.toContain('dx="1.98"');
+    expect(body).not.toContain("[13C]");
     expect(body).not.toContain("<canvas");
   });
 });

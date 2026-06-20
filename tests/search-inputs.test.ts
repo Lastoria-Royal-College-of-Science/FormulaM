@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { render } from "svelte/server";
 import SearchInputs from "../src/components/search/SearchInputs.svelte";
+import { PPM_ERROR_TEX } from "../src/core/math/tex";
 import { createDefaultSearchForm } from "../src/core/search/searchForm";
+
+function texAnnotation(tex: string): string {
+  return `<annotation encoding="application/x-tex">${tex}</annotation>`;
+}
 
 const baseProps = {
   onChange: () => undefined,
@@ -92,5 +97,22 @@ describe("SearchInputs", () => {
     expect(body).toContain('aria-label="Tolerance ppm"');
     expect(body).toContain('aria-label="Tolerance Da"');
     expect(body).toContain('aria-label="Max results"');
+  });
+
+  it("centers help dialogs and renders ppm help as display math", () => {
+    const { body } = render(SearchInputs, {
+      props: {
+        form: createDefaultSearchForm(),
+        ...baseProps,
+      },
+    });
+
+    expect(body.match(/\bhelp-dialog\b/g)).toHaveLength(2);
+    expect(body).toContain("help-equation");
+    expect(body).not.toContain("overflow-x-auto");
+    expect(body).toContain("math-tex-display");
+    expect(body).toContain("katex-display");
+    expect(body).toContain(texAnnotation(PPM_ERROR_TEX));
+    expect(body).toContain('data-selectable-formula="true"');
   });
 });

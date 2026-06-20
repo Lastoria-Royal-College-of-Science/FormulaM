@@ -1,6 +1,8 @@
 <script lang="ts">
   import { tick } from "svelte";
+  import MathTex from "../ui/MathTex.svelte";
   import ToggleSwitch from "../ui/ToggleSwitch.svelte";
+  import { MZ_TEX, PPM_ERROR_TEX } from "../../core/math/tex";
   import { canCommitChargeEntryText, formatChargeEntry, formatSignedChargeText, isChargeDraftText } from "../../core/search/chargeInput";
   import type { SearchFormState } from "../../core/types";
 
@@ -87,7 +89,7 @@
   <h2 class="mt-0">Search inputs</h2>
   <div class="grid grid-cols-3 gap-4 lt-md:grid-cols-1">
     <div class="block">
-      <span class="field-title">Observed <code class="inline-code">m/z</code></span>
+      <span class="field-title">Observed <MathTex tex={MZ_TEX} ariaLabel="m/z" fallback="m/z" /></span>
       <input
         class="field-control"
         type="text"
@@ -285,7 +287,7 @@
       />
     </div>
   </div>
-  <dialog class="max-w-[520px] rounded-2 border border-solid border-border bg-surface p-4 text-text shadow-app" bind:this={chargeHelpDialog}>
+  <dialog class="help-dialog rounded-2 border border-solid border-border bg-surface p-4 text-text shadow-app" bind:this={chargeHelpDialog}>
     <form method="dialog" class="m-0">
       <h3 class="mt-0">Explicit charge</h3>
       <p>Enter <code class="inline-code">n</code> for a single charge or <code class="inline-code">min-max</code> for an inclusive range.</p>
@@ -293,10 +295,10 @@
       <button class="secondary-action">Close</button>
     </form>
   </dialog>
-  <dialog class="max-w-[520px] rounded-2 border border-solid border-border bg-surface p-4 text-text shadow-app" bind:this={ppmHelpDialog}>
+  <dialog class="help-dialog rounded-2 border border-solid border-border bg-surface p-4 text-text shadow-app" bind:this={ppmHelpDialog}>
     <form method="dialog" class="m-0">
       <h3 class="mt-0">Tolerance ppm</h3>
-      <p><code class="inline-code">ppm error = (predicted_mz - observed_mz) / observed_mz * 1,000,000</code></p>
+      <div class="help-equation"><MathTex displayMode={true} tex={PPM_ERROR_TEX} ariaLabel="ppm error equals predicted m/z minus observed m/z divided by observed m/z times 1,000,000" fallback="ppm error = (predicted_mz - observed_mz) / observed_mz * 1,000,000" selectionLabel="Click to select equation" /></div>
       <p>A formula is accepted if the absolute ppm error is within the selected tolerance.</p>
       <button class="secondary-action">Close</button>
     </form>
@@ -304,6 +306,23 @@
 </section>
 
 <style>
+  .help-dialog {
+    position: fixed;
+    inset: 0;
+    width: min(520px, calc(100vw - 32px));
+    max-height: calc(100vh - 32px);
+    margin: auto;
+    overflow: auto;
+  }
+
+  .help-equation {
+    max-width: 100%;
+    margin-block: 1rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-block: 0.25rem;
+  }
+
   .charge-field-shell {
     display: flex;
     height: 42px;

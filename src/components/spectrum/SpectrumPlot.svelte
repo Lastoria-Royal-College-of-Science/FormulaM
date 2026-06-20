@@ -1,8 +1,16 @@
 <script lang="ts">
-  import { createSpectrumPlotScene, getPlotMargins } from "../../core/plot/plotScene";
+  import MathTex from "../ui/MathTex.svelte";
+  import {
+    createSpectrumPlotScene,
+    getPlotMargins,
+    plotRichTextLineOffset,
+    plotTextRunBaselineOffset,
+    plotTextRunFontSize,
+  } from "../../core/plot/plotScene";
   import { findNearestPeak } from "../../core/spectrum/peakSelection";
   import { filterPeaksInRange, resolvePlotDomain } from "../../core/plot/plotTicks";
-  import type { PlotScene, PlotText } from "../../core/plot/plotScene";
+  import { MZ_TEX } from "../../core/math/tex";
+  import type { PlotRichText, PlotScene, PlotText, PlotTextRun } from "../../core/plot/plotScene";
   import type { PlotSettings, SpectrumPeak, ThemeName } from "../../core/types";
 
   export let peaks: SpectrumPeak[] = [];
@@ -42,8 +50,25 @@
     return "alphabetic";
   }
 
-  function textRotation(shape: PlotText): string | undefined {
+  function textRotation(shape: PlotText | PlotRichText): string | undefined {
     return shape.rotation ? `rotate(${shape.rotation} ${shape.x} ${shape.y})` : undefined;
+  }
+
+  function richLineY(shape: PlotRichText, lineIndex: number): number {
+    return shape.y + plotRichTextLineOffset(lineIndex, shape.lines.length, shape.fontSize, shape.baseline);
+  }
+
+  function runFontSize(shape: PlotRichText, run: PlotTextRun): number {
+    return plotTextRunFontSize(shape.fontSize, run.script);
+  }
+
+  function runBaselineShift(run: PlotTextRun): string {
+    const offset = plotTextRunBaselineOffset(1, run.script);
+    return offset ? `${-offset}em` : "baseline";
+  }
+
+  function runDx(shape: PlotRichText, run: PlotTextRun): number | undefined {
+    return run.leadingGap ? shape.fontSize * run.leadingGap : undefined;
   }
 
   function eventToMz(event: MouseEvent): number | null {
@@ -146,7 +171,7 @@
   <div class="mb-3 flex flex-wrap items-start justify-between gap-3">
     <div>
       <h2 class="mt-0">Interactive spectrum</h2>
-      <p class="mb-0 mt-1 text-sm text-muted">Click the nearest peak to load its <code class="inline-code">m/z</code> into FormulaM and prepare a formula assignment.</p>
+      <p class="mb-0 mt-1 text-sm text-muted">Click the nearest peak to load its <MathTex tex={MZ_TEX} ariaLabel="m/z" fallback="m/z" /> into FormulaM and prepare a formula assignment.</p>
     </div>
     <button type="button" class="secondary-action" disabled={peaks.length === 0} on:click={onResetView}>Reset view</button>
   </div>
@@ -188,7 +213,7 @@
               ></line>
             {:else if shape.kind === "circle"}
               <circle cx={shape.x} cy={shape.y} r={shape.radius} fill={shape.fill}></circle>
-            {:else}
+            {:else if shape.kind === "text"}
               <text
                 x={shape.x}
                 y={shape.y}
@@ -199,6 +224,17 @@
                 text-anchor={textAnchor(shape.align)}
                 transform={textRotation(shape)}
               >{shape.text}</text>
+            {:else}
+              <text
+                x={shape.x}
+                y={shape.y}
+                dominant-baseline={dominantBaseline(shape.baseline)}
+                fill={shape.fill}
+                font-size={shape.fontSize}
+                font-weight={shape.fontWeight === "bold" ? 600 : 400}
+                text-anchor={textAnchor(shape.align)}
+                transform={textRotation(shape)}
+              >{#each shape.lines as line, lineIndex (lineIndex)}<tspan x={shape.x} y={richLineY(shape, lineIndex)}>{#each line as run, runIndex (runIndex)}<tspan dx={runDx(shape, run)} font-size={runFontSize(shape, run)} baseline-shift={runBaselineShift(run)}>{run.text}</tspan>{/each}</tspan>{/each}</text>
             {/if}
           {/each}
         </svg>
@@ -209,7 +245,7 @@
           class="pointer-events-none absolute z-10 rounded-2 border border-solid border-border bg-surface px-3 py-2 text-sm shadow-app"
           style={`left: min(${tooltipX}px, calc(100% - 190px)); top: ${tooltipY}px;`}
         >
-          <div><strong class="text-text"><code class="inline-code">m/z</code></strong> {hoveredPeak.mz.toFixed(6)}</div>
+          <div><strong class="text-text"><MathTex tex={MZ_TEX} ariaLabel="m/z" fallback="m/z" selectable={false} /></strong> {hoveredPeak.mz.toFixed(6)}</div>
           <div><strong class="text-text">Intensity</strong> {hoveredPeak.intensity}</div>
           <div><strong class="text-text">Relative</strong> {hoveredPeak.relativeIntensity.toFixed(2)}%</div>
         </div>

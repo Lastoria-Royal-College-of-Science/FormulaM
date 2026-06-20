@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { attachAssignmentsToPeaks, buildPeakAssignment, upsertAssignment } from "../src/core/spectrum/assignments";
 import { assignmentsToCsv } from "../src/core/export/spectrumCsv";
 import { annotatedSpectrumPdfBytes } from "../src/core/export/spectrumPdf";
-import { createSpectrumPlotScene } from "../src/core/plot/plotScene";
+import { PLOT_RICH_TEXT_ISOTOPE_GAP_EM, createSpectrumPlotScene, formulaToPlotTextRuns, renderSpectrumPlot } from "../src/core/plot/plotScene";
 import { DEFAULT_PLOT_SETTINGS, computeAutoMajorTickSpacing, computeMinorTicks, createPlotSettings, resolvePlotDomain } from "../src/core/plot/plotTicks";
 import { loadSpectrumImportSource, parseCsvText } from "../src/core/spectrum/spectrumImport";
 import { buildSpectrumPreview, normalizeSpectrumTable } from "../src/core/spectrum/spectrumNormalize";
@@ -170,6 +170,178 @@ describe("spectrum plot settings", () => {
   });
 });
 
+describe("spectrum plot formula labels", () => {
+  const assignedPeaks: SpectrumPeak[] = [
+    {
+      id: "peak-1",
+      mz: 180.0634,
+      intensity: 1000,
+      relativeIntensity: 100,
+      assignments: [
+        {
+          peakId: "peak-1",
+          mz: 180.0634,
+          intensity: 1000,
+          relativeIntensity: 100,
+          formula: "C5[13C]H12O6",
+          ionFormula: "[C5[13C]H12O6]+",
+          source: "manual",
+        },
+      ],
+    },
+  ];
+
+  it("converts formula display tokens into plot text runs", () => {
+    expect(formulaToPlotTextRuns("C6H12O6")).toEqual([
+      { text: "C", script: "normal" },
+      { text: "6", script: "sub" },
+      { text: "H", script: "normal" },
+      { text: "12", script: "sub" },
+      { text: "O", script: "normal" },
+      { text: "6", script: "sub" },
+    ]);
+    expect(formulaToPlotTextRuns("[C6H12O6]+")).toContainEqual({ text: "+", script: "sup" });
+    expect(formulaToPlotTextRuns("[C5[13C]H12O6]2+")).toContainEqual({
+      text: "13",
+      script: "sup",
+    });
+    expect(formulaToPlotTextRuns("[C[13C]H12O6]2+")).toContainEqual({
+      text: "13",
+      script: "sup",
+      leadingGap: PLOT_RICH_TEXT_ISOTOPE_GAP_EM,
+    });
+    expect(formulaToPlotTextRuns("[C5[13C]H12O6]2+")).toContainEqual({ text: "2+", script: "sup" });
+    expect(formulaToPlotTextRuns("[C5[13C]H12O6]2+").map((run) => run.text).join("")).toBe("[C513CH12O6]2+");
+  });
+
+  it("emits rich text for assigned formula labels and keeps numeric labels plain", () => {
+    const formulaScene = createSpectrumPlotScene({
+      peaks: assignedPeaks,
+      settings: {
+        ...DEFAULT_PLOT_SETTINGS,
+        labelMode: "formula",
+        labelFilter: "assigned-only",
+      },
+      width: 800,
+      height: 450,
+      theme: "light",
+    });
+    const formulaLabel = formulaScene.shapes.find((shape) => shape.kind === "rich-text");
+
+    expect(formulaLabel?.kind).toBe("rich-text");
+    if (formulaLabel?.kind === "rich-text") {
+      expect(formulaLabel.lines[0].map((run) => run.text).join("")).toBe("[C513CH12O6]+");
+      expect(formulaLabel.lines[0].map((run) => run.text).join("")).not.toContain("\\ce");
+      expect(formulaLabel.lines[0]).toContainEqual({
+        text: "13",
+        script: "sup",
+      });
+      expect(formulaLabel.lines[0]).toContainEqual({ text: "+", script: "sup" });
+    }
+
+    const mzScene = createSpectrumPlotScene({
+      peaks: assignedPeaks,
+      settings: {
+        ...DEFAULT_PLOT_SETTINGS,
+        labelMode: "mz",
+        labelFilter: "assigned-only",
+      },
+      width: 800,
+      height: 450,
+      theme: "light",
+    });
+    const textLabels = mzScene.shapes.filter((shape) => shape.kind === "text").map((shape) => shape.text);
+
+    expect(mzScene.shapes.some((shape) => shape.kind === "rich-text")).toBe(false);
+    expect(textLabels).toContain("180.0634");
+  });
+
+  it("stacks rich formula and plain m/z labels in formula plus m/z mode", () => {
+    const scene = createSpectrumPlotScene({
+      peaks: assignedPeaks,
+      settings: {
+        ...DEFAULT_PLOT_SETTINGS,
+        labelMode: "formula+mz",
+        labelFilter: "assigned-only",
+      },
+      width: 800,
+      height: 450,
+      theme: "light",
+    });
+
+    const richLabel = scene.shapes.find((shape) => shape.kind === "rich-text");
+    const textLabels = scene.shapes.filter((shape) => shape.kind === "text").map((shape) => shape.text);
+
+    expect(richLabel?.kind).toBe("rich-text");
+    expect(textLabels).toContain("180.0634");
+  });
+
+  it("does not emit formula labels when label filtering hides them", () => {
+    const scene = createSpectrumPlotScene({
+      peaks: assignedPeaks,
+      settings: {
+        ...DEFAULT_PLOT_SETTINGS,
+        labelMode: "formula",
+        labelFilter: "none",
+      },
+      width: 800,
+      height: 450,
+      theme: "light",
+    });
+
+    expect(scene.shapes.some((shape) => shape.kind === "rich-text")).toBe(false);
+  });
+
+  it("renders rich isotope labels through the canvas path", () => {
+    const drawnText: string[] = [];
+    const context = {
+      clearRect: () => undefined,
+      fillRect: () => undefined,
+      save: () => undefined,
+      restore: () => undefined,
+      setLineDash: () => undefined,
+      beginPath: () => undefined,
+      moveTo: () => undefined,
+      lineTo: () => undefined,
+      stroke: () => undefined,
+      arc: () => undefined,
+      fill: () => undefined,
+      translate: () => undefined,
+      rotate: () => undefined,
+      fillText: (text: string) => drawnText.push(text),
+      measureText: (text: string) => ({
+        width: text.length * 6,
+        actualBoundingBoxAscent: 8,
+        actualBoundingBoxDescent: 2,
+      }) as TextMetrics,
+      fillStyle: "",
+      font: "",
+      globalAlpha: 1,
+      lineWidth: 1,
+      strokeStyle: "",
+      textAlign: "left",
+      textBaseline: "alphabetic",
+    } as unknown as CanvasRenderingContext2D;
+
+    renderSpectrumPlot(context, {
+      peaks: assignedPeaks,
+      settings: {
+        ...DEFAULT_PLOT_SETTINGS,
+        labelMode: "formula",
+        labelFilter: "assigned-only",
+      },
+      width: 800,
+      height: 450,
+      theme: "light",
+      renderMode: "export",
+    });
+
+    expect(drawnText).toContain("13");
+    expect(drawnText).toContain("C");
+    expect(drawnText).not.toContain("[13C]");
+  });
+});
+
 describe("assignment export", () => {
   it("exports assigned peaks into the spectrum assignment csv", () => {
     const imported = normalizeSpectrumTable(parseCsvText("mz,intensity\n180.063388,1000\n181.000000,50\n"), "assign.csv");
@@ -195,18 +367,18 @@ describe("assignment export", () => {
     expect(csv.split("\n")).toHaveLength(2);
   });
 
-  it("builds an annotated vector PDF export for the current spectrum view", () => {
+  it("builds an annotated vector PDF export with run-level formula labels", () => {
     const imported = normalizeSpectrumTable(parseCsvText("mz,intensity\n180.063388,1000\n181.000000,50\n"), "assign.pdf.csv");
     const hit: FormulaHit = {
-      formula: "C6H12O6",
+      formula: "C5[13C]H12O6",
       composition: { C: 6, H: 12, O: 6 },
       mass: "180.063388104",
       mz: "180.063388104",
       error_da: "0.000000104",
       error_ppm: "0.000577",
-      charge: 1,
-      charge_state: "1+",
-      ion_formula: "[C6H12O6]+",
+      charge: 2,
+      charge_state: "2+",
+      ion_formula: "[C5[13C]H12O6]2+",
     };
 
     const assignments = upsertAssignment([], buildPeakAssignment(imported.peaks[0], hit));
@@ -229,7 +401,12 @@ describe("assignment export", () => {
     expect(pdf).toContain("/BaseFont /Helvetica");
     expect(pdf).toContain("(2 visible peaks) Tj");
     expect(pdf).not.toContain("Threshold");
-    expect(pdf).toContain("(C6H12O6) Tj");
+    expect(pdf.match(/\(\[\) Tj/g)).toHaveLength(1);
+    expect(pdf.match(/\(\]\) Tj/g)).toHaveLength(1);
+    expect(pdf).toContain("(13) Tj");
+    expect(pdf).toContain("(2+) Tj");
+    expect(pdf).not.toContain("\\ce");
+    expect(pdf).not.toContain("(?) Tj");
   });
 
   it("uses a transparent export scene with black axes and axis labels", () => {

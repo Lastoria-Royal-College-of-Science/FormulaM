@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { render } from "svelte/server";
 import ResultsTable from "../src/components/results/ResultsTable.svelte";
+import { MZ_TEX } from "../src/core/math/tex";
 import type { FormulaHit, PeakAssignment } from "../src/core/types";
 
 const sampleHit: FormulaHit = {
-  formula: "C6H12O6",
+  formula: "C5[13C]H12O6",
   composition: { C: 6, H: 12, O: 6 },
   mass: "180.063388098",
   mz: "180.062839518",
@@ -12,7 +13,7 @@ const sampleHit: FormulaHit = {
   error_ppm: "0.000000",
   charge: 1,
   charge_state: "+",
-  ion_formula: "[C6H12O6]+",
+  ion_formula: "[C5[13C]H12O6]+",
 };
 
 const sampleAssignment: PeakAssignment = {
@@ -42,6 +43,10 @@ function makeHit(index: number): FormulaHit {
   };
 }
 
+function texAnnotation(tex: string): string {
+  return `<annotation encoding="application/x-tex">${tex}</annotation>`;
+}
+
 describe("ResultsTable", () => {
   it("shows only the merged formula column for candidate hits", () => {
     const { body } = render(ResultsTable, { props: { results: [sampleHit] } });
@@ -49,19 +54,26 @@ describe("ResultsTable", () => {
     expect(body.match(/<th class="table-head">Formula<\/th>/g)).toHaveLength(1);
     expect(body).not.toContain(">ion_formula<");
     expect(body).not.toContain(">charge<");
-    expect(body).toContain(`<span class="chemical-formula" aria-label="${sampleHit.ion_formula}">`);
-    expect(body).toContain("<sub>6</sub>");
-    expect(body).toContain("<sub>12</sub>");
-    expect(body).toContain("<sup>+</sup>");
+    expect(body).toContain("math-tex-selectable");
+    expect(body).toContain("chemical-formula");
+    expect(body).toContain(`aria-label="${sampleHit.ion_formula}"`);
+    expect(body).toContain('data-selectable-formula="true"');
+    expect(body).toContain('tabindex="0"');
+    expect(body.match(/data-selectable-formula="true"/g)).toHaveLength(1);
+    expect(body).toContain(texAnnotation("\\ce{[C5{}^{13}CH12O6]+}"));
+    expect(body).not.toContain("formula-isotope");
+    expect(body).not.toMatch(/<sub\b/);
+    expect(body).not.toMatch(/<sup\b/);
     expect(body).not.toContain(`<td class="table-cell">${sampleHit.formula}</td>`);
     expect(body).not.toContain(">Assign<");
   });
 
   it("renders sorting controls for the numeric result columns", () => {
-    const { body } = render(ResultsTable, { props: { results: [sampleHit] } });
+    const { body } = render(ResultsTable, { props: { results: [] } });
 
     expect(body).toContain(">Neutral mass<");
-    expect(body).toContain('Predicted <code class="inline-code">m/z</code>');
+    expect(body).toContain(texAnnotation(MZ_TEX));
+    expect(body).not.toContain('data-selectable-formula="true"');
     expect(body).toContain(">Error (Da)<");
     expect(body).toContain(">Error (ppm)<");
     expect(body).toContain('aria-label="Sort by neutral mass"');
@@ -87,7 +99,8 @@ describe("ResultsTable", () => {
     expect(body).toContain('class="results-assign-button-active"');
     expect(body).toContain('aria-pressed="true"');
     expect(body).toContain('i-mdi-minus');
-    expect(body).toContain('Remove [C6H12O6]+ from the selected peak');
+    expect(body).toContain('Remove [C5[13C]H12O6]+ from the selected peak');
+    expect(body).toContain('data-selectable-formula="true"');
   });
 
   it("renders pagination controls and shows the first 10 rows by default", () => {
