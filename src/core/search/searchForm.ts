@@ -1,5 +1,5 @@
-import { createChargeEntry, expandChargeEntries } from "./chargeInput";
 import type { ChargeSpec, SearchFormState } from "../types";
+import { createChargeEntry, expandChargeEntries } from "./chargeInput";
 
 export function createDefaultSearchForm(): SearchFormState {
   return {
@@ -38,7 +38,10 @@ export function hasEnabledTolerance(form: SearchFormState): boolean {
   return form.tolerancePpmEnabled || form.toleranceDaEnabled;
 }
 
-export function selectedTolerance(form: SearchFormState): { tolerancePpm: string | null; toleranceDa: string | null } {
+export function selectedTolerance(form: SearchFormState): {
+  tolerancePpm: string | null;
+  toleranceDa: string | null;
+} {
   const ppmText = form.tolerancePpm.trim();
   const daText = form.toleranceDa.trim();
 

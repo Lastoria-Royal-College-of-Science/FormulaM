@@ -45,11 +45,5 @@ export default defineConfig({
   // project control unless Oxfmt gains first-class UnoCSS-aware sorting.
   sortTailwindcss: false,
 
-  ignorePatterns: [
-    "dist/**",
-    "coverage/**",
-    "playwright-report/**",
-    "test-results/**",
-    "*.min.*",
-  ],
+  ignorePatterns: ["dist/**", "coverage/**", "playwright-report/**", "test-results/**", "*.min.*"],
 });

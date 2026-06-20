@@ -9,10 +9,7 @@
     "default_selection_source_url": "https://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl",
     "radioactive_selection_source": "IUPAC/CIAAW Atomic Weights of the Elements 2023; bracketed values denote mass numbers of longest-lived isotopes for elements with no stable nuclides",
     "radioactive_selection_source_url": "https://iupac.qmul.ac.uk/AtWt/",
-    "atomic_number_range_with_complete_bundled_isotope_records": [
-      1,
-      92
-    ],
+    "atomic_number_range_with_complete_bundled_isotope_records": [1, 92],
     "isotope_record_count": 2696,
     "default_element_count": 118,
     "alias_count": 2,

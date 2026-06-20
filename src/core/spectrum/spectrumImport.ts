@@ -1,5 +1,9 @@
-import { columnCountForTable, normalizeSpectrumTable, suggestSpectrumSelection } from "./spectrumNormalize";
 import type { SpectrumImportResult, SpectrumImportSheet, SpectrumImportSource } from "../types";
+import {
+  columnCountForTable,
+  normalizeSpectrumTable,
+  suggestSpectrumSelection,
+} from "./spectrumNormalize";
 
 function fileExtension(fileName: string): string {
   const lastDot = fileName.lastIndexOf(".");
@@ -92,7 +96,8 @@ async function loadExcelImportSource(file: File): Promise<SpectrumImportSource> 
   const [{ read, utils }, buffer] = await Promise.all([import("xlsx"), file.arrayBuffer()]);
   const workbook = read(buffer, { type: "array", dense: true });
   const sheetNames = workbook.SheetNames;
-  if (!sheetNames.length) throw new Error(`Spectrum import failed: ${file.name} does not contain any worksheets.`);
+  if (!sheetNames.length)
+    throw new Error(`Spectrum import failed: ${file.name} does not contain any worksheets.`);
 
   const sheets = sheetNames.map((sheetName) => {
     const table = utils.sheet_to_json(workbook.Sheets[sheetName], {
@@ -113,16 +118,20 @@ export async function loadSpectrumImportSource(file: File): Promise<SpectrumImpo
   const extension = fileExtension(file.name);
   if (extension === ".csv") return loadCsvImportSource(file);
   if (extension === ".xlsx" || extension === ".xls") return loadExcelImportSource(file);
-  throw new Error(`Spectrum import failed: unsupported file type ${extension || "(no extension)"}.`);
+  throw new Error(
+    `Spectrum import failed: unsupported file type ${extension || "(no extension)"}.`,
+  );
 }
 
 export async function importSpectrumFile(file: File): Promise<SpectrumImportResult> {
   const source = await loadSpectrumImportSource(file);
   const firstSheet = source.sheets[0];
-  if (!firstSheet) throw new Error(`Spectrum import failed: ${file.name} does not contain any readable tables.`);
+  if (!firstSheet)
+    throw new Error(`Spectrum import failed: ${file.name} does not contain any readable tables.`);
 
   return normalizeSpectrumTable(firstSheet.table, {
-    sourceName: source.sheets.length > 1 ? `${source.sourceName} / ${firstSheet.name}` : source.sourceName,
+    sourceName:
+      source.sheets.length > 1 ? `${source.sourceName} / ${firstSheet.name}` : source.sourceName,
     hasHeaderRow: firstSheet.suggestedHasHeaderRow,
     mzColumnIndex: firstSheet.suggestedMzColumnIndex,
     intensityColumnIndex: firstSheet.suggestedIntensityColumnIndex,

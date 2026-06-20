@@ -1,31 +1,27 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
 {
-	"name": "Node.js & TypeScript",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/typescript-node:4-24-trixie",
-	"features": {
-		"ghcr.io/devcontainers/features/copilot-cli:1": {},
-		"ghcr.io/devcontainers/features/github-cli:1": {}
-	},
+  "name": "Node.js & TypeScript",
+  // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:4-24-trixie",
+  "features": {
+    "ghcr.io/devcontainers/features/copilot-cli:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
 
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
+  // Features to add to the dev container. More info: https://containers.dev/features.
+  // "features": {},
 
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  // "forwardPorts": [],
 
-	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "npm ci",
+  // Use 'postCreateCommand' to run commands after the container is created.
+  "postCreateCommand": "npm ci",
 
-	// Configure tool-specific properties.
-	"customizations": {
+  // Configure tool-specific properties.
+  "customizations": {
     "codespaces": {
-      "openFiles": [
-        "README.md",
-        "CONTRIBUTING.md",
-        "package.json"
-      ]
+      "openFiles": ["README.md", "CONTRIBUTING.md", "package.json"]
     },
     "vscode": {
       "extensions": [
@@ -39,8 +35,8 @@
     }
   },
 
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "root",
+  // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+  // "remoteUser": "root",
 
   // Use 'updateContentCommand' to run commands to update content in the container. For example, you can use this to update dependencies when the container is updated.
   "updateContentCommand": "npm install",

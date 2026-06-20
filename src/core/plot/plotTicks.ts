@@ -47,7 +47,10 @@ function resolveFallbackXDomain(peaks: readonly SpectrumPeak[]): { xMin: number;
   return { xMin, xMax };
 }
 
-function resolveXDomain(peaks: readonly SpectrumPeak[], settings: PlotSettings): { xMin: number; xMax: number } {
+function resolveXDomain(
+  peaks: readonly SpectrumPeak[],
+  settings: PlotSettings,
+): { xMin: number; xMax: number } {
   const fallback = resolveFallbackXDomain(peaks);
   let xMin = Number.isFinite(settings.xMin) ? Number(settings.xMin) : fallback.xMin;
   let xMax = Number.isFinite(settings.xMax) ? Number(settings.xMax) : fallback.xMax;
@@ -71,8 +74,15 @@ export function createPlotSettings(peaks: readonly SpectrumPeak[]): PlotSettings
   };
 }
 
-export function resolveAutoYMax(peaks: readonly SpectrumPeak[], xMin: number, xMax: number): number {
-  const localMax = filterPeaksInRange(peaks, xMin, xMax).reduce((max, peak) => Math.max(max, peak.relativeIntensity), 0);
+export function resolveAutoYMax(
+  peaks: readonly SpectrumPeak[],
+  xMin: number,
+  xMax: number,
+): number {
+  const localMax = filterPeaksInRange(peaks, xMin, xMax).reduce(
+    (max, peak) => Math.max(max, peak.relativeIntensity),
+    0,
+  );
   return localMax > 0 ? localMax * 1.1 : 100;
 }
 
@@ -89,7 +99,12 @@ export function computeAutoMajorTickSpacing(min: number, max: number): number {
   return tickSpacing;
 }
 
-export function resolveMajorTickSpacing(min: number, max: number, spacing?: number, autoTicks = true): number {
+export function resolveMajorTickSpacing(
+  min: number,
+  max: number,
+  spacing?: number,
+  autoTicks = true,
+): number {
   if (autoTicks || !spacing || spacing <= 0) return computeAutoMajorTickSpacing(min, max);
   return spacing;
 }
@@ -100,7 +115,10 @@ export function resolveThresholdPercent(settings: PlotSettings): number {
     : DEFAULT_PLOT_SETTINGS.thresholdPercent;
 }
 
-export function resolvePlotAutoValues(peaks: readonly SpectrumPeak[], settings: PlotSettings): PlotAutoValues {
+export function resolvePlotAutoValues(
+  peaks: readonly SpectrumPeak[],
+  settings: PlotSettings,
+): PlotAutoValues {
   const { xMin, xMax } = resolveXDomain(peaks, settings);
   return {
     xMin,
@@ -110,18 +128,28 @@ export function resolvePlotAutoValues(peaks: readonly SpectrumPeak[], settings: 
   };
 }
 
-export function resolvePlotDomain(peaks: readonly SpectrumPeak[], settings: PlotSettings): { xMin: number; xMax: number; yMax: number } {
+export function resolvePlotDomain(
+  peaks: readonly SpectrumPeak[],
+  settings: PlotSettings,
+): { xMin: number; xMax: number; yMax: number } {
   const { xMin, xMax } = resolveXDomain(peaks, settings);
   const autoYMax = resolveAutoYMax(peaks, xMin, xMax);
-  const yMax = settings.yScale === "fixed" && Number.isFinite(settings.yMax) && Number(settings.yMax) > 0
-    ? Number(settings.yMax)
-    : autoYMax;
+  const yMax =
+    settings.yScale === "fixed" && Number.isFinite(settings.yMax) && Number(settings.yMax) > 0
+      ? Number(settings.yMax)
+      : autoYMax;
 
   return { xMin, xMax, yMax };
 }
 
-export function computeMajorTicks(min: number, max: number, spacing?: number, autoTicks = true): number[] {
-  if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) return [min, max].filter(Number.isFinite);
+export function computeMajorTicks(
+  min: number,
+  max: number,
+  spacing?: number,
+  autoTicks = true,
+): number[] {
+  if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min)
+    return [min, max].filter(Number.isFinite);
   const resolvedSpacing = resolveMajorTickSpacing(min, max, spacing, autoTicks);
   const firstTick = Math.ceil(min / resolvedSpacing) * resolvedSpacing;
   const ticks: number[] = [];
@@ -135,7 +163,14 @@ export function computeMajorTicks(min: number, max: number, spacing?: number, au
 }
 
 export function computeMinorTicks(min: number, max: number, majorSpacing: number): number[] {
-  if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min || !Number.isFinite(majorSpacing) || majorSpacing <= 0) return [];
+  if (
+    !Number.isFinite(min) ||
+    !Number.isFinite(max) ||
+    max <= min ||
+    !Number.isFinite(majorSpacing) ||
+    majorSpacing <= 0
+  )
+    return [];
   const spacing = majorSpacing / 10;
   const resolution = spacing * 1e-6;
   const ticks: number[] = [];
@@ -147,12 +182,17 @@ export function computeMinorTicks(min: number, max: number, majorSpacing: number
   return ticks;
 }
 
-export function filterPeaksInRange(peaks: readonly SpectrumPeak[], xMin: number, xMax: number): SpectrumPeak[] {
+export function filterPeaksInRange(
+  peaks: readonly SpectrumPeak[],
+  xMin: number,
+  xMax: number,
+): SpectrumPeak[] {
   return peaks.filter((peak) => peak.mz >= xMin && peak.mz <= xMax);
 }
 
 export function formatTickValue(value: number, spacing?: number): string {
   if (!Number.isFinite(value)) return "";
-  const decimals = spacing && spacing < 1 ? Math.min(6, Math.ceil(Math.abs(Math.log10(spacing)))) : 0;
+  const decimals =
+    spacing && spacing < 1 ? Math.min(6, Math.ceil(Math.abs(Math.log10(spacing)))) : 0;
   return value.toFixed(decimals);
 }

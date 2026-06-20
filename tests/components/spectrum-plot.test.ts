@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
 import { render } from "svelte/server";
+import { describe, expect, it } from "vitest";
+
 import SpectrumPlot from "../../src/components/spectrum/SpectrumPlot.svelte";
 import { DEFAULT_PLOT_SETTINGS } from "../../src/core/plot/plotTicks";
 import type { SpectrumPeak } from "../../src/core/types";

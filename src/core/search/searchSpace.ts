@@ -8,7 +8,10 @@ export const DEFAULT_ROWS = [
   { element: "O", lower: 0, upper: 20 },
 ] as const;
 
-export function createInitialRows(massIndex: MassIndex): { rows: FormulaSpaceRow[]; nextRowId: number } {
+export function createInitialRows(massIndex: MassIndex): {
+  rows: FormulaSpaceRow[];
+  nextRowId: number;
+} {
   const rows: FormulaSpaceRow[] = [];
   let nextRowId = 0;
   for (const row of DEFAULT_ROWS) {
@@ -43,7 +46,10 @@ export function makeRow(
   };
 }
 
-function countRowsByElement(rows: FormulaSpaceRow[], exceptRowId: number | null = null): Map<string, number> {
+function countRowsByElement(
+  rows: FormulaSpaceRow[],
+  exceptRowId: number | null = null,
+): Map<string, number> {
   const counts = new Map<string, number>();
   for (const row of rows) {
     if (row.id === exceptRowId) continue;
@@ -52,7 +58,11 @@ function countRowsByElement(rows: FormulaSpaceRow[], exceptRowId: number | null 
   return counts;
 }
 
-export function elementOptionsForRow(rows: FormulaSpaceRow[], massIndex: MassIndex, rowId: number | null = null): string[] {
+export function elementOptionsForRow(
+  rows: FormulaSpaceRow[],
+  massIndex: MassIndex,
+  rowId: number | null = null,
+): string[] {
   const counts = countRowsByElement(rows, rowId);
   const options: string[] = [];
   for (const symbol of massIndex.elementSymbols) {
@@ -69,7 +79,11 @@ export function firstAvailableElement(rows: FormulaSpaceRow[], massIndex: MassIn
   return options[0] ?? "H";
 }
 
-function usedIsotopesForElement(rows: FormulaSpaceRow[], element: string, exceptRowId: number | null = null): Set<string> {
+function usedIsotopesForElement(
+  rows: FormulaSpaceRow[],
+  element: string,
+  exceptRowId: number | null = null,
+): Set<string> {
   const used = new Set<string>();
   for (const row of rows) {
     if (row.id !== exceptRowId && row.element === element) used.add(row.isotope);
@@ -77,7 +91,12 @@ function usedIsotopesForElement(rows: FormulaSpaceRow[], element: string, except
   return used;
 }
 
-export function chooseUnusedIsotope(rows: FormulaSpaceRow[], massIndex: MassIndex, element: string, exceptRowId: number | null = null): string {
+export function chooseUnusedIsotope(
+  rows: FormulaSpaceRow[],
+  massIndex: MassIndex,
+  element: string,
+  exceptRowId: number | null = null,
+): string {
   const options = massIndex.isotopeOptions[element] || [];
   if (!options.length) throw new Error(`No isotopes are available for ${element}.`);
   const used = usedIsotopesForElement(rows, element, exceptRowId);
@@ -86,7 +105,12 @@ export function chooseUnusedIsotope(rows: FormulaSpaceRow[], massIndex: MassInde
   return options.find((label) => !used.has(label)) || options[0] || defaultLabel;
 }
 
-export function enforceUniqueIsotopes(rows: FormulaSpaceRow[], massIndex: MassIndex, changedRowId: number, previousIsotope: string | null = null): FormulaSpaceRow[] {
+export function enforceUniqueIsotopes(
+  rows: FormulaSpaceRow[],
+  massIndex: MassIndex,
+  changedRowId: number,
+  previousIsotope: string | null = null,
+): FormulaSpaceRow[] {
   const next = rows.map((row) => ({ ...row }));
   const changedRow = next.find((row) => row.id === changedRowId);
   if (!changedRow) return next;
@@ -96,9 +120,18 @@ export function enforceUniqueIsotopes(rows: FormulaSpaceRow[], massIndex: MassIn
     changedRow.isotope = chooseUnusedIsotope(next, massIndex, changedRow.element, changedRow.id);
   }
 
-  const duplicate = next.find((row) => row.id !== changedRow.id && row.element === changedRow.element && row.isotope === changedRow.isotope);
+  const duplicate = next.find(
+    (row) =>
+      row.id !== changedRow.id &&
+      row.element === changedRow.element &&
+      row.isotope === changedRow.isotope,
+  );
   if (duplicate) {
-    if (previousIsotope && options.includes(previousIsotope) && previousIsotope !== changedRow.isotope) {
+    if (
+      previousIsotope &&
+      options.includes(previousIsotope) &&
+      previousIsotope !== changedRow.isotope
+    ) {
       duplicate.isotope = previousIsotope;
     } else {
       duplicate.isotope = chooseUnusedIsotope(next, massIndex, duplicate.element, duplicate.id);
@@ -126,11 +159,15 @@ export function searchKeyForRow(row: FormulaSpaceRow, massIndex: MassIndex): str
 
 function parseNonNegativeInteger(value: unknown, label: string, rowNumber: number): number {
   const number = Number(value);
-  if (!Number.isInteger(number) || number < 0) throw new Error(`Row ${rowNumber}: ${label} must be a non-negative integer.`);
+  if (!Number.isInteger(number) || number < 0)
+    throw new Error(`Row ${rowNumber}: ${label} must be a non-negative integer.`);
   return number;
 }
 
-export function validateAndBuildElements(rows: FormulaSpaceRow[], massIndex: MassIndex): SearchElements {
+export function validateAndBuildElements(
+  rows: FormulaSpaceRow[],
+  massIndex: MassIndex,
+): SearchElements {
   if (!rows.length) throw new Error("Enter at least one element bound.");
 
   const rowsByElement = new Map<string, number>();
@@ -141,21 +178,32 @@ export function validateAndBuildElements(rows: FormulaSpaceRow[], massIndex: Mas
     const row = rows[index];
     if (!row) continue;
     const rowNumber = index + 1;
-    if (!massIndex.defaultIsotopeBySymbol[row.element]) throw new Error(`Row ${rowNumber}: unknown element ${row.element}.`);
+    if (!massIndex.defaultIsotopeBySymbol[row.element])
+      throw new Error(`Row ${rowNumber}: unknown element ${row.element}.`);
     const isotopeOptions = massIndex.isotopeOptions[row.element] || [];
-    if (!isotopeOptions.includes(row.isotope)) throw new Error(`Row ${rowNumber}: isotope ${row.isotope} is not available for element ${row.element}.`);
+    if (!isotopeOptions.includes(row.isotope))
+      throw new Error(
+        `Row ${rowNumber}: isotope ${row.isotope} is not available for element ${row.element}.`,
+      );
 
     rowsByElement.set(row.element, (rowsByElement.get(row.element) || 0) + 1);
-    if ((rowsByElement.get(row.element) || 0) > isotopeOptions.length) throw new Error(`Row ${rowNumber}: element ${row.element} cannot appear more than ${isotopeOptions.length} time(s).`);
+    if ((rowsByElement.get(row.element) || 0) > isotopeOptions.length)
+      throw new Error(
+        `Row ${rowNumber}: element ${row.element} cannot appear more than ${isotopeOptions.length} time(s).`,
+      );
 
     const elementIsotopes = usedIsotopes.get(row.element) || new Set<string>();
-    if (elementIsotopes.has(row.isotope)) throw new Error(`Row ${rowNumber}: isotope ${row.isotope} is already selected for element ${row.element}.`);
+    if (elementIsotopes.has(row.isotope))
+      throw new Error(
+        `Row ${rowNumber}: isotope ${row.isotope} is already selected for element ${row.element}.`,
+      );
     elementIsotopes.add(row.isotope);
     usedIsotopes.set(row.element, elementIsotopes);
 
     const lower = parseNonNegativeInteger(row.lower, "lower limit", rowNumber);
     const upper = parseNonNegativeInteger(row.upper, "upper limit", rowNumber);
-    if (lower > upper) throw new Error(`Row ${rowNumber}: lower limit must be less than or equal to upper limit.`);
+    if (lower > upper)
+      throw new Error(`Row ${rowNumber}: lower limit must be less than or equal to upper limit.`);
 
     const key = searchKeyForRow(row, massIndex);
     if (key in elements) throw new Error(`Row ${rowNumber}: duplicate search key ${key}.`);

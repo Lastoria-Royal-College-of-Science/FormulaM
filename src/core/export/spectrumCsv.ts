@@ -1,6 +1,6 @@
+import type { SpectrumPeak } from "../types";
 import { csvEscape } from "./csv";
 import { downloadBlob } from "./download";
-import type { SpectrumPeak } from "../types";
 
 export function assignmentsToCsv(peaks: SpectrumPeak[], includeUnassigned = false): string {
   const headers = [
@@ -33,7 +33,13 @@ export function assignmentsToCsv(peaks: SpectrumPeak[], includeUnassigned = fals
   return [headers, ...rows].map((row) => row.map(csvEscape).join(",")).join("\n");
 }
 
-export function downloadAssignmentsCsv(peaks: SpectrumPeak[], includeUnassigned = false, filename = "spectrum_assignments.csv"): void {
-  const blob = new Blob([assignmentsToCsv(peaks, includeUnassigned)], { type: "text/csv;charset=utf-8" });
+export function downloadAssignmentsCsv(
+  peaks: SpectrumPeak[],
+  includeUnassigned = false,
+  filename = "spectrum_assignments.csv",
+): void {
+  const blob = new Blob([assignmentsToCsv(peaks, includeUnassigned)], {
+    type: "text/csv;charset=utf-8",
+  });
   downloadBlob(blob, filename);
 }

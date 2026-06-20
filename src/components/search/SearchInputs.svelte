@@ -1,10 +1,16 @@
 <script lang="ts">
   import { tick } from "svelte";
+
+  import { MZ_TEX, PPM_ERROR_TEX } from "../../core/math/tex";
+  import {
+    canCommitChargeEntryText,
+    formatChargeEntry,
+    formatSignedChargeText,
+    isChargeDraftText,
+  } from "../../core/search/chargeInput";
+  import type { SearchFormState } from "../../core/types";
   import MathTex from "../ui/MathTex.svelte";
   import ToggleSwitch from "../ui/ToggleSwitch.svelte";
-  import { MZ_TEX, PPM_ERROR_TEX } from "../../core/math/tex";
-  import { canCommitChargeEntryText, formatChargeEntry, formatSignedChargeText, isChargeDraftText } from "../../core/search/chargeInput";
-  import type { SearchFormState } from "../../core/types";
 
   export let form: SearchFormState;
   export let disabled = false;
@@ -89,14 +95,16 @@
   <h2 class="mt-0">Search inputs</h2>
   <div class="grid grid-cols-3 gap-4 lt-md:grid-cols-1">
     <div class="block">
-      <span class="field-title">Observed <MathTex tex={MZ_TEX} ariaLabel="m/z" fallback="m/z" /></span>
+      <span class="field-title"
+        >Observed <MathTex tex={MZ_TEX} ariaLabel="m/z" fallback="m/z" /></span
+      >
       <input
         class="field-control"
         type="text"
         inputmode="decimal"
         value={form.mz}
         aria-label="Observed m/z"
-        disabled={disabled}
+        {disabled}
         on:input={(event) => onChange({ mz: (event.currentTarget as HTMLInputElement).value })}
       />
     </div>
@@ -104,7 +112,12 @@
       <div class="mb-1.5">
         <div class="field-title m-0 flex items-center gap-1.25">
           <span>Explicit charge</span>
-          <button class="help-button" type="button" aria-label="Explicit charge help" on:click={openChargeHelp}>
+          <button
+            class="help-button"
+            type="button"
+            aria-label="Explicit charge help"
+            on:click={openChargeHelp}
+          >
             <span class="help-button-icon i-mdi-help" aria-hidden="true"></span>
           </button>
         </div>
@@ -115,11 +128,16 @@
           class="charge-polarity-switch"
           role="switch"
           aria-checked={form.chargeSign === "+"}
-          aria-label={form.chargeSign === "+" ? "Charge polarity is positive. Click to switch to negative charges." : "Charge polarity is negative. Click to switch to positive charges."}
-          disabled={disabled}
+          aria-label={form.chargeSign === "+"
+            ? "Charge polarity is positive. Click to switch to negative charges."
+            : "Charge polarity is negative. Click to switch to positive charges."}
+          {disabled}
           on:click={toggleChargeSign}
         >
-          <span class="charge-polarity-thumb" class:charge-polarity-thumb-positive={form.chargeSign === "+"}></span>
+          <span
+            class="charge-polarity-thumb"
+            class:charge-polarity-thumb-positive={form.chargeSign === "+"}
+          ></span>
           <span
             class="charge-polarity-mark charge-polarity-mark-negative"
             class:charge-polarity-mark-active={form.chargeSign === "-"}
@@ -148,7 +166,7 @@
                       type="text"
                       inputmode="numeric"
                       value={form.chargeEditText}
-                      disabled={disabled}
+                      {disabled}
                       aria-label={`Edit ${signedChargeText(entry.text)}`}
                       on:input={(event) => {
                         const value = (event.currentTarget as HTMLInputElement).value;
@@ -173,7 +191,7 @@
                     type="button"
                     class="charge-chip-target"
                     aria-label={`Edit ${signedChargeText(entry.text)}`}
-                    disabled={disabled}
+                    {disabled}
                     on:click={() => onStartChargeEdit(entry.id)}
                   >
                     <span class="charge-chip-value">{formatChargeEntry(entry)}</span>
@@ -182,7 +200,7 @@
                     type="button"
                     class="charge-chip-action"
                     aria-label={`Remove ${signedChargeText(entry.text)}`}
-                    disabled={disabled}
+                    {disabled}
                     on:click={() => onRemoveChargeEntry(entry.id)}
                   >
                     <span class="charge-chip-icon i-codex-cross" aria-hidden="true"></span>
@@ -198,13 +216,18 @@
               inputmode="numeric"
               placeholder="n or min-max"
               value={form.chargeInputText}
-              disabled={disabled}
+              {disabled}
               aria-label="Add charge magnitude or range"
               on:input={(event) => {
                 const value = (event.currentTarget as HTMLInputElement).value;
                 if (isChargeDraftText(value)) onChargeInputTextChange(value);
               }}
-              on:keydown={(event) => handleCommitKeydown(event, onCommitChargeInput, canCommitChargeEntryText(form.chargeInputText))}
+              on:keydown={(event) =>
+                handleCommitKeydown(
+                  event,
+                  onCommitChargeInput,
+                  canCommitChargeEntryText(form.chargeInputText),
+                )}
             />
             {#if form.chargeInputText}
               <button
@@ -225,7 +248,12 @@
       <div class="mb-1.5">
         <div class="field-title m-0 flex items-center gap-1.25">
           <span>Tolerance ppm</span>
-          <button class="help-button" type="button" aria-label="Tolerance ppm help" on:click={openPpmHelp}>
+          <button
+            class="help-button"
+            type="button"
+            aria-label="Tolerance ppm help"
+            on:click={openPpmHelp}
+          >
             <span class="help-button-icon i-mdi-help" aria-hidden="true"></span>
           </button>
         </div>
@@ -234,7 +262,7 @@
         <ToggleSwitch
           ariaLabel="Enable ppm tolerance"
           checked={form.tolerancePpmEnabled}
-          disabled={disabled}
+          {disabled}
           onChange={(value) => onChange({ tolerancePpmEnabled: value })}
         />
         <input
@@ -245,7 +273,8 @@
           value={form.tolerancePpm}
           aria-label="Tolerance ppm"
           disabled={disabled || !form.tolerancePpmEnabled}
-          on:input={(event) => onChange({ tolerancePpm: (event.currentTarget as HTMLInputElement).value })}
+          on:input={(event) =>
+            onChange({ tolerancePpm: (event.currentTarget as HTMLInputElement).value })}
         />
       </div>
     </div>
@@ -257,7 +286,7 @@
         <ToggleSwitch
           ariaLabel="Enable Da tolerance"
           checked={form.toleranceDaEnabled}
-          disabled={disabled}
+          {disabled}
           onChange={(value) => onChange({ toleranceDaEnabled: value })}
         />
         <input
@@ -268,7 +297,8 @@
           value={form.toleranceDa}
           aria-label="Tolerance Da"
           disabled={disabled || !form.toleranceDaEnabled}
-          on:input={(event) => onChange({ toleranceDa: (event.currentTarget as HTMLInputElement).value })}
+          on:input={(event) =>
+            onChange({ toleranceDa: (event.currentTarget as HTMLInputElement).value })}
         />
       </div>
     </div>
@@ -282,23 +312,45 @@
         step="10"
         value={form.maxResults}
         aria-label="Max results"
-        disabled={disabled}
-        on:input={(event) => onChange({ maxResults: Number((event.currentTarget as HTMLInputElement).value) })}
+        {disabled}
+        on:input={(event) =>
+          onChange({ maxResults: Number((event.currentTarget as HTMLInputElement).value) })}
       />
     </div>
   </div>
-  <dialog class="help-dialog rounded-2 border border-solid border-border bg-surface p-4 text-text shadow-app" bind:this={chargeHelpDialog}>
+  <dialog
+    class="help-dialog rounded-2 border border-solid border-border bg-surface p-4 text-text shadow-app"
+    bind:this={chargeHelpDialog}
+  >
     <form method="dialog" class="m-0">
       <h3 class="mt-0">Explicit charge</h3>
-      <p>Enter <code class="inline-code">n</code> for a single charge or <code class="inline-code">min-max</code> for an inclusive range.</p>
-      <p>All tags share the same global <code class="inline-code">+</code> or <code class="inline-code">-</code> sign, and every range expands through its upper limit during search.</p>
+      <p>
+        Enter <code class="inline-code">n</code> for a single charge or
+        <code class="inline-code">min-max</code> for an inclusive range.
+      </p>
+      <p>
+        All tags share the same global <code class="inline-code">+</code> or
+        <code class="inline-code">-</code> sign, and every range expands through its upper limit during
+        search.
+      </p>
       <button class="secondary-action">Close</button>
     </form>
   </dialog>
-  <dialog class="help-dialog rounded-2 border border-solid border-border bg-surface p-4 text-text shadow-app" bind:this={ppmHelpDialog}>
+  <dialog
+    class="help-dialog rounded-2 border border-solid border-border bg-surface p-4 text-text shadow-app"
+    bind:this={ppmHelpDialog}
+  >
     <form method="dialog" class="m-0">
       <h3 class="mt-0">Tolerance ppm</h3>
-      <div class="help-equation"><MathTex displayMode={true} tex={PPM_ERROR_TEX} ariaLabel="ppm error equals predicted m/z minus observed m/z divided by observed m/z times 1,000,000" fallback="ppm error = (predicted_mz - observed_mz) / observed_mz * 1,000,000" selectionLabel="Click to select equation" /></div>
+      <div class="help-equation">
+        <MathTex
+          displayMode={true}
+          tex={PPM_ERROR_TEX}
+          ariaLabel="ppm error equals predicted m/z minus observed m/z divided by observed m/z times 1,000,000"
+          fallback="ppm error = (predicted_mz - observed_mz) / observed_mz * 1,000,000"
+          selectionLabel="Click to select equation"
+        />
+      </div>
       <p>A formula is accepted if the absolute ppm error is within the selected tolerance.</p>
       <button class="secondary-action">Close</button>
     </form>

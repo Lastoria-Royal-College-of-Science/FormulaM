@@ -1,5 +1,5 @@
-import { normalizeSpeciesLabel } from "./formula";
 import type { AliasRecord, IsotopeRecord, MassIndex, MassPayload } from "../types";
+import { normalizeSpeciesLabel } from "./formula";
 
 export const MASS_DATA_CANDIDATES = [
   "data/masses.json",
@@ -34,14 +34,16 @@ function formatIsotopeDisplayLabel(label: string): string {
   return match ? `${superscriptDigits(match[1])}${match[2]}` : label;
 }
 
-export async function loadMassPayload(urls: readonly string[] = MASS_DATA_CANDIDATES): Promise<{ payload: MassPayload; url: string }> {
+export async function loadMassPayload(
+  urls: readonly string[] = MASS_DATA_CANDIDATES,
+): Promise<{ payload: MassPayload; url: string }> {
   const errors: string[] = [];
   for (const path of urls) {
     const url = resolveAssetPath(path);
     try {
       const response = await fetch(url, { cache: "force-cache" });
       if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-      const payload = await response.json() as MassPayload;
+      const payload = (await response.json()) as MassPayload;
       return { payload, url };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -81,12 +83,16 @@ export function buildMassIndex(payload: MassPayload): MassIndex {
     if (!(symbol in isotopeOptions)) continue;
     const canonical = normalizeSpeciesLabel(label);
     const isDefault = canonical === defaultIsotopeBySymbol[symbol];
-    if (record.abundance !== null && record.abundance !== undefined || isDefault) {
+    if ((record.abundance !== null && record.abundance !== undefined) || isDefault) {
       isotopeOptions[symbol]?.push(canonical);
     }
   }
   for (const [symbol, labels] of Object.entries(isotopeOptions)) {
-    labels.sort((a, b) => Number((isotopes[a] as IsotopeRecord | undefined)?.mass_number ?? 0) - Number((isotopes[b] as IsotopeRecord | undefined)?.mass_number ?? 0));
+    labels.sort(
+      (a, b) =>
+        Number((isotopes[a] as IsotopeRecord | undefined)?.mass_number ?? 0) -
+        Number((isotopes[b] as IsotopeRecord | undefined)?.mass_number ?? 0),
+    );
     isotopeOptions[symbol] = labels;
   }
 
@@ -112,7 +118,9 @@ export function formatIsotopeOption(massIndex: MassIndex, label: string): string
   const record = massIndex.isotopes[canonical];
   const displayLabel = formatIsotopeDisplayLabel(canonical);
   if (!record) return displayLabel;
-  return massIndex.defaultIsotopeBySymbol[record.symbol] === canonical ? `${displayLabel} (default)` : displayLabel;
+  return massIndex.defaultIsotopeBySymbol[record.symbol] === canonical
+    ? `${displayLabel} (default)`
+    : displayLabel;
 }
 
 export function elementCapacity(massIndex: MassIndex, symbol: string): number {

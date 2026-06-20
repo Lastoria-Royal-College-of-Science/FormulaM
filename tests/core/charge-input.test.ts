@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import {
   canCommitChargeEntryText,
   createChargeEntry,
@@ -46,6 +47,8 @@ describe("charge input helpers", () => {
 
   it("accepts wide charge ranges that remain numerically valid", () => {
     expect(canCommitChargeEntryText("114-514")).toBe(true);
-    expect(expandChargeEntries([createChargeEntry("charge-114-514", "114-514")], "+")).toHaveLength(401);
+    expect(expandChargeEntries([createChargeEntry("charge-114-514", "114-514")], "+")).toHaveLength(
+      401,
+    );
   });
 });

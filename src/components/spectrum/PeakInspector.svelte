@@ -1,8 +1,8 @@
 <script lang="ts">
-  import ChemicalFormula from "../ui/ChemicalFormula.svelte";
-  import MathTex from "../ui/MathTex.svelte";
   import { MZ_TEX } from "../../core/math/tex";
   import type { PeakAssignment, SpectrumPeak } from "../../core/types";
+  import ChemicalFormula from "../ui/ChemicalFormula.svelte";
+  import MathTex from "../ui/MathTex.svelte";
 
   export let selectedPeak: SpectrumPeak | null = null;
   export let assignment: PeakAssignment | null = null;
@@ -16,24 +16,58 @@
     <div class="grid grid-cols-2 gap-4 lt-md:grid-cols-1">
       <div class="rounded-2 border border-solid border-border bg-surface-2 px-3.5 py-3">
         <div class="text-xs uppercase tracking-[0.14em] text-muted">Selected peak</div>
-        <div class="mt-2 text-sm"><strong class="text-text">Observed <MathTex tex={MZ_TEX} ariaLabel="m/z" fallback="m/z" />:</strong> {selectedPeak.mz.toFixed(6)}</div>
-        <div class="mt-1 text-sm"><strong class="text-text">Intensity:</strong> {selectedPeak.intensity}</div>
-        <div class="mt-1 text-sm"><strong class="text-text">Relative intensity:</strong> {selectedPeak.relativeIntensity.toFixed(2)}%</div>
+        <div class="mt-2 text-sm">
+          <strong class="text-text"
+            >Observed <MathTex tex={MZ_TEX} ariaLabel="m/z" fallback="m/z" />:</strong
+          >
+          {selectedPeak.mz.toFixed(6)}
+        </div>
+        <div class="mt-1 text-sm">
+          <strong class="text-text">Intensity:</strong>
+          {selectedPeak.intensity}
+        </div>
+        <div class="mt-1 text-sm">
+          <strong class="text-text">Relative intensity:</strong>
+          {selectedPeak.relativeIntensity.toFixed(2)}%
+        </div>
       </div>
 
       <div class="rounded-2 border border-solid border-border bg-surface-2 px-3.5 py-3">
         <div class="text-xs uppercase tracking-[0.14em] text-muted">Assignment</div>
         {#if assignment}
-          <div class="mt-2 text-sm"><strong class="text-text">Formula:</strong> <ChemicalFormula formula={assignment.ionFormula ?? assignment.formula} /></div>
-          <div class="mt-1 text-sm"><strong class="text-text">Predicted <MathTex tex={MZ_TEX} ariaLabel="m/z" fallback="m/z" />:</strong> {assignment.predictedMz?.toFixed(6) ?? "n/a"}</div>
-          <div class="mt-1 text-sm"><strong class="text-text">Error:</strong> {assignment.errorPpm?.toFixed(4) ?? "n/a"} ppm</div>
-          <button class="secondary-action mt-3" type="button" on:click={() => onRemoveAssignment(selectedPeak.id)}>Remove assignment</button>
+          <div class="mt-2 text-sm">
+            <strong class="text-text">Formula:</strong>
+            <ChemicalFormula formula={assignment.ionFormula ?? assignment.formula} />
+          </div>
+          <div class="mt-1 text-sm">
+            <strong class="text-text"
+              >Predicted <MathTex tex={MZ_TEX} ariaLabel="m/z" fallback="m/z" />:</strong
+            >
+            {assignment.predictedMz?.toFixed(6) ?? "n/a"}
+          </div>
+          <div class="mt-1 text-sm">
+            <strong class="text-text">Error:</strong>
+            {assignment.errorPpm?.toFixed(4) ?? "n/a"} ppm
+          </div>
+          <button
+            class="secondary-action mt-3"
+            type="button"
+            on:click={() => onRemoveAssignment(selectedPeak.id)}>Remove assignment</button
+          >
         {:else}
-          <p class="mb-0 mt-2 text-sm text-muted">No formula assigned yet. Select a candidate hit below and click Assign.</p>
+          <p class="mb-0 mt-2 text-sm text-muted">
+            No formula assigned yet. Select a candidate hit below and click Assign.
+          </p>
         {/if}
       </div>
     </div>
   {:else}
-    <p class="mb-0 text-sm text-muted">Click a peak in the spectrum plot to populate FormulaM <MathTex tex={MZ_TEX} ariaLabel="m/z" fallback="m/z" /> and prepare a formula assignment.</p>
+    <p class="mb-0 text-sm text-muted">
+      Click a peak in the spectrum plot to populate FormulaM <MathTex
+        tex={MZ_TEX}
+        ariaLabel="m/z"
+        fallback="m/z"
+      /> and prepare a formula assignment.
+    </p>
   {/if}
 </section>

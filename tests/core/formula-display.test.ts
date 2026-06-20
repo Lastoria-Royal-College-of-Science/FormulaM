@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { tokenizeFormulaDisplay } from "../../src/core/chemistry/formulaDisplay";
 
 describe("formula display tokens", () => {
@@ -17,7 +18,11 @@ describe("formula display tokens", () => {
   });
 
   it("renders isotope mass labels as superscripts", () => {
-    expect(tokenizeFormulaDisplay("[C5[13C]H12O6]2+")).toContainEqual({ kind: "isotope", massNumber: "13", element: "C" });
+    expect(tokenizeFormulaDisplay("[C5[13C]H12O6]2+")).toContainEqual({
+      kind: "isotope",
+      massNumber: "13",
+      element: "C",
+    });
     expect(tokenizeFormulaDisplay("[C5[13C]H12O6]2+")).toContainEqual({ kind: "sup", text: "2+" });
   });
 

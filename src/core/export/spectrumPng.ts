@@ -1,6 +1,6 @@
 import { renderSpectrumPlot } from "../plot/plotScene";
-import { downloadBlob } from "./download";
 import type { PlotSettings, SpectrumPeak, ThemeName } from "../types";
+import { downloadBlob } from "./download";
 
 export async function downloadAnnotatedSpectrumPng(
   peaks: SpectrumPeak[],

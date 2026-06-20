@@ -1,6 +1,7 @@
 import katex from "katex";
 import "katex/contrib/mhchem";
 import { describe, expect, it } from "vitest";
+
 import { formulaToMhchemTex, tryFormulaToMhchemTex } from "../../src/core/chemistry/formulaTex";
 
 const examples = [
@@ -23,7 +24,9 @@ describe("formula mhchem TeX conversion", () => {
 
   it("generates KaTeX-renderable mhchem strings", () => {
     for (const [, tex] of examples) {
-      expect(katex.renderToString(tex, { output: "htmlAndMathml", throwOnError: true })).toContain("katex");
+      expect(katex.renderToString(tex, { output: "htmlAndMathml", throwOnError: true })).toContain(
+        "katex",
+      );
     }
   });
 

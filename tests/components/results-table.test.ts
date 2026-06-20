@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
 import { render } from "svelte/server";
+import { describe, expect, it } from "vitest";
+
 import ResultsTable from "../../src/components/results/ResultsTable.svelte";
 import { MZ_TEX } from "../../src/core/math/tex";
 import type { FormulaHit, PeakAssignment } from "../../src/core/types";
@@ -98,8 +99,8 @@ describe("ResultsTable", () => {
     expect(body).toContain('class="results-row-active"');
     expect(body).toContain('class="results-assign-button-active"');
     expect(body).toContain('aria-pressed="true"');
-    expect(body).toContain('i-mdi-minus');
-    expect(body).toContain('Remove [C5[13C]H12O6]+ from the selected peak');
+    expect(body).toContain("i-mdi-minus");
+    expect(body).toContain("Remove [C5[13C]H12O6]+ from the selected peak");
     expect(body).toContain('data-selectable-formula="true"');
   });
 
@@ -109,7 +110,7 @@ describe("ResultsTable", () => {
 
     expect(body).not.toContain('<label for="results-page-size">');
     expect(body).toContain('aria-label="Rows per page"');
-    expect(body).toContain('>All<');
+    expect(body).toContain(">All<");
     expect(body).toContain("Showing 1-10 of 12");
     expect(body).toContain("Page 1 of 2");
     expect(body).toContain("Go to previous results page");
@@ -121,7 +122,9 @@ describe("ResultsTable", () => {
 
   it("updates the empty-state colspan to match the visible columns", () => {
     const withoutAssign = render(ResultsTable, { props: { results: [] } }).body;
-    const withAssign = render(ResultsTable, { props: { results: [], onToggleAssignment: () => undefined } }).body;
+    const withAssign = render(ResultsTable, {
+      props: { results: [], onToggleAssignment: () => undefined },
+    }).body;
 
     expect(withoutAssign).toContain('colspan="5"');
     expect(withAssign).toContain('colspan="6"');

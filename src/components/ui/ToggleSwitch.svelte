@@ -16,10 +16,11 @@
   role="switch"
   aria-checked={checked}
   aria-label={ariaLabel}
-  disabled={disabled}
+  {disabled}
   on:click={handleClick}
 >
-  <span class="toggle-switch-thumb" class:toggle-switch-thumb-checked={checked} aria-hidden="true"></span>
+  <span class="toggle-switch-thumb" class:toggle-switch-thumb-checked={checked} aria-hidden="true"
+  ></span>
 </button>
 
 <style>

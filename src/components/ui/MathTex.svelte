@@ -14,7 +14,9 @@
 
   $: rendered = renderTex(tex, displayMode);
   $: modeClass = displayMode ? "math-tex-display" : "math-tex-inline";
-  $: rootClass = ["math-tex", modeClass, selectable ? "math-tex-selectable" : "", className].filter(Boolean).join(" ");
+  $: rootClass = ["math-tex", modeClass, selectable ? "math-tex-selectable" : "", className]
+    .filter(Boolean)
+    .join(" ");
 
   function renderTex(value: string, isDisplayMode: boolean): string {
     try {

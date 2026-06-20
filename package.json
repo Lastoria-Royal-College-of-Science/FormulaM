@@ -1,9 +1,15 @@
 {
   "name": "formulam",
   "version": "2.0.0",
-  "description": "Interactive molecular formula elucidation from high-resolution mass spectrometry m/z values.",
-  "type": "module",
   "private": true,
+  "description": "Interactive molecular formula elucidation from high-resolution mass spectrometry m/z values.",
+  "keywords": [
+    "chemistry",
+    "mass-spectrometry",
+    "molecular-formula"
+  ],
+  "license": "MIT",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -17,17 +23,12 @@
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui"
   },
-  "keywords": [
-    "chemistry",
-    "mass-spectrometry",
-    "molecular-formula",
-    "isotopes",
-    "github-pages",
-    "svelte",
-    "vite",
-    "typescript"
-  ],
-  "license": "MIT",
+  "dependencies": {
+    "katex": "^0.17.0",
+    "svelte": "^5.56.3",
+    "unocss": "^66.7.2",
+    "xlsx": "^0.18.5"
+  },
   "devDependencies": {
     "@iconify-json/codex": "^1.2.0",
     "@iconify-json/mdi": "^1.2.3",
@@ -42,11 +43,5 @@
     "typescript": "^6.0.3",
     "vite": "^8.0.16",
     "vitest": "^4.1.9"
-  },
-  "dependencies": {
-    "katex": "^0.17.0",
-    "svelte": "^5.56.3",
-    "unocss": "^66.7.2",
-    "xlsx": "^0.18.5"
   }
 }

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+
 import { waitForAppReady } from "./helpers";
 
 test("starts the app and exposes the primary work areas @smoke", async ({ page }) => {
@@ -12,5 +13,7 @@ test("starts the app and exposes the primary work areas @smoke", async ({ page }
 
   const previousTheme = await page.evaluate(() => document.documentElement.dataset.theme ?? "");
   await page.getByRole("button", { name: /Switch to (light|dark) mode/ }).click();
-  await expect.poll(() => page.evaluate(() => document.documentElement.dataset.theme ?? "")).not.toBe(previousTheme);
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.dataset.theme ?? ""))
+    .not.toBe(previousTheme);
 });

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import config from "../../uno.config";
 
 const shortcuts = config.shortcuts as Record<string, string>;
@@ -19,7 +20,9 @@ describe("Uno interaction shortcuts", () => {
   });
 
   it("keeps link controls visually consistent with buttons", () => {
-    expect(shortcuts["round-link-control"]).toContain("hover:[filter:var(--interactive-hover-filter)]");
+    expect(shortcuts["round-link-control"]).toContain(
+      "hover:[filter:var(--interactive-hover-filter)]",
+    );
     expect(shortcuts["round-link-control"]).toContain("active:border-accent");
     expect(shortcuts["round-link-control"]).toContain("active:shadow-control-glow");
   });

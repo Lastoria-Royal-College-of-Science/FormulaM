@@ -15,7 +15,9 @@ function isMzHeaderToken(token: string): boolean {
 }
 
 function isIntensityHeaderToken(token: string): boolean {
-  return INTENSITY_HEADER_TOKENS.some((candidate) => token === candidate || token.includes(candidate));
+  return INTENSITY_HEADER_TOKENS.some(
+    (candidate) => token === candidate || token.includes(candidate),
+  );
 }
 
 export function normalizeHeaderToken(value: unknown): string {
@@ -64,14 +66,18 @@ function buildHeaderLabels(headerRow: readonly unknown[], columnCount: number): 
   });
 }
 
-function detectColumnIndexes(labels: readonly string[]): { mzColumnIndex: number | null; intensityColumnIndex: number | null } {
+function detectColumnIndexes(labels: readonly string[]): {
+  mzColumnIndex: number | null;
+  intensityColumnIndex: number | null;
+} {
   let mzColumnIndex: number | null = null;
   let intensityColumnIndex: number | null = null;
 
   labels.forEach((label, index) => {
     const token = normalizeHeaderToken(label);
     if (mzColumnIndex === null && isMzHeaderToken(token)) mzColumnIndex = index;
-    if (intensityColumnIndex === null && isIntensityHeaderToken(token)) intensityColumnIndex = index;
+    if (intensityColumnIndex === null && isIntensityHeaderToken(token))
+      intensityColumnIndex = index;
   });
 
   return { mzColumnIndex, intensityColumnIndex };
@@ -93,7 +99,10 @@ export function suggestHeaderRow(table: readonly (readonly unknown[])[]): boolea
   return numericCount < nonBlankCells.length / 2;
 }
 
-export function columnLabelsForTable(table: readonly (readonly unknown[])[], hasHeaderRow: boolean): string[] {
+export function columnLabelsForTable(
+  table: readonly (readonly unknown[])[],
+  hasHeaderRow: boolean,
+): string[] {
   const columnCount = columnCountForTable(table);
   if (columnCount === 0) return [];
 
@@ -116,7 +125,9 @@ export function suggestSpectrumSelection(
   }
 
   const labels = columnLabelsForTable(table, hasHeaderRow);
-  const detected = hasHeaderRow ? detectColumnIndexes(labels) : { mzColumnIndex: null, intensityColumnIndex: null };
+  const detected = hasHeaderRow
+    ? detectColumnIndexes(labels)
+    : { mzColumnIndex: null, intensityColumnIndex: null };
 
   if (detected.mzColumnIndex !== null && detected.intensityColumnIndex !== null) {
     return {
@@ -163,7 +174,11 @@ export function buildSpectrumPreview(
   };
 }
 
-function validateColumnIndex(columnIndex: number | null | undefined, columnCount: number, label: string): number | null {
+function validateColumnIndex(
+  columnIndex: number | null | undefined,
+  columnCount: number,
+  label: string,
+): number | null {
   if (columnIndex === null || columnIndex === undefined) return null;
   if (!Number.isInteger(columnIndex) || columnIndex < 0 || columnIndex >= columnCount) {
     throw new Error(`Spectrum import failed: ${label} selection is outside the table range.`);
@@ -176,13 +191,29 @@ function resolveColumns(
   hasHeaderRow: boolean,
   mzColumnIndex?: number | null,
   intensityColumnIndex?: number | null,
-): { mzColumnIndex: number; intensityColumnIndex: number; mzColumn: string; intensityColumn: string } {
+): {
+  mzColumnIndex: number;
+  intensityColumnIndex: number;
+  mzColumn: string;
+  intensityColumn: string;
+} {
   const columnCount = labels.length;
   const validatedMzColumnIndex = validateColumnIndex(mzColumnIndex, columnCount, "m/z column");
-  const validatedIntensityColumnIndex = validateColumnIndex(intensityColumnIndex, columnCount, "intensity column");
-  const detected = hasHeaderRow ? detectColumnIndexes(labels) : { mzColumnIndex: null, intensityColumnIndex: null };
+  const validatedIntensityColumnIndex = validateColumnIndex(
+    intensityColumnIndex,
+    columnCount,
+    "intensity column",
+  );
+  const detected = hasHeaderRow
+    ? detectColumnIndexes(labels)
+    : { mzColumnIndex: null, intensityColumnIndex: null };
 
-  if (!hasHeaderRow && validatedMzColumnIndex === null && validatedIntensityColumnIndex === null && columnCount >= 2) {
+  if (
+    !hasHeaderRow &&
+    validatedMzColumnIndex === null &&
+    validatedIntensityColumnIndex === null &&
+    columnCount >= 2
+  ) {
     return {
       mzColumnIndex: 0,
       intensityColumnIndex: 1,
@@ -192,7 +223,8 @@ function resolveColumns(
   }
 
   const resolvedMzColumnIndex = validatedMzColumnIndex ?? detected.mzColumnIndex;
-  const resolvedIntensityColumnIndex = validatedIntensityColumnIndex ?? detected.intensityColumnIndex;
+  const resolvedIntensityColumnIndex =
+    validatedIntensityColumnIndex ?? detected.intensityColumnIndex;
   if (resolvedMzColumnIndex === null) {
     throw new Error("Spectrum import failed: select the m/z column before importing.");
   }
@@ -222,7 +254,8 @@ export function normalizeSpectrumTable(
 
   const hasHeaderRow = resolvedOptions.hasHeaderRow ?? suggestHeaderRow(table);
   const columnLabels = columnLabelsForTable(table, hasHeaderRow);
-  if (!columnLabels.length) throw new Error(`Spectrum import failed: ${sourceName} does not contain any columns.`);
+  if (!columnLabels.length)
+    throw new Error(`Spectrum import failed: ${sourceName} does not contain any columns.`);
 
   const { mzColumnIndex, intensityColumnIndex, mzColumn, intensityColumn } = resolveColumns(
     columnLabels,
@@ -248,7 +281,9 @@ export function normalizeSpectrumTable(
   }
 
   if (!parsedPeaks.length) {
-    throw new Error(`Spectrum import failed: ${sourceName} does not contain any numeric peak rows.`);
+    throw new Error(
+      `Spectrum import failed: ${sourceName} does not contain any numeric peak rows.`,
+    );
   }
 
   parsedPeaks.sort((left, right) => left.mz - right.mz);

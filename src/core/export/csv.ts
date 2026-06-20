@@ -1,5 +1,5 @@
-import { downloadBlob } from "./download";
 import type { FormulaHit } from "../types";
+import { downloadBlob } from "./download";
 
 export function csvEscape(value: unknown): string {
   const text = String(value);
@@ -8,7 +8,15 @@ export function csvEscape(value: unknown): string {
 }
 
 export function hitsToCsv(hits: FormulaHit[]): string {
-  const headers = ["formula", "ion_formula", "charge", "neutral_mass", "predicted_mz", "error_da", "error_ppm"];
+  const headers = [
+    "formula",
+    "ion_formula",
+    "charge",
+    "neutral_mass",
+    "predicted_mz",
+    "error_da",
+    "error_ppm",
+  ];
   const rows = hits.map((hit) => [
     hit.formula,
     hit.ion_formula,

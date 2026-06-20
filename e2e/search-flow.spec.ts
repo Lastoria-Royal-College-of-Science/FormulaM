@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+
 import { glucoseFormula, runDefaultSearch } from "./helpers";
 
 test("finds a glucose candidate through the browser UI", async ({ page }) => {

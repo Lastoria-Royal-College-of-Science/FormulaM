@@ -11,7 +11,12 @@ function lowerBound(peaks: readonly SpectrumPeak[], targetMz: number): number {
   return low;
 }
 
-export function findNearestPeak(peaks: readonly SpectrumPeak[], targetMz: number, xMin = Number.NEGATIVE_INFINITY, xMax = Number.POSITIVE_INFINITY): SpectrumPeak | null {
+export function findNearestPeak(
+  peaks: readonly SpectrumPeak[],
+  targetMz: number,
+  xMin = Number.NEGATIVE_INFINITY,
+  xMax = Number.POSITIVE_INFINITY,
+): SpectrumPeak | null {
   if (!peaks.length) return null;
   const visiblePeaks = peaks.filter((peak) => peak.mz >= xMin && peak.mz <= xMax);
   if (!visiblePeaks.length) return null;

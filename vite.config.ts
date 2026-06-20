@@ -1,6 +1,6 @@
-import { defineConfig } from "vite";
-import UnoCSS from "unocss/vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import UnoCSS from "unocss/vite";
+import { defineConfig } from "vite";
 
 export default defineConfig({
   base: "/",

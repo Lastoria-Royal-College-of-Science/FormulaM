@@ -10,11 +10,7 @@
     "isolatedModules": true,
     "moduleDetection": "force",
     "strict": true,
-    "types": [
-      "svelte",
-      "vite/client",
-      "node"
-    ]
+    "types": ["svelte", "vite/client", "node"]
   },
   "include": [
     "src/**/*.ts",

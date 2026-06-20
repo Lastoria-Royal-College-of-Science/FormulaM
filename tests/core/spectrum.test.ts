@@ -1,11 +1,30 @@
 import { describe, expect, it } from "vitest";
-import { attachAssignmentsToPeaks, buildPeakAssignment, upsertAssignment } from "../../src/core/spectrum/assignments";
+
 import { assignmentsToCsv } from "../../src/core/export/spectrumCsv";
 import { annotatedSpectrumPdfBytes } from "../../src/core/export/spectrumPdf";
-import { PLOT_RICH_TEXT_ISOTOPE_GAP_EM, createSpectrumPlotScene, formulaToPlotTextRuns, renderSpectrumPlot } from "../../src/core/plot/plotScene";
-import { DEFAULT_PLOT_SETTINGS, computeAutoMajorTickSpacing, computeMinorTicks, createPlotSettings, resolvePlotDomain } from "../../src/core/plot/plotTicks";
+import {
+  PLOT_RICH_TEXT_ISOTOPE_GAP_EM,
+  createSpectrumPlotScene,
+  formulaToPlotTextRuns,
+  renderSpectrumPlot,
+} from "../../src/core/plot/plotScene";
+import {
+  DEFAULT_PLOT_SETTINGS,
+  computeAutoMajorTickSpacing,
+  computeMinorTicks,
+  createPlotSettings,
+  resolvePlotDomain,
+} from "../../src/core/plot/plotTicks";
+import {
+  attachAssignmentsToPeaks,
+  buildPeakAssignment,
+  upsertAssignment,
+} from "../../src/core/spectrum/assignments";
 import { loadSpectrumImportSource, parseCsvText } from "../../src/core/spectrum/spectrumImport";
-import { buildSpectrumPreview, normalizeSpectrumTable } from "../../src/core/spectrum/spectrumNormalize";
+import {
+  buildSpectrumPreview,
+  normalizeSpectrumTable,
+} from "../../src/core/spectrum/spectrumNormalize";
 import type { FormulaHit, SpectrumPeak } from "../../src/core/types";
 
 describe("spectrum import", () => {
@@ -24,9 +43,12 @@ describe("spectrum import", () => {
   });
 
   it("fails with a clear error when the intensity column is missing", () => {
-    expect(() => normalizeSpectrumTable(parseCsvText("mz,formula_name\n120.1,glucose\n"), "missing-intensity.csv")).toThrow(
-      /select the intensity/i,
-    );
+    expect(() =>
+      normalizeSpectrumTable(
+        parseCsvText("mz,formula_name\n120.1,glucose\n"),
+        "missing-intensity.csv",
+      ),
+    ).toThrow(/select the intensity/i);
   });
 
   it("builds numeric preview headers and supports manual column selection without a header row", () => {
@@ -50,8 +72,22 @@ describe("spectrum import", () => {
   it("loads all worksheets from an xlsx workbook for sheet switching", async () => {
     const xlsx = await import("xlsx");
     const workbook = xlsx.utils.book_new();
-    xlsx.utils.book_append_sheet(workbook, xlsx.utils.aoa_to_sheet([["mz", "intensity"], [100, 20]]), "SheetA");
-    xlsx.utils.book_append_sheet(workbook, xlsx.utils.aoa_to_sheet([["m/z", "Abund"], [200, 50]]), "SheetB");
+    xlsx.utils.book_append_sheet(
+      workbook,
+      xlsx.utils.aoa_to_sheet([
+        ["mz", "intensity"],
+        [100, 20],
+      ]),
+      "SheetA",
+    );
+    xlsx.utils.book_append_sheet(
+      workbook,
+      xlsx.utils.aoa_to_sheet([
+        ["m/z", "Abund"],
+        [200, 50],
+      ]),
+      "SheetB",
+    );
 
     const workbookBytes = xlsx.write(workbook, { type: "array", bookType: "xlsx" }) as ArrayBuffer;
     const file = new File([workbookBytes], "multi-sheet.xlsx", {
@@ -125,7 +161,9 @@ describe("spectrum plot settings", () => {
     expect(text).toContain("79.2234");
     expect(text).toContain("101.4000");
     expect(text).not.toContain("128.8695");
-    expect(scene.shapes.some((shape) => shape.kind === "line" && Boolean(shape.dash?.length))).toBe(false);
+    expect(scene.shapes.some((shape) => shape.kind === "line" && Boolean(shape.dash?.length))).toBe(
+      false,
+    );
   });
 
   it("omits threshold guide lines and labels from exported plot scenes", () => {
@@ -144,7 +182,9 @@ describe("spectrum plot settings", () => {
 
     const text = scene.shapes.filter((shape) => shape.kind === "text").map((shape) => shape.text);
 
-    expect(scene.shapes.some((shape) => shape.kind === "line" && Boolean(shape.dash?.length))).toBe(false);
+    expect(scene.shapes.some((shape) => shape.kind === "line" && Boolean(shape.dash?.length))).toBe(
+      false,
+    );
     expect(text.some((value) => value.startsWith("Threshold"))).toBe(false);
   });
 
@@ -163,9 +203,13 @@ describe("spectrum plot settings", () => {
       theme: "light",
     });
 
-    const peakLines = scene.shapes.filter((shape) => shape.kind === "line" && !shape.dash?.length && shape.y2 < shape.y1);
+    const peakLines = scene.shapes.filter(
+      (shape) => shape.kind === "line" && !shape.dash?.length && shape.y2 < shape.y1,
+    );
 
-    expect(scene.shapes.some((shape) => shape.kind === "line" && Boolean(shape.dash?.length))).toBe(true);
+    expect(scene.shapes.some((shape) => shape.kind === "line" && Boolean(shape.dash?.length))).toBe(
+      true,
+    );
     expect(peakLines.some((shape) => shape.kind === "line" && shape.opacity === 0.32)).toBe(true);
   });
 });
@@ -211,7 +255,11 @@ describe("spectrum plot formula labels", () => {
       leadingGap: PLOT_RICH_TEXT_ISOTOPE_GAP_EM,
     });
     expect(formulaToPlotTextRuns("[C5[13C]H12O6]2+")).toContainEqual({ text: "2+", script: "sup" });
-    expect(formulaToPlotTextRuns("[C5[13C]H12O6]2+").map((run) => run.text).join("")).toBe("[C513CH12O6]2+");
+    expect(
+      formulaToPlotTextRuns("[C5[13C]H12O6]2+")
+        .map((run) => run.text)
+        .join(""),
+    ).toBe("[C513CH12O6]2+");
   });
 
   it("emits rich text for assigned formula labels and keeps numeric labels plain", () => {
@@ -251,7 +299,9 @@ describe("spectrum plot formula labels", () => {
       height: 450,
       theme: "light",
     });
-    const textLabels = mzScene.shapes.filter((shape) => shape.kind === "text").map((shape) => shape.text);
+    const textLabels = mzScene.shapes
+      .filter((shape) => shape.kind === "text")
+      .map((shape) => shape.text);
 
     expect(mzScene.shapes.some((shape) => shape.kind === "rich-text")).toBe(false);
     expect(textLabels).toContain("180.0634");
@@ -271,7 +321,9 @@ describe("spectrum plot formula labels", () => {
     });
 
     const richLabel = scene.shapes.find((shape) => shape.kind === "rich-text");
-    const textLabels = scene.shapes.filter((shape) => shape.kind === "text").map((shape) => shape.text);
+    const textLabels = scene.shapes
+      .filter((shape) => shape.kind === "text")
+      .map((shape) => shape.text);
 
     expect(richLabel?.kind).toBe("rich-text");
     expect(textLabels).toContain("180.0634");
@@ -310,11 +362,12 @@ describe("spectrum plot formula labels", () => {
       translate: () => undefined,
       rotate: () => undefined,
       fillText: (text: string) => drawnText.push(text),
-      measureText: (text: string) => ({
-        width: text.length * 6,
-        actualBoundingBoxAscent: 8,
-        actualBoundingBoxDescent: 2,
-      }) as TextMetrics,
+      measureText: (text: string) =>
+        ({
+          width: text.length * 6,
+          actualBoundingBoxAscent: 8,
+          actualBoundingBoxDescent: 2,
+        }) as TextMetrics,
       fillStyle: "",
       font: "",
       globalAlpha: 1,
@@ -345,7 +398,10 @@ describe("spectrum plot formula labels", () => {
 
 describe("assignment export", () => {
   it("exports assigned peaks into the spectrum assignment csv", () => {
-    const imported = normalizeSpectrumTable(parseCsvText("mz,intensity\n180.063388,1000\n181.000000,50\n"), "assign.csv");
+    const imported = normalizeSpectrumTable(
+      parseCsvText("mz,intensity\n180.063388,1000\n181.000000,50\n"),
+      "assign.csv",
+    );
     const hit: FormulaHit = {
       formula: "C6H12O6",
       composition: { C: 6, H: 12, O: 6 },
@@ -359,7 +415,11 @@ describe("assignment export", () => {
     };
 
     const assignments = upsertAssignment([], buildPeakAssignment(imported.peaks[0], hit));
-    const decoratedPeaks = attachAssignmentsToPeaks(imported.peaks, assignments, imported.peaks[0].id);
+    const decoratedPeaks = attachAssignmentsToPeaks(
+      imported.peaks,
+      assignments,
+      imported.peaks[0].id,
+    );
     const csv = assignmentsToCsv(decoratedPeaks);
 
     expect(csv).toContain("observed_mz,intensity,relative_intensity,assigned_formula");
@@ -369,7 +429,10 @@ describe("assignment export", () => {
   });
 
   it("builds an annotated vector PDF export with run-level formula labels", () => {
-    const imported = normalizeSpectrumTable(parseCsvText("mz,intensity\n180.063388,1000\n181.000000,50\n"), "assign.pdf.csv");
+    const imported = normalizeSpectrumTable(
+      parseCsvText("mz,intensity\n180.063388,1000\n181.000000,50\n"),
+      "assign.pdf.csv",
+    );
     const hit: FormulaHit = {
       formula: "C5[13C]H12O6",
       composition: { C: 6, H: 12, O: 6 },
@@ -383,7 +446,11 @@ describe("assignment export", () => {
     };
 
     const assignments = upsertAssignment([], buildPeakAssignment(imported.peaks[0], hit));
-    const decoratedPeaks = attachAssignmentsToPeaks(imported.peaks, assignments, imported.peaks[0].id);
+    const decoratedPeaks = attachAssignmentsToPeaks(
+      imported.peaks,
+      assignments,
+      imported.peaks[0].id,
+    );
     const pdf = new TextDecoder().decode(
       annotatedSpectrumPdfBytes(
         decoratedPeaks,
@@ -411,7 +478,10 @@ describe("assignment export", () => {
   });
 
   it("uses a transparent export scene with black axes and axis labels", () => {
-    const imported = normalizeSpectrumTable(parseCsvText("mz,intensity\n180.063388,1000\n181.000000,50\n"), "export-style.csv");
+    const imported = normalizeSpectrumTable(
+      parseCsvText("mz,intensity\n180.063388,1000\n181.000000,50\n"),
+      "export-style.csv",
+    );
     const scene = createSpectrumPlotScene({
       peaks: imported.peaks,
       settings: {
@@ -427,10 +497,17 @@ describe("assignment export", () => {
     });
 
     const rootRect = scene.shapes.find(
-      (shape) => shape.kind === "rect" && shape.x === 0 && shape.y === 0 && shape.width === 800 && shape.height === 450,
+      (shape) =>
+        shape.kind === "rect" &&
+        shape.x === 0 &&
+        shape.y === 0 &&
+        shape.width === 800 &&
+        shape.height === 450,
     );
     const axisTitle = scene.shapes.find((shape) => shape.kind === "text" && shape.text === "m/z");
-    const axisLine = scene.shapes.find((shape) => shape.kind === "line" && shape.stroke === "#000000");
+    const axisLine = scene.shapes.find(
+      (shape) => shape.kind === "line" && shape.stroke === "#000000",
+    );
 
     expect(rootRect).toBeUndefined();
     expect(axisTitle?.kind).toBe("text");

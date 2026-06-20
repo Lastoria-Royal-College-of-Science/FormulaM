@@ -1,9 +1,14 @@
 <script lang="ts">
-  import MathTex from "../ui/MathTex.svelte";
-  import ToggleSwitch from "../ui/ToggleSwitch.svelte";
   import { X_MAX_TEX, X_MIN_TEX, Y_MAX_TEX } from "../../core/math/tex";
   import { resolvePlotAutoValues } from "../../core/plot/plotTicks";
-  import type { PlotLabelFilter, PlotLabelMode, PlotSettings, SpectrumPeak } from "../../core/types";
+  import type {
+    PlotLabelFilter,
+    PlotLabelMode,
+    PlotSettings,
+    SpectrumPeak,
+  } from "../../core/types";
+  import MathTex from "../ui/MathTex.svelte";
+  import ToggleSwitch from "../ui/ToggleSwitch.svelte";
 
   export let settings: PlotSettings;
   export let peaks: SpectrumPeak[] = [];
@@ -54,7 +59,10 @@
   function updateManualTickSpacingEnabled(value: boolean): void {
     onChange({
       autoTicks: !value,
-      majorTickSpacing: value && !settings.majorTickSpacing ? autoValues.majorTickSpacing : settings.majorTickSpacing,
+      majorTickSpacing:
+        value && !settings.majorTickSpacing
+          ? autoValues.majorTickSpacing
+          : settings.majorTickSpacing,
     });
   }
 
@@ -67,42 +75,49 @@
   <div class="flex flex-wrap items-start justify-between gap-3">
     <div>
       <h2 class="mt-0">Plot settings</h2>
-      <p class="mb-0 mt-1 text-sm text-muted">Adjust view range, tick spacing, peak styling, threshold, and label rendering.</p>
+      <p class="mb-0 mt-1 text-sm text-muted">
+        Adjust view range, tick spacing, peak styling, threshold, and label rendering.
+      </p>
     </div>
   </div>
 
   <div class="mt-4 grid grid-cols-4 gap-4 lt-lg:grid-cols-2 lt-md:grid-cols-1">
     <div class="block">
-      <span class="field-title"><MathTex tex={X_MIN_TEX} ariaLabel="x min" fallback="x min" /></span>
+      <span class="field-title"><MathTex tex={X_MIN_TEX} ariaLabel="x min" fallback="x min" /></span
+      >
       <input
         class="field-control"
         type="number"
         step="0.0001"
         value={settings.xMin ?? ""}
         aria-label="x min"
-        disabled={disabled}
-        on:input={(event) => onChange({ xMin: parseOptionalNumber((event.currentTarget as HTMLInputElement).value) })}
+        {disabled}
+        on:input={(event) =>
+          onChange({ xMin: parseOptionalNumber((event.currentTarget as HTMLInputElement).value) })}
       />
     </div>
     <div class="block">
-      <span class="field-title"><MathTex tex={X_MAX_TEX} ariaLabel="x max" fallback="x max" /></span>
+      <span class="field-title"><MathTex tex={X_MAX_TEX} ariaLabel="x max" fallback="x max" /></span
+      >
       <input
         class="field-control"
         type="number"
         step="0.0001"
         value={settings.xMax ?? ""}
         aria-label="x max"
-        disabled={disabled}
-        on:input={(event) => onChange({ xMax: parseOptionalNumber((event.currentTarget as HTMLInputElement).value) })}
+        {disabled}
+        on:input={(event) =>
+          onChange({ xMax: parseOptionalNumber((event.currentTarget as HTMLInputElement).value) })}
       />
     </div>
     <div class="block">
-      <span class="field-title"><MathTex tex={Y_MAX_TEX} ariaLabel="y max" fallback="y max" /></span>
+      <span class="field-title"><MathTex tex={Y_MAX_TEX} ariaLabel="y max" fallback="y max" /></span
+      >
       <div class="flex items-center gap-3">
         <ToggleSwitch
           ariaLabel="y scale"
           checked={settings.yScale === "fixed"}
-          disabled={disabled}
+          {disabled}
           onChange={updateFixedYMaxEnabled}
         />
         <input
@@ -110,10 +125,13 @@
           type={settings.yScale === "fixed" ? "number" : "text"}
           min="1"
           step="1"
-          value={settings.yScale === "fixed" ? settings.yMax ?? "" : autoValue(autoValues.yMax)}
+          value={settings.yScale === "fixed" ? (settings.yMax ?? "") : autoValue(autoValues.yMax)}
           aria-label="y max"
           disabled={disabled || settings.yScale === "auto"}
-          on:input={(event) => onChange({ yMax: parseOptionalNumber((event.currentTarget as HTMLInputElement).value) })}
+          on:input={(event) =>
+            onChange({
+              yMax: parseOptionalNumber((event.currentTarget as HTMLInputElement).value),
+            })}
         />
       </div>
     </div>
@@ -127,8 +145,11 @@
         step="0.5"
         value={settings.lineWidth}
         aria-label="Line width"
-        disabled={disabled}
-        on:input={(event) => onChange({ lineWidth: Math.max(1, Number((event.currentTarget as HTMLInputElement).value) || 1) })}
+        {disabled}
+        on:input={(event) =>
+          onChange({
+            lineWidth: Math.max(1, Number((event.currentTarget as HTMLInputElement).value) || 1),
+          })}
       />
     </div>
   </div>
@@ -136,15 +157,39 @@
   <div class="mt-4 grid grid-cols-4 gap-4 lt-lg:grid-cols-2 lt-md:grid-cols-1">
     <div class="block">
       <span class="field-title">Peak color</span>
-      <input class="field-control h-[44px] p-2" type="color" value={settings.peakColor} aria-label="Peak color" disabled={disabled} on:input={(event) => onChange({ peakColor: (event.currentTarget as HTMLInputElement).value })} />
+      <input
+        class="field-control h-[44px] p-2"
+        type="color"
+        value={settings.peakColor}
+        aria-label="Peak color"
+        {disabled}
+        on:input={(event) =>
+          onChange({ peakColor: (event.currentTarget as HTMLInputElement).value })}
+      />
     </div>
     <div class="block">
       <span class="field-title">Selected peak color</span>
-      <input class="field-control h-[44px] p-2" type="color" value={settings.selectedPeakColor} aria-label="Selected peak color" disabled={disabled} on:input={(event) => onChange({ selectedPeakColor: (event.currentTarget as HTMLInputElement).value })} />
+      <input
+        class="field-control h-[44px] p-2"
+        type="color"
+        value={settings.selectedPeakColor}
+        aria-label="Selected peak color"
+        {disabled}
+        on:input={(event) =>
+          onChange({ selectedPeakColor: (event.currentTarget as HTMLInputElement).value })}
+      />
     </div>
     <div class="block">
       <span class="field-title">Assigned peak color</span>
-      <input class="field-control h-[44px] p-2" type="color" value={settings.assignedPeakColor} aria-label="Assigned peak color" disabled={disabled} on:input={(event) => onChange({ assignedPeakColor: (event.currentTarget as HTMLInputElement).value })} />
+      <input
+        class="field-control h-[44px] p-2"
+        type="color"
+        value={settings.assignedPeakColor}
+        aria-label="Assigned peak color"
+        {disabled}
+        on:input={(event) =>
+          onChange({ assignedPeakColor: (event.currentTarget as HTMLInputElement).value })}
+      />
     </div>
   </div>
 
@@ -155,7 +200,7 @@
         <ToggleSwitch
           ariaLabel="Use fixed major tick spacing"
           checked={!settings.autoTicks}
-          disabled={disabled}
+          {disabled}
           onChange={updateManualTickSpacingEnabled}
         />
         <input
@@ -163,10 +208,17 @@
           type={!settings.autoTicks ? "number" : "text"}
           min="0.0001"
           step="0.0001"
-          value={!settings.autoTicks ? settings.majorTickSpacing ?? "" : autoValue(autoValues.majorTickSpacing)}
+          value={!settings.autoTicks
+            ? (settings.majorTickSpacing ?? "")
+            : autoValue(autoValues.majorTickSpacing)}
           aria-label="Major tick spacing"
           disabled={disabled || settings.autoTicks}
-          on:input={(event) => onChange({ majorTickSpacing: parseOptionalNumber((event.currentTarget as HTMLInputElement).value) })}
+          on:input={(event) =>
+            onChange({
+              majorTickSpacing: parseOptionalNumber(
+                (event.currentTarget as HTMLInputElement).value,
+              ),
+            })}
         />
       </div>
     </div>
@@ -178,10 +230,13 @@
           class="round-control rounded-[10px]"
           aria-label={settings.thresholdEnabled ? "Hide threshold" : "Show threshold"}
           aria-pressed={settings.thresholdEnabled}
-          disabled={disabled}
+          {disabled}
           on:click={() => updateManualThresholdEnabled(!settings.thresholdEnabled)}
         >
-          <span class={`h-5 w-5 ${settings.thresholdEnabled ? "i-mdi-eye-outline" : "i-mdi-eye-off-outline"}`} aria-hidden="true"></span>
+          <span
+            class={`h-5 w-5 ${settings.thresholdEnabled ? "i-mdi-eye-outline" : "i-mdi-eye-off-outline"}`}
+            aria-hidden="true"
+          ></span>
         </button>
         <input
           class="field-control min-w-0 flex-1"
@@ -191,14 +246,27 @@
           step="0.1"
           value={settings.thresholdPercent}
           aria-label="Threshold percent"
-          disabled={disabled}
-          on:input={(event) => onChange({ thresholdPercent: Math.min(100, Math.max(0, Number((event.currentTarget as HTMLInputElement).value) || 0)) })}
+          {disabled}
+          on:input={(event) =>
+            onChange({
+              thresholdPercent: Math.min(
+                100,
+                Math.max(0, Number((event.currentTarget as HTMLInputElement).value) || 0),
+              ),
+            })}
         />
       </div>
     </div>
     <div class="block">
       <span class="field-title">Label content</span>
-      <select class="field-control field-select" value={settings.labelMode} aria-label="Label content" disabled={disabled} on:change={(event) => updateLabelMode((event.currentTarget as HTMLSelectElement).value as PlotLabelMode)}>
+      <select
+        class="field-control field-select"
+        value={settings.labelMode}
+        aria-label="Label content"
+        {disabled}
+        on:change={(event) =>
+          updateLabelMode((event.currentTarget as HTMLSelectElement).value as PlotLabelMode)}
+      >
         <option value="formula">formula only</option>
         <option value="mz">m/z only</option>
         <option value="formula+mz">formula + m/z</option>
@@ -206,7 +274,14 @@
     </div>
     <div class="block">
       <span class="field-title">Label target</span>
-      <select class="field-control field-select" value={settings.labelFilter} aria-label="Label target" disabled={disabled} on:change={(event) => updateLabelFilter((event.currentTarget as HTMLSelectElement).value as PlotLabelFilter)}>
+      <select
+        class="field-control field-select"
+        value={settings.labelFilter}
+        aria-label="Label target"
+        {disabled}
+        on:change={(event) =>
+          updateLabelFilter((event.currentTarget as HTMLSelectElement).value as PlotLabelFilter)}
+      >
         <option value="none">none</option>
         <option value="assigned-only">assigned peaks only</option>
         <option value="threshold">threshold-filtered peaks</option>

@@ -64,7 +64,10 @@ export function expandChargeEntry(entry: Pick<ChargeEntry, "text">, sign: Charge
   return charges;
 }
 
-export function expandChargeEntries(entries: Array<Pick<ChargeEntry, "text">>, sign: ChargeSign): number[] {
+export function expandChargeEntries(
+  entries: Array<Pick<ChargeEntry, "text">>,
+  sign: ChargeSign,
+): number[] {
   const seen = new Set<number>();
   const charges: number[] = [];
 

@@ -6,7 +6,8 @@ const ALIAS_TO_ISOTOPE: Record<string, string> = { D: "2H", T: "3H" };
 
 export function isotopeLabel(symbol: string, massNumber: number | string): string {
   const number = Number.parseInt(String(massNumber), 10);
-  if (!Number.isFinite(number) || number <= 0) throw new Error("isotope mass number must be positive");
+  if (!Number.isFinite(number) || number <= 0)
+    throw new Error("isotope mass number must be positive");
   if (!/^[A-Z][a-z]?$/.test(symbol)) throw new Error(`invalid element symbol ${symbol}`);
   return `${number}${symbol}`;
 }
@@ -41,7 +42,10 @@ export function displaySpeciesLabel(label: string): string {
   return match ? `[${match[1]}${match[2]}]` : normalized;
 }
 
-function speciesSortKey(symbol: string, hasCarbon: boolean): { group: number; base: string; massNumber: number; symbol: string } {
+function speciesSortKey(
+  symbol: string,
+  hasCarbon: boolean,
+): { group: number; base: string; massNumber: number; symbol: string } {
   const base = isotopeBaseSymbol(symbol);
   const massNumber = isotopeMassNumber(symbol) || 0;
   let group: number;
@@ -61,10 +65,12 @@ export function hillSortSymbols(symbols: Iterable<string>): string[] {
   return normalized.sort((a, b) => {
     const ka = speciesSortKey(a, hasCarbon);
     const kb = speciesSortKey(b, hasCarbon);
-    return ka.group - kb.group
-      || ka.base.localeCompare(kb.base)
-      || ka.massNumber - kb.massNumber
-      || ka.symbol.localeCompare(kb.symbol);
+    return (
+      ka.group - kb.group ||
+      ka.base.localeCompare(kb.base) ||
+      ka.massNumber - kb.massNumber ||
+      ka.symbol.localeCompare(kb.symbol)
+    );
   });
 }
 
@@ -106,7 +112,8 @@ export function parseCharge(charge: ChargeSpec): number {
   else if (/^[+-]?\d+$/.test(text)) value = Number.parseInt(text, 10);
   else throw new Error(`invalid charge value ${charge}`);
 
-  if (!Number.isSafeInteger(value) || value === 0) throw new Error("charge must be a non-zero safe integer");
+  if (!Number.isSafeInteger(value) || value === 0)
+    throw new Error("charge must be a non-zero safe integer");
   return value;
 }
 

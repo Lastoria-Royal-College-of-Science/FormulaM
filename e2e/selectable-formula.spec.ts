@@ -1,7 +1,10 @@
 import { expect, test } from "@playwright/test";
+
 import { glucoseFormulaLocator, runDefaultSearch, selectedText } from "./helpers";
 
-test("selects rendered formula and math text without hidden helper duplication", async ({ page }) => {
+test("selects rendered formula and math text without hidden helper duplication", async ({
+  page,
+}) => {
   await runDefaultSearch(page);
 
   await glucoseFormulaLocator(page).click();

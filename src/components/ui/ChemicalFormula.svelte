@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { selectElementContents } from "../../core/dom/selection";
   import { tokenizeFormulaDisplay } from "../../core/chemistry/formulaDisplay";
   import { tryFormulaToMhchemTex } from "../../core/chemistry/formulaTex";
+  import { selectElementContents } from "../../core/dom/selection";
   import MathTex from "./MathTex.svelte";
 
   export let formula: string;
@@ -43,7 +43,11 @@
       {:else if token.kind === "sup"}
         <sup>{token.text}</sup>
       {:else if token.kind === "isotope"}
-        <span class="formula-isotope"><sup class="formula-isotope-mass">{token.massNumber}</sup><span class="formula-isotope-element">{token.element}</span></span>
+        <span class="formula-isotope"
+          ><sup class="formula-isotope-mass">{token.massNumber}</sup><span
+            class="formula-isotope-element">{token.element}</span
+          ></span
+        >
       {:else}
         {token.text}
       {/if}

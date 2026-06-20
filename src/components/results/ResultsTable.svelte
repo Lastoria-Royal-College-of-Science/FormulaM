@@ -1,6 +1,4 @@
 <script lang="ts">
-  import ChemicalFormula from "../ui/ChemicalFormula.svelte";
-  import MathTex from "../ui/MathTex.svelte";
   import { MZ_TEX } from "../../core/math/tex";
   import {
     cycleResultSortState,
@@ -12,6 +10,8 @@
   } from "../../core/search/resultsSort";
   import { matchesAssignmentHit } from "../../core/spectrum/assignments";
   import type { FormulaHit, PeakAssignment } from "../../core/types";
+  import ChemicalFormula from "../ui/ChemicalFormula.svelte";
+  import MathTex from "../ui/MathTex.svelte";
 
   type ResultsPageSizeValue = "10" | "20" | "50" | "all";
 
@@ -39,12 +39,19 @@
   }
   $: resolvedPageSize = pageSizeValue === "all" ? null : Number(pageSizeValue);
   $: totalResults = sortedResults.length;
-  $: totalPages = resolvedPageSize === null || totalResults === 0 ? 1 : Math.ceil(totalResults / resolvedPageSize);
+  $: totalPages =
+    resolvedPageSize === null || totalResults === 0
+      ? 1
+      : Math.ceil(totalResults / resolvedPageSize);
   $: if (currentPage > totalPages) currentPage = totalPages;
   $: pageStart = resolvedPageSize === null ? 0 : (currentPage - 1) * resolvedPageSize;
-  $: pageEnd = resolvedPageSize === null ? totalResults : Math.min(totalResults, pageStart + resolvedPageSize);
+  $: pageEnd =
+    resolvedPageSize === null ? totalResults : Math.min(totalResults, pageStart + resolvedPageSize);
   $: visibleResults = sortedResults.slice(pageStart, pageEnd);
-  $: paginationSummary = totalResults === 0 ? "Showing 0 results" : `Showing ${pageStart + 1}-${pageEnd} of ${totalResults}`;
+  $: paginationSummary =
+    totalResults === 0
+      ? "Showing 0 results"
+      : `Showing ${pageStart + 1}-${pageEnd} of ${totalResults}`;
 
   function toggleSort(column: ResultSortColumn): void {
     sortState = cycleResultSortState(sortState, column);
@@ -59,7 +66,9 @@
   }
 
   function assignmentAriaLabel(hit: FormulaHit, isAssigned: boolean): string {
-    return isAssigned ? `Remove ${hit.ion_formula} from the selected peak` : `Assign ${hit.ion_formula} to the selected peak`;
+    return isAssigned
+      ? `Remove ${hit.ion_formula} from the selected peak`
+      : `Assign ${hit.ion_formula} to the selected peak`;
   }
 </script>
 
@@ -118,7 +127,14 @@
               aria-label="Sort by predicted m/z"
               on:click={() => toggleSort("mz")}
             >
-              <span>Predicted <MathTex tex={MZ_TEX} ariaLabel="m/z" fallback="m/z" selectable={false} /></span>
+              <span
+                >Predicted <MathTex
+                  tex={MZ_TEX}
+                  ariaLabel="m/z"
+                  fallback="m/z"
+                  selectable={false}
+                /></span
+              >
               <span
                 aria-hidden="true"
                 class={`results-sort-icon ${getResultSortIconClass(sortState, "mz")} ${sortState?.column === "mz" ? "text-accent" : "text-muted"}`}
@@ -177,14 +193,21 @@
                   disabled={!selectedPeakLabel}
                   on:click={() => toggleAssignment(hit)}
                 >
-                  <span class={`results-assign-icon ${isAssigned ? "i-mdi-minus" : "i-mdi-add"}`} aria-hidden="true"></span>
+                  <span
+                    class={`results-assign-icon ${isAssigned ? "i-mdi-minus" : "i-mdi-add"}`}
+                    aria-hidden="true"
+                  ></span>
                 </button>
               </td>
             {/if}
           </tr>
         {:else}
           <tr>
-            <td colspan={onToggleAssignment ? 6 : 5} class="table-cell px-2 py-4.5 text-center text-muted">No candidate formulae matched the current search.</td>
+            <td
+              colspan={onToggleAssignment ? 6 : 5}
+              class="table-cell px-2 py-4.5 text-center text-muted"
+              >No candidate formulae matched the current search.</td
+            >
           </tr>
         {/each}
       </tbody>

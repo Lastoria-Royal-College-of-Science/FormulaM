@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
+
   import type { ThemeName } from "../../core/types";
 
   export let theme: ThemeName = "dark";
@@ -44,7 +45,12 @@
       class={`topbar-brand transition-opacity duration-200 ${isBrandVisible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
       href="#top"
     >
-      <img class={`topbar-brand-mark ${isDark ? "brand-logo-dark" : "brand-logo-light"}`} src={brandMarkSrc} alt="" aria-hidden="true" />
+      <img
+        class={`topbar-brand-mark ${isDark ? "brand-logo-dark" : "brand-logo-light"}`}
+        src={brandMarkSrc}
+        alt=""
+        aria-hidden="true"
+      />
       <span class="topbar-brand-copy">FormulaM</span>
     </a>
 

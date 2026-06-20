@@ -68,7 +68,8 @@ function formulaBodyToMhchem(body: string): string {
 
     if (char === "]") {
       squareDepth -= 1;
-      if (squareDepth < 0) throw new Error(`Unbalanced formula bracket near "${body.slice(index)}".`);
+      if (squareDepth < 0)
+        throw new Error(`Unbalanced formula bracket near "${body.slice(index)}".`);
       parts.push(char);
       index += 1;
       continue;
@@ -83,7 +84,8 @@ function formulaBodyToMhchem(body: string): string {
 
     if (char === ")") {
       parenDepth -= 1;
-      if (parenDepth < 0) throw new Error(`Unbalanced formula parenthesis near "${body.slice(index)}".`);
+      if (parenDepth < 0)
+        throw new Error(`Unbalanced formula parenthesis near "${body.slice(index)}".`);
       parts.push(char);
       index += 1;
       continue;

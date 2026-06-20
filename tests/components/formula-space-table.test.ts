@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
 import { render } from "svelte/server";
+import { describe, expect, it } from "vitest";
+
 import FormulaSpaceTable from "../../src/components/search/FormulaSpaceTable.svelte";
 import { buildMassIndex, formatIsotopeOption } from "../../src/core/chemistry/massData";
 import type { FormulaSpaceRow, MassPayload } from "../../src/core/types";
@@ -32,9 +33,7 @@ describe("formatIsotopeOption", () => {
 
 describe("FormulaSpaceTable", () => {
   it("shows superscript isotope labels while preserving canonical option values", () => {
-    const rows: FormulaSpaceRow[] = [
-      { id: 1, element: "O", isotope: "16O", lower: 0, upper: 20 },
-    ];
+    const rows: FormulaSpaceRow[] = [{ id: 1, element: "O", isotope: "16O", lower: 0, upper: 20 }];
 
     const { body } = render(FormulaSpaceTable, {
       props: {

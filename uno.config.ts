@@ -1,4 +1,5 @@
 import { defineConfig, presetIcons, presetWind4 } from "unocss";
+
 import { shortcuts } from "./src/styles/uno-shortcuts";
 import { theme } from "./src/styles/uno-tokens";
 

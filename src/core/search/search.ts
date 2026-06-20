@@ -16,9 +16,19 @@ import {
   normalizeSpeciesLabel,
   parseCharge,
 } from "../chemistry/formula";
-import type { FindFormulaRequest, FormulaHit, FormulaSearchRequest, SearchElements } from "../types";
+import type {
+  FindFormulaRequest,
+  FormulaHit,
+  FormulaSearchRequest,
+  SearchElements,
+} from "../types";
 
-type ElementBound = number | [number, number] | { min?: number | string; max?: number | string | null } | null | undefined;
+type ElementBound =
+  | number
+  | [number, number]
+  | { min?: number | string; max?: number | string | null }
+  | null
+  | undefined;
 type InternalHit = FormulaHit & { _sort_abs_error: bigint; _sort_mass: bigint };
 // NIST CODATA electron mass in u; FormulaM exact masses are handled in Da, so the numeric value is the same here.
 // Reference: https://physics.nist.gov/cuu/Constants/index.html
@@ -30,14 +40,18 @@ function parseBound(bound: ElementBound): [number, number | null] {
   if (Array.isArray(bound) && bound.length === 2) return [Number(bound[0]), Number(bound[1])];
   if (typeof bound === "object") {
     const mapping = bound as { min?: number | string; max?: number | string | null };
-    return [Number(mapping.min ?? 0), mapping.max === undefined || mapping.max === null ? null : Number(mapping.max)];
+    return [
+      Number(mapping.min ?? 0),
+      mapping.max === undefined || mapping.max === null ? null : Number(mapping.max),
+    ];
   }
   throw new Error("element bounds must be a max integer, [min, max], or {min, max}");
 }
 
 function parseNonNegativeCount(value: unknown, label: string): number {
   const number = Number(value);
-  if (!Number.isInteger(number) || number < 0) throw new Error(`${label} must be a non-negative integer`);
+  if (!Number.isInteger(number) || number < 0)
+    throw new Error(`${label} must be a non-negative integer`);
   return number;
 }
 
@@ -49,13 +63,14 @@ function normalizeBounds(
 ): Record<string, [number, number]> {
   const entries = Array.isArray(elements)
     ? elements.map((symbol) => [symbol, null] as [string, null])
-    : Object.entries(elements || {}) as [string, ElementBound][];
+    : (Object.entries(elements || {}) as [string, ElementBound][]);
   if (!entries.length) throw new Error("at least one element symbol is required");
 
   const bounds: Record<string, [number, number]> = {};
   for (const [rawSymbol, rawBound] of entries) {
     const symbol = normalizeSpeciesLabel(rawSymbol);
-    if (!(symbol in massTable)) throw new Error(`no exact mass is available for symbol or isotope label ${symbol}`);
+    if (!(symbol in massTable))
+      throw new Error(`no exact mass is available for symbol or isotope label ${symbol}`);
     const massInt = decimalToScaledBigInt(massTable[symbol], scaleDigits, "round");
     if (massInt <= 0n) throw new Error(`mass for ${symbol} must be positive`);
 
@@ -110,8 +125,8 @@ function buildCandidate({
     formula,
     composition: { ...composition },
     mass: bigIntToDecimalString(massInt, scaleDigits, 9),
-    mz: rationalToDecimalString(ionMassInt, chargeAbsBig * (10n ** BigInt(scaleDigits)), 9),
-    error_da: rationalToDecimalString(ionDiffInt, chargeAbsBig * (10n ** BigInt(scaleDigits)), 9),
+    mz: rationalToDecimalString(ionMassInt, chargeAbsBig * 10n ** BigInt(scaleDigits), 9),
+    error_da: rationalToDecimalString(ionDiffInt, chargeAbsBig * 10n ** BigInt(scaleDigits), 9),
     error_ppm: rationalToDecimalString(ionDiffInt * 1_000_000n, chargeAbsBig * targetMzInt, 6),
     charge,
     charge_state: formatChargeState(charge),
@@ -167,7 +182,9 @@ export function findFormulae({
     const mb = decimalToScaledBigInt(massIndex.masses[b], massDigits, "round");
     return mb > ma ? 1 : mb < ma ? -1 : a.localeCompare(b);
   });
-  const massesInt = symbols.map((symbol) => decimalToScaledBigInt(massIndex.masses[symbol], massDigits, "round"));
+  const massesInt = symbols.map((symbol) =>
+    decimalToScaledBigInt(massIndex.masses[symbol], massDigits, "round"),
+  );
   const minCounts = symbols.map((symbol) => bounds[symbol][0]);
   const maxCounts = symbols.map((symbol) => bounds[symbol][1]);
 
@@ -190,15 +207,17 @@ export function findFormulae({
         for (const [symbol, count] of Object.entries(composition)) {
           if (count) cleanComposition[symbol] = count;
         }
-        candidates.push(buildCandidate({
-          composition: cleanComposition,
-          massInt: currentMassInt,
-          targetMzInt,
-          charge: resolvedCharge,
-          chargeAbs,
-          electronMassInt,
-          scaleDigits: massDigits,
-        }));
+        candidates.push(
+          buildCandidate({
+            composition: cleanComposition,
+            massInt: currentMassInt,
+            targetMzInt,
+            charge: resolvedCharge,
+            chargeAbs,
+            electronMassInt,
+            scaleDigits: massDigits,
+          }),
+        );
       }
       return;
     }
@@ -224,14 +243,16 @@ export function findFormulae({
 
   recurse(0, 0n);
   candidates.sort((a, b) => {
-    if (a._sort_abs_error !== b._sort_abs_error) return a._sort_abs_error < b._sort_abs_error ? -1 : 1;
+    if (a._sort_abs_error !== b._sort_abs_error)
+      return a._sort_abs_error < b._sort_abs_error ? -1 : 1;
     if (a._sort_mass !== b._sort_mass) return a._sort_mass < b._sort_mass ? -1 : 1;
     return a.formula.localeCompare(b.formula);
   });
 
   if (maxResults !== null && maxResults !== undefined) {
     const limit = Number(maxResults);
-    if (!Number.isInteger(limit) || limit < 0) throw new Error("max_results must be a non-negative integer");
+    if (!Number.isInteger(limit) || limit < 0)
+      throw new Error("max_results must be a non-negative integer");
     return candidates.slice(0, limit).map(stripInternalFields);
   }
   return candidates.map(stripInternalFields);
@@ -264,16 +285,18 @@ export function findFormulaeForCharges({
     return true;
   });
 
-  const hits = uniqueCharges.flatMap((charge) => findFormulae({
-    mz,
-    elements,
-    charge,
-    toleranceDa,
-    tolerancePpm,
-    maxResults: limit,
-    massIndex,
-    massDigits,
-  }));
+  const hits = uniqueCharges.flatMap((charge) =>
+    findFormulae({
+      mz,
+      elements,
+      charge,
+      toleranceDa,
+      tolerancePpm,
+      maxResults: limit,
+      massIndex,
+      massDigits,
+    }),
+  );
 
   hits.sort(compareFormulaHits);
   return limit === null ? hits : hits.slice(0, limit);

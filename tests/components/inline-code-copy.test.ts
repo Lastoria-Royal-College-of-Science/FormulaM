@@ -1,12 +1,20 @@
-import { describe, expect, it } from "vitest";
 import { render } from "svelte/server";
+import { describe, expect, it } from "vitest";
+
 import Hero from "../../src/components/layout/Hero.svelte";
-import PeakInspector from "../../src/components/spectrum/PeakInspector.svelte";
 import SearchInputs from "../../src/components/search/SearchInputs.svelte";
+import PeakInspector from "../../src/components/spectrum/PeakInspector.svelte";
 import SpectrumImport from "../../src/components/spectrum/SpectrumImport.svelte";
 import SpectrumPlot from "../../src/components/spectrum/SpectrumPlot.svelte";
 import { MZ_TEX, PPM_ERROR_TEX } from "../../src/core/math/tex";
-import type { PeakAssignment, PlotSettings, SearchFormState, SpectrumImportSource, SpectrumPreviewTable, SpectrumPeak } from "../../src/core/types";
+import type {
+  PeakAssignment,
+  PlotSettings,
+  SearchFormState,
+  SpectrumImportSource,
+  SpectrumPreviewTable,
+  SpectrumPeak,
+} from "../../src/core/types";
 
 function texAnnotation(tex: string): string {
   return `<annotation encoding="application/x-tex">${tex}</annotation>`;
@@ -51,7 +59,10 @@ const importSource: SpectrumImportSource = {
   sheets: [
     {
       name: "Sheet1",
-      table: [["m/z", "Intensity"], [100.1, 50]],
+      table: [
+        ["m/z", "Intensity"],
+        [100.1, 50],
+      ],
       columnCount: 2,
       rowCount: 2,
       suggestedHasHeaderRow: true,
@@ -154,7 +165,7 @@ describe("DOM math label rendering", () => {
 
   it("marks the hero logo for topbar visibility and theme coloring", () => {
     const lightHero = render(Hero, { props: { theme: "light" } }).body;
-    expect(lightHero).toContain("data-hero-logo=\"true\"");
+    expect(lightHero).toContain('data-hero-logo="true"');
     expect(lightHero).toContain("hero-logo brand-logo-light");
 
     const darkHero = render(Hero, { props: { theme: "dark" } }).body;

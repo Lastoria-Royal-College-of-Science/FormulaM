@@ -1,3 +1,5 @@
+import { tokenizeFormulaDisplay } from "../chemistry/formulaDisplay";
+import type { PlotSettings, SpectrumPeak, ThemeName } from "../types";
 import {
   computeMajorTicks,
   computeMinorTicks,
@@ -7,8 +9,6 @@ import {
   resolvePlotDomain,
   resolveThresholdPercent,
 } from "./plotTicks";
-import { tokenizeFormulaDisplay } from "../chemistry/formulaDisplay";
-import type { PlotSettings, SpectrumPeak, ThemeName } from "../types";
 
 type PlotPalette = {
   background: string;
@@ -162,14 +162,20 @@ export function getPlotMargins(): PlotMargins {
   return plotMargins();
 }
 
-function peakColor(peak: SpectrumPeak, settings: PlotSettings, selectedPeakId?: string | null): string {
+function peakColor(
+  peak: SpectrumPeak,
+  settings: PlotSettings,
+  selectedPeakId?: string | null,
+): string {
   if (peak.id === selectedPeakId) return settings.selectedPeakColor;
   if (peak.assignments?.length) return settings.assignedPeakColor;
   return settings.peakColor;
 }
 
 function peakOpacity(peak: SpectrumPeak, settings: PlotSettings): number {
-  return settings.thresholdEnabled && peak.relativeIntensity < resolveThresholdPercent(settings) ? 0.32 : 1;
+  return settings.thresholdEnabled && peak.relativeIntensity < resolveThresholdPercent(settings)
+    ? 0.32
+    : 1;
 }
 
 export function plotTextRunFontSize(fontSize: number, script: PlotTextRun["script"]): number {
@@ -186,7 +192,12 @@ export function plotRichTextLineHeight(fontSize: number): number {
   return fontSize * PLOT_RICH_TEXT_LINE_HEIGHT_EM;
 }
 
-export function plotRichTextLineOffset(lineIndex: number, lineCount: number, fontSize: number, baseline: CanvasTextBaseline): number {
+export function plotRichTextLineOffset(
+  lineIndex: number,
+  lineCount: number,
+  fontSize: number,
+  baseline: CanvasTextBaseline,
+): number {
   const lineHeight = plotRichTextLineHeight(fontSize);
   if (baseline === "top" || baseline === "hanging") return lineIndex * lineHeight;
   if (baseline === "middle") return (lineIndex - (lineCount - 1) / 2) * lineHeight;
@@ -292,7 +303,14 @@ function resolveCoordinates(
   width: number,
   height: number,
   margins: PlotMargins,
-): { x: number; y: number; plotLeft: number; plotBottom: number; plotWidth: number; plotHeight: number } {
+): {
+  x: number;
+  y: number;
+  plotLeft: number;
+  plotBottom: number;
+  plotWidth: number;
+  plotHeight: number;
+} {
   const plotLeft = margins.left;
   const plotTop = margins.top;
   const plotWidth = Math.max(1, width - margins.left - margins.right);
@@ -306,12 +324,27 @@ function resolveCoordinates(
 }
 
 export function createSpectrumPlotScene(options: SpectrumPlotRenderOptions): PlotScene {
-  const { peaks, settings, width, height, selectedPeakId = null, hoveredPeakId = null, theme = "dark", renderMode = "screen", transparentBackground = false } = options;
+  const {
+    peaks,
+    settings,
+    width,
+    height,
+    selectedPeakId = null,
+    hoveredPeakId = null,
+    theme = "dark",
+    renderMode = "screen",
+    transparentBackground = false,
+  } = options;
   const palette = renderMode === "export" ? exportPalette() : themePalette(theme);
   const margins = plotMargins();
   const domain = resolvePlotDomain(peaks, settings);
   const visiblePeaks = filterPeaksInRange(peaks, domain.xMin, domain.xMax);
-  const xTickSpacing = resolveMajorTickSpacing(domain.xMin, domain.xMax, settings.majorTickSpacing, settings.autoTicks);
+  const xTickSpacing = resolveMajorTickSpacing(
+    domain.xMin,
+    domain.xMax,
+    settings.majorTickSpacing,
+    settings.autoTicks,
+  );
   const thresholdPercent = resolveThresholdPercent(settings);
   const xTicks = computeMajorTicks(domain.xMin, domain.xMax, xTickSpacing, false);
   const xMinorTicks = computeMinorTicks(domain.xMin, domain.xMax, xTickSpacing);
@@ -399,7 +432,14 @@ export function createSpectrumPlotScene(options: SpectrumPlotRenderOptions): Plo
   }
 
   for (const peak of visiblePeaks) {
-    const { x, y } = resolveCoordinates(peak.mz, peak.relativeIntensity, domain, width, height, margins);
+    const { x, y } = resolveCoordinates(
+      peak.mz,
+      peak.relativeIntensity,
+      domain,
+      width,
+      height,
+      margins,
+    );
     const clampedY = Math.max(plotTop, y);
     shapes.push({
       kind: "line",
@@ -408,7 +448,8 @@ export function createSpectrumPlotScene(options: SpectrumPlotRenderOptions): Plo
       x2: x,
       y2: clampedY,
       stroke: peakColor(peak, settings, selectedPeakId),
-      strokeWidth: peak.id === selectedPeakId ? Math.max(settings.lineWidth + 1.5, 2.5) : settings.lineWidth,
+      strokeWidth:
+        peak.id === selectedPeakId ? Math.max(settings.lineWidth + 1.5, 2.5) : settings.lineWidth,
       opacity: peakOpacity(peak, settings),
     });
 
@@ -522,7 +563,14 @@ export function createSpectrumPlotScene(options: SpectrumPlotRenderOptions): Plo
   }
 
   for (const peak of visiblePeaks) {
-    const { x, y } = resolveCoordinates(peak.mz, peak.relativeIntensity, domain, width, height, margins);
+    const { x, y } = resolveCoordinates(
+      peak.mz,
+      peak.relativeIntensity,
+      domain,
+      width,
+      height,
+      margins,
+    );
     shapes.push(...buildPeakLabelShapes(peak, settings, x, y, plotTop, palette.text));
   }
 
@@ -538,7 +586,12 @@ function canvasFont(fontSize: number, fontWeight: PlotText["fontWeight"]): strin
   return `${fontWeight === "bold" ? 600 : 400} ${fontSize}px ${CANVAS_FONT_FAMILY}`;
 }
 
-function measureRichTextLine(context: CanvasRenderingContext2D, line: PlotTextRun[], fontSize: number, fontWeight: PlotText["fontWeight"]): number {
+function measureRichTextLine(
+  context: CanvasRenderingContext2D,
+  line: PlotTextRun[],
+  fontSize: number,
+  fontWeight: PlotText["fontWeight"],
+): number {
   return line.reduce((width, run) => {
     const runFontSize = plotTextRunFontSize(fontSize, run.script);
     context.font = canvasFont(runFontSize, fontWeight);
@@ -590,8 +643,20 @@ function drawRichText(context: CanvasRenderingContext2D, shape: PlotRichText): v
 
   shape.lines.forEach((line, lineIndex) => {
     const x = shape.rotation ? 0 : shape.x;
-    const y = (shape.rotation ? 0 : shape.y) + plotRichTextLineOffset(lineIndex, shape.lines.length, shape.fontSize, shape.baseline);
-    drawRichTextLine(context, line, x, y, shape.fill, shape.fontSize, shape.fontWeight, shape.align, shape.baseline);
+    const y =
+      (shape.rotation ? 0 : shape.y) +
+      plotRichTextLineOffset(lineIndex, shape.lines.length, shape.fontSize, shape.baseline);
+    drawRichTextLine(
+      context,
+      line,
+      x,
+      y,
+      shape.fill,
+      shape.fontSize,
+      shape.fontWeight,
+      shape.align,
+      shape.baseline,
+    );
   });
 
   context.restore();
@@ -652,6 +717,9 @@ function renderPlotScene(context: CanvasRenderingContext2D, scene: PlotScene): v
   }
 }
 
-export function renderSpectrumPlot(context: CanvasRenderingContext2D, options: SpectrumPlotRenderOptions): void {
+export function renderSpectrumPlot(
+  context: CanvasRenderingContext2D,
+  options: SpectrumPlotRenderOptions,
+): void {
   renderPlotScene(context, createSpectrumPlotScene(options));
 }

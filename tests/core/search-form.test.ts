@@ -1,13 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { createDefaultSearchForm, hasCommittedCharges, hasEnabledTolerance, selectedCharges, selectedTolerance } from "../../src/core/search/searchForm";
+
+import {
+  createDefaultSearchForm,
+  hasCommittedCharges,
+  hasEnabledTolerance,
+  selectedCharges,
+  selectedTolerance,
+} from "../../src/core/search/searchForm";
 
 describe("search form tolerance helpers", () => {
   it("defaults to a committed +1 charge and seeds the Da value", () => {
     const form = createDefaultSearchForm();
 
-    expect(form.chargeEntries).toEqual([
-      { id: "charge-0", text: "1" },
-    ]);
+    expect(form.chargeEntries).toEqual([{ id: "charge-0", text: "1" }]);
     expect(form.chargeSign).toBe("+");
     expect(form.chargeInputText).toBe("");
     expect(selectedCharges(form)).toEqual([1]);
@@ -61,7 +66,9 @@ describe("search form tolerance helpers", () => {
     form.tolerancePpmEnabled = false;
 
     expect(hasEnabledTolerance(form)).toBe(false);
-    expect(() => selectedTolerance(form)).toThrow("Enable a ppm tolerance, a Da tolerance, or both.");
+    expect(() => selectedTolerance(form)).toThrow(
+      "Enable a ppm tolerance, a Da tolerance, or both.",
+    );
   });
 
   it("requires values for enabled tolerance inputs", () => {

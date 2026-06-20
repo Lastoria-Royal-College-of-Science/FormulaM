@@ -44,7 +44,11 @@ export function parseDecimalToRational(rawValue: unknown): Rational {
   };
 }
 
-export function decimalToScaledBigInt(rawValue: unknown, scaleDigits = 9, rounding: RoundingMode = "round"): bigint {
+export function decimalToScaledBigInt(
+  rawValue: unknown,
+  scaleDigits = 9,
+  rounding: RoundingMode = "round",
+): bigint {
   const expanded = expandExponential(rawValue);
   const match = expanded.match(/^([+-]?)(\d+)(?:\.(\d*))?$/);
   if (!match) throw new Error(`Invalid decimal value: ${rawValue}`);
@@ -93,7 +97,11 @@ export function maxBigInt(a: bigint, b: bigint): bigint {
   return a > b ? a : b;
 }
 
-export function bigIntToDecimalString(value: bigint, scaleDigits = 9, fractionDigits = scaleDigits): string {
+export function bigIntToDecimalString(
+  value: bigint,
+  scaleDigits = 9,
+  fractionDigits = scaleDigits,
+): string {
   const sign = value < 0n ? "-" : "";
   const magnitude = value < 0n ? -value : value;
   const scale = TEN ** BigInt(scaleDigits);
@@ -112,7 +120,11 @@ export function bigIntToDecimalString(value: bigint, scaleDigits = 9, fractionDi
   return fractionDigits === 0 ? `${sign}${whole}` : `${sign}${whole}.${frac}`;
 }
 
-export function rationalToDecimalString(numerator: bigint, denominator: bigint, fractionDigits = 9): string {
+export function rationalToDecimalString(
+  numerator: bigint,
+  denominator: bigint,
+  fractionDigits = 9,
+): string {
   if (denominator <= 0n) throw new Error("denominator must be positive");
   const sign = numerator < 0n ? "-" : "";
   const n = numerator < 0n ? -numerator : numerator;

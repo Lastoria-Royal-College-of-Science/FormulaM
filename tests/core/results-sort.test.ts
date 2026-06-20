@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import {
   cycleResultSortState,
   getResultSortAria,
@@ -49,17 +50,33 @@ describe("sortFormulaHits", () => {
   });
 
   it("sorts neutral mass and predicted m/z numerically in both directions", () => {
-    expect(sortFormulaHits(hits, { column: "mass", direction: "asc" }).map((hit) => hit.formula)).toEqual(["B", "C", "A"]);
-    expect(sortFormulaHits(hits, { column: "mass", direction: "desc" }).map((hit) => hit.formula)).toEqual(["A", "C", "B"]);
-    expect(sortFormulaHits(hits, { column: "mz", direction: "asc" }).map((hit) => hit.formula)).toEqual(["C", "A", "B"]);
-    expect(sortFormulaHits(hits, { column: "mz", direction: "desc" }).map((hit) => hit.formula)).toEqual(["B", "A", "C"]);
+    expect(
+      sortFormulaHits(hits, { column: "mass", direction: "asc" }).map((hit) => hit.formula),
+    ).toEqual(["B", "C", "A"]);
+    expect(
+      sortFormulaHits(hits, { column: "mass", direction: "desc" }).map((hit) => hit.formula),
+    ).toEqual(["A", "C", "B"]);
+    expect(
+      sortFormulaHits(hits, { column: "mz", direction: "asc" }).map((hit) => hit.formula),
+    ).toEqual(["C", "A", "B"]);
+    expect(
+      sortFormulaHits(hits, { column: "mz", direction: "desc" }).map((hit) => hit.formula),
+    ).toEqual(["B", "A", "C"]);
   });
 
   it("sorts error columns by absolute error while preserving the displayed sign", () => {
-    expect(sortFormulaHits(hits, { column: "error_da", direction: "asc" }).map((hit) => hit.formula)).toEqual(["C", "B", "A"]);
-    expect(sortFormulaHits(hits, { column: "error_da", direction: "desc" }).map((hit) => hit.formula)).toEqual(["A", "B", "C"]);
-    expect(sortFormulaHits(hits, { column: "error_ppm", direction: "asc" }).map((hit) => hit.formula)).toEqual(["C", "A", "B"]);
-    expect(sortFormulaHits(hits, { column: "error_ppm", direction: "desc" }).map((hit) => hit.formula)).toEqual(["B", "A", "C"]);
+    expect(
+      sortFormulaHits(hits, { column: "error_da", direction: "asc" }).map((hit) => hit.formula),
+    ).toEqual(["C", "B", "A"]);
+    expect(
+      sortFormulaHits(hits, { column: "error_da", direction: "desc" }).map((hit) => hit.formula),
+    ).toEqual(["A", "B", "C"]);
+    expect(
+      sortFormulaHits(hits, { column: "error_ppm", direction: "asc" }).map((hit) => hit.formula),
+    ).toEqual(["C", "A", "B"]);
+    expect(
+      sortFormulaHits(hits, { column: "error_ppm", direction: "desc" }).map((hit) => hit.formula),
+    ).toEqual(["B", "A", "C"]);
   });
 
   it("cycles sort state as SORT to ASC to DESC to SORT", () => {
@@ -82,7 +99,11 @@ describe("sortFormulaHits", () => {
 
   it("maps the active state to the requested UnoCSS icon classes", () => {
     expect(getResultSortIconClass(null, "mass")).toBe("i-typcn-arrow-unsorted");
-    expect(getResultSortIconClass({ column: "mass", direction: "asc" }, "mass")).toBe("i-typcn-arrow-sorted-up");
-    expect(getResultSortIconClass({ column: "mass", direction: "desc" }, "mass")).toBe("i-typcn-arrow-sorted-down");
+    expect(getResultSortIconClass({ column: "mass", direction: "asc" }, "mass")).toBe(
+      "i-typcn-arrow-sorted-up",
+    );
+    expect(getResultSortIconClass({ column: "mass", direction: "desc" }, "mass")).toBe(
+      "i-typcn-arrow-sorted-down",
+    );
   });
 });

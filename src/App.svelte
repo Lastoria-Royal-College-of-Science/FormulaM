@@ -1,17 +1,35 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
-  import TopBar from "./components/layout/TopBar.svelte";
+
   import Hero from "./components/layout/Hero.svelte";
-  import SearchInputs from "./components/search/SearchInputs.svelte";
-  import FormulaSpaceTable from "./components/search/FormulaSpaceTable.svelte";
+  import TopBar from "./components/layout/TopBar.svelte";
   import ResultsTable from "./components/results/ResultsTable.svelte";
+  import FormulaSpaceTable from "./components/search/FormulaSpaceTable.svelte";
+  import SearchInputs from "./components/search/SearchInputs.svelte";
+  import ExportPanel from "./components/spectrum/ExportPanel.svelte";
+  import PeakInspector from "./components/spectrum/PeakInspector.svelte";
+  import PlotSettingsPanel from "./components/spectrum/PlotSettingsPanel.svelte";
   import SpectrumImport from "./components/spectrum/SpectrumImport.svelte";
   import SpectrumPlot from "./components/spectrum/SpectrumPlot.svelte";
-  import PlotSettingsPanel from "./components/spectrum/PlotSettingsPanel.svelte";
-  import PeakInspector from "./components/spectrum/PeakInspector.svelte";
-  import ExportPanel from "./components/spectrum/ExportPanel.svelte";
-  import { downloadHitsCsv } from "./core/export/csv";
   import { buildMassIndex, loadMassPayload } from "./core/chemistry/massData";
+  import { downloadHitsCsv } from "./core/export/csv";
+  import { downloadAssignmentsCsv } from "./core/export/spectrumCsv";
+  import { downloadAnnotatedSpectrumPdf } from "./core/export/spectrumPdf";
+  import { downloadAnnotatedSpectrumPng } from "./core/export/spectrumPng";
+  import { createPlotSettings, DEFAULT_PLOT_SETTINGS } from "./core/plot/plotTicks";
+  import {
+    canCommitChargeEntryText,
+    createChargeEntry,
+    isChargeDraftText,
+  } from "./core/search/chargeInput";
+  import { findFormulaeForCharges } from "./core/search/search";
+  import {
+    createDefaultSearchForm,
+    hasCommittedCharges,
+    hasEnabledTolerance,
+    selectedCharges,
+    selectedTolerance,
+  } from "./core/search/searchForm";
   import {
     chooseUnusedIsotope,
     createInitialRows,
@@ -20,16 +38,20 @@
     makeRow,
     validateAndBuildElements,
   } from "./core/search/searchSpace";
-  import { getAssignment, attachAssignmentsToPeaks, buildPeakAssignment, matchesAssignmentHit, removeAssignment, upsertAssignment } from "./core/spectrum/assignments";
-  import { downloadAnnotatedSpectrumPdf } from "./core/export/spectrumPdf";
-  import { downloadAnnotatedSpectrumPng } from "./core/export/spectrumPng";
-  import { downloadAssignmentsCsv } from "./core/export/spectrumCsv";
-  import { createPlotSettings, DEFAULT_PLOT_SETTINGS } from "./core/plot/plotTicks";
-  import { canCommitChargeEntryText, createChargeEntry, isChargeDraftText } from "./core/search/chargeInput";
-  import { findFormulaeForCharges } from "./core/search/search";
-  import { createDefaultSearchForm, hasCommittedCharges, hasEnabledTolerance, selectedCharges, selectedTolerance } from "./core/search/searchForm";
+  import {
+    getAssignment,
+    attachAssignmentsToPeaks,
+    buildPeakAssignment,
+    matchesAssignmentHit,
+    removeAssignment,
+    upsertAssignment,
+  } from "./core/spectrum/assignments";
   import { loadSpectrumImportSource } from "./core/spectrum/spectrumImport";
-  import { buildSpectrumPreview, normalizeSpectrumTable, suggestSpectrumSelection } from "./core/spectrum/spectrumNormalize";
+  import {
+    buildSpectrumPreview,
+    normalizeSpectrumTable,
+    suggestSpectrumSelection,
+  } from "./core/spectrum/spectrumNormalize";
   import type {
     AppStatus,
     FormulaSearchRequest,
@@ -81,14 +103,24 @@
   let plotSettings: PlotSettings = { ...DEFAULT_PLOT_SETTINGS };
 
   $: isBusy = status === "loading" || status === "running";
-  $: spectrumPeaks = attachAssignmentsToPeaks(rawSpectrumPeaks, spectrumAssignments, selectedPeakId);
+  $: spectrumPeaks = attachAssignmentsToPeaks(
+    rawSpectrumPeaks,
+    spectrumAssignments,
+    selectedPeakId,
+  );
   $: selectedPeak = spectrumPeaks.find((peak) => peak.id === selectedPeakId) ?? null;
   $: selectedAssignment = getAssignment(spectrumAssignments, selectedPeakId);
   $: assignedCount = spectrumAssignments.length;
   $: selectedPeakLabel = selectedPeak ? selectedPeak.mz.toFixed(6) : "";
-  $: canExportAssignmentCsv = rawSpectrumPeaks.length > 0 && (includeUnassignedInAssignmentCsv || assignedCount > 0);
-  $: currentSpectrumImportSheet = spectrumImportSource?.sheets.find((sheet) => sheet.name === spectrumActiveSheetName) ?? spectrumImportSource?.sheets[0] ?? null;
-  $: spectrumPreview = currentSpectrumImportSheet ? buildSpectrumPreview(currentSpectrumImportSheet.table, spectrumHasHeaderRow) : null;
+  $: canExportAssignmentCsv =
+    rawSpectrumPeaks.length > 0 && (includeUnassignedInAssignmentCsv || assignedCount > 0);
+  $: currentSpectrumImportSheet =
+    spectrumImportSource?.sheets.find((sheet) => sheet.name === spectrumActiveSheetName) ??
+    spectrumImportSource?.sheets[0] ??
+    null;
+  $: spectrumPreview = currentSpectrumImportSheet
+    ? buildSpectrumPreview(currentSpectrumImportSheet.table, spectrumHasHeaderRow)
+    : null;
 
   function applyTheme(nextTheme: ThemeName): void {
     theme = nextTheme;
@@ -178,7 +210,9 @@
     if (!form.chargeEditId || !canCommitChargeEntryText(form.chargeEditText)) return;
     const updatedEntry = createChargeEntry(form.chargeEditId, form.chargeEditText);
     updateForm({
-      chargeEntries: form.chargeEntries.map((entry) => (entry.id === updatedEntry.id ? updatedEntry : entry)),
+      chargeEntries: form.chargeEntries.map((entry) =>
+        entry.id === updatedEntry.id ? updatedEntry : entry,
+      ),
       chargeEditId: null,
       chargeEditText: "",
     });
@@ -254,7 +288,8 @@
   function buildRequest(): FormulaSearchRequest {
     if (!massIndex) throw new Error("Mass database is not loaded yet.");
     const maxResults = Number(form.maxResults);
-    if (!Number.isInteger(maxResults) || maxResults < 1) throw new Error("Max results must be a positive integer.");
+    if (!Number.isInteger(maxResults) || maxResults < 1)
+      throw new Error("Max results must be a positive integer.");
     const elements = validateAndBuildElements(rows, massIndex);
     const charges = selectedCharges(form);
     const { tolerancePpm, toleranceDa } = selectedTolerance(form);
@@ -309,16 +344,18 @@
   }
 
   function importSourceLabel(sheetName: string): string {
-    return spectrumImportSource && spectrumImportSource.sheets.length > 1 ? `${spectrumFileName} / ${sheetName}` : spectrumFileName;
+    return spectrumImportSource && spectrumImportSource.sheets.length > 1
+      ? `${spectrumFileName} / ${sheetName}`
+      : spectrumFileName;
   }
 
   function isSpectrumImportSheet(candidate: unknown): candidate is SpectrumImportSheet {
     return Boolean(
-      candidate
-      && typeof candidate === "object"
-      && "name" in candidate
-      && "table" in candidate
-      && Array.isArray((candidate as SpectrumImportSheet).table),
+      candidate &&
+      typeof candidate === "object" &&
+      "name" in candidate &&
+      "table" in candidate &&
+      Array.isArray((candidate as SpectrumImportSheet).table),
     );
   }
 
@@ -353,7 +390,9 @@
     spectrumIntensityColumnIndex = suggestion.intensityColumnIndex;
   }
 
-  function handleApplySpectrumSelection(sheet: SpectrumImportSheet | Event | null = currentSpectrumImportSheet): void {
+  function handleApplySpectrumSelection(
+    sheet: SpectrumImportSheet | Event | null = currentSpectrumImportSheet,
+  ): void {
     const resolvedSheet = isSpectrumImportSheet(sheet) ? sheet : currentSpectrumImportSheet;
     if (!resolvedSheet) return;
 
@@ -384,7 +423,8 @@
 
     const suggestion = suggestSpectrumSelection(currentSpectrumImportSheet.table, value);
     if (spectrumMzColumnIndex === null) spectrumMzColumnIndex = suggestion.mzColumnIndex;
-    if (spectrumIntensityColumnIndex === null) spectrumIntensityColumnIndex = suggestion.intensityColumnIndex;
+    if (spectrumIntensityColumnIndex === null)
+      spectrumIntensityColumnIndex = suggestion.intensityColumnIndex;
   }
 
   function handleSpectrumMzColumnSelect(index: number | null): void {
@@ -411,7 +451,10 @@
       spectrumFileName = file.name;
 
       const firstSheet = spectrumImportSource.sheets[0];
-      if (!firstSheet) throw new Error(`Spectrum import failed: ${file.name} does not contain any readable tables.`);
+      if (!firstSheet)
+        throw new Error(
+          `Spectrum import failed: ${file.name} does not contain any readable tables.`,
+        );
 
       applySuggestedSpectrumSelection(firstSheet);
       handleApplySpectrumSelection(firstSheet);
@@ -431,7 +474,10 @@
 
   function handleAssign(hit: FormulaHit): void {
     if (!selectedPeak) return;
-    spectrumAssignments = upsertAssignment(spectrumAssignments, buildPeakAssignment(selectedPeak, hit));
+    spectrumAssignments = upsertAssignment(
+      spectrumAssignments,
+      buildPeakAssignment(selectedPeak, hit),
+    );
     status = "success";
   }
 
@@ -499,10 +545,15 @@
     }
 
     try {
-      worker = new Worker(new URL("./workers/formulaSearch.worker.ts", import.meta.url), { type: "module" });
+      worker = new Worker(new URL("./workers/formulaSearch.worker.ts", import.meta.url), {
+        type: "module",
+      });
       worker.onmessage = handleWorkerMessage;
     } catch (error) {
-      console.warn("Formula search worker could not be created; falling back to main-thread search.", error);
+      console.warn(
+        "Formula search worker could not be created; falling back to main-thread search.",
+        error,
+      );
       worker = null;
     }
 
@@ -568,8 +619,17 @@
     />
 
     {#if rawSpectrumPeaks.length > 0}
-      <PlotSettingsPanel settings={plotSettings} peaks={spectrumPeaks} disabled={isBusy} onChange={updatePlotSettings} />
-      <PeakInspector selectedPeak={selectedPeak} assignment={selectedAssignment} onRemoveAssignment={handleRemoveAssignment} />
+      <PlotSettingsPanel
+        settings={plotSettings}
+        peaks={spectrumPeaks}
+        disabled={isBusy}
+        onChange={updatePlotSettings}
+      />
+      <PeakInspector
+        {selectedPeak}
+        assignment={selectedAssignment}
+        onRemoveAssignment={handleRemoveAssignment}
+      />
     {/if}
 
     <SearchInputs
@@ -597,14 +657,25 @@
     {/if}
 
     <section class="my-4 flex flex-wrap gap-3">
-      <button type="button" class="primary-action" disabled={isBusy || !massIndex || !hasCommittedCharges(form) || !hasEnabledTolerance(form)} on:click={runSearch}>Find candidate formulae</button>
-      <button id="downloadCsv" type="button" class="secondary-action" disabled={isBusy || results.length === 0} on:click={downloadCsv}>Download formula hits CSV</button>
+      <button
+        type="button"
+        class="primary-action"
+        disabled={isBusy || !massIndex || !hasCommittedCharges(form) || !hasEnabledTolerance(form)}
+        on:click={runSearch}>Find candidate formulae</button
+      >
+      <button
+        id="downloadCsv"
+        type="button"
+        class="secondary-action"
+        disabled={isBusy || results.length === 0}
+        on:click={downloadCsv}>Download formula hits CSV</button
+      >
     </section>
 
     {#if hasSearched}
       <ResultsTable
         {results}
-        selectedPeakLabel={selectedPeakLabel}
+        {selectedPeakLabel}
         activeAssignment={selectedAssignment}
         onToggleAssignment={rawSpectrumPeaks.length > 0 ? handleToggleAssignment : null}
       />

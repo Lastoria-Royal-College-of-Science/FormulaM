@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { elementOptionsForRow } from "../../core/search/searchSpace";
   import { formatIsotopeOption } from "../../core/chemistry/massData";
+  import { elementOptionsForRow } from "../../core/search/searchSpace";
   import type { FormulaSpaceRow, MassIndex } from "../../core/types";
 
   export let rows: FormulaSpaceRow[] = [];
@@ -17,7 +17,10 @@
   <div class="flex items-start justify-between gap-4">
     <div>
       <h2 class="mt-0">Formula search space</h2>
-      <p class="-mt-1.5 text-muted">Use one row per isotope-specific species. Repeated elements are allowed when different isotopes are selected.</p>
+      <p class="-mt-1.5 text-muted">
+        Use one row per isotope-specific species. Repeated elements are allowed when different
+        isotopes are selected.
+      </p>
     </div>
   </div>
 
@@ -39,9 +42,12 @@
               <select
                 class="field-control field-select"
                 value={row.element}
-                disabled={disabled}
+                {disabled}
                 aria-label="Element"
-                on:change={(event) => onUpdateRow(row.id, { element: (event.currentTarget as HTMLSelectElement).value })}
+                on:change={(event) =>
+                  onUpdateRow(row.id, {
+                    element: (event.currentTarget as HTMLSelectElement).value,
+                  })}
               >
                 {#each elementOptionsForRow(rows, massIndex, row.id) as symbol}
                   <option value={symbol}>{symbol}</option>
@@ -52,9 +58,12 @@
               <select
                 class="field-control field-select"
                 value={row.isotope}
-                disabled={disabled}
+                {disabled}
                 aria-label="Isotope"
-                on:change={(event) => onUpdateRow(row.id, { isotope: (event.currentTarget as HTMLSelectElement).value })}
+                on:change={(event) =>
+                  onUpdateRow(row.id, {
+                    isotope: (event.currentTarget as HTMLSelectElement).value,
+                  })}
               >
                 {#each massIndex.isotopeOptions[row.element] || [] as isotope}
                   <option value={isotope}>{formatIsotopeOption(massIndex, isotope)}</option>
@@ -68,7 +77,7 @@
                 min="0"
                 step="1"
                 value={row.lower}
-                disabled={disabled}
+                {disabled}
                 aria-label="Lower limit"
                 on:input={(event) => {
                   const value = (event.currentTarget as HTMLInputElement).value;
@@ -83,7 +92,7 @@
                 min="0"
                 step="1"
                 value={row.upper}
-                disabled={disabled}
+                {disabled}
                 aria-label="Upper limit"
                 on:input={(event) => {
                   const value = (event.currentTarget as HTMLInputElement).value;
@@ -108,7 +117,14 @@
     </table>
   </div>
   <div class="mt-2.5 flex justify-start">
-    <button id="addRow" type="button" class="icon-action" title="Add row" disabled={disabled || !canAddRow} on:click={onAddRow}>
+    <button
+      id="addRow"
+      type="button"
+      class="icon-action"
+      title="Add row"
+      disabled={disabled || !canAddRow}
+      on:click={onAddRow}
+    >
       <span class="i-mdi-add h-[18px] w-[18px]" aria-hidden="true"></span>
     </button>
   </div>

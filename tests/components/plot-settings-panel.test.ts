@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
 import { render } from "svelte/server";
+import { describe, expect, it } from "vitest";
+
 import PlotSettingsPanel from "../../src/components/spectrum/PlotSettingsPanel.svelte";
 import { X_MAX_TEX, X_MIN_TEX, Y_MAX_TEX } from "../../src/core/math/tex";
 import { DEFAULT_PLOT_SETTINGS, createPlotSettings } from "../../src/core/plot/plotTicks";

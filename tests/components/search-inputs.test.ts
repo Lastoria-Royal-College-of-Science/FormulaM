@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
 import { render } from "svelte/server";
+import { describe, expect, it } from "vitest";
+
 import SearchInputs from "../../src/components/search/SearchInputs.svelte";
 import { PPM_ERROR_TEX } from "../../src/core/math/tex";
 import { createDefaultSearchForm } from "../../src/core/search/searchForm";
@@ -43,8 +44,12 @@ describe("SearchInputs", () => {
     expect(body).not.toContain(">+1<");
     expect(body.match(/role="switch"/g)).toHaveLength(3);
     expect(body.match(/<button[^>]*class="[^"]*\btoggle-switch\b[^"]*"/g)).toHaveLength(2);
-    expect(body.indexOf('aria-label="Enable ppm tolerance"')).toBeLessThan(body.indexOf('id="tolerancePpm"'));
-    expect(body.indexOf('aria-label="Enable Da tolerance"')).toBeLessThan(body.indexOf('id="toleranceDa"'));
+    expect(body.indexOf('aria-label="Enable ppm tolerance"')).toBeLessThan(
+      body.indexOf('id="tolerancePpm"'),
+    );
+    expect(body.indexOf('aria-label="Enable Da tolerance"')).toBeLessThan(
+      body.indexOf('id="toleranceDa"'),
+    );
     expect(body).toContain('value="0.01"');
     expect(body).not.toMatch(/<input[^>]*id="tolerancePpm"[^>]*disabled/);
     expect(body).toMatch(/<input[^>]*id="toleranceDa"[^>]*disabled/);

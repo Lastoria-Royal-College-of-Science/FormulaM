@@ -4,9 +4,16 @@ import {
   plotTextRunBaselineOffset,
   plotTextRunFontSize,
 } from "../plot/plotScene";
-import { downloadBlob } from "./download";
-import type { PlotCircle, PlotRichText, PlotScene, PlotShape, PlotText, PlotTextRun } from "../plot/plotScene";
+import type {
+  PlotCircle,
+  PlotRichText,
+  PlotScene,
+  PlotShape,
+  PlotText,
+  PlotTextRun,
+} from "../plot/plotScene";
 import type { PlotSettings, SpectrumPeak, ThemeName } from "../types";
+import { downloadBlob } from "./download";
 
 type PdfTextMetrics = {
   width: number;
@@ -62,7 +69,11 @@ function parseColor(color: string): { r: number; g: number; b: number; a: number
   return { r: 0, g: 0, b: 0, a: 1 };
 }
 
-function resolvePdfColor(color: string, background: string, opacity = 1): { r: number; g: number; b: number } {
+function resolvePdfColor(
+  color: string,
+  background: string,
+  opacity = 1,
+): { r: number; g: number; b: number } {
   const foreground = parseColor(color);
   const alpha = Math.min(1, Math.max(0, foreground.a * opacity));
   if (alpha >= 1) {
@@ -100,7 +111,11 @@ function getPdfMeasurementContext(): CanvasRenderingContext2D | null {
   return pdfMeasurementContext;
 }
 
-function measurePdfText(text: string, fontSize: number, fontWeight: PlotText["fontWeight"]): PdfTextMetrics {
+function measurePdfText(
+  text: string,
+  fontSize: number,
+  fontWeight: PlotText["fontWeight"],
+): PdfTextMetrics {
   const context = getPdfMeasurementContext();
   if (!context) {
     return {
@@ -146,8 +161,10 @@ function buildPdfText(shape: PlotText, scene: PlotScene): string {
   const xOffset = textAlignOffset(metrics.width, shape.align);
   const yOffset = textBaselineOffset(metrics, shape.baseline);
   const canvasRotation = ((shape.rotation ?? 0) * Math.PI) / 180;
-  const baselineX = shape.x + xOffset * Math.cos(canvasRotation) - yOffset * Math.sin(canvasRotation);
-  const baselineY = shape.y + xOffset * Math.sin(canvasRotation) + yOffset * Math.cos(canvasRotation);
+  const baselineX =
+    shape.x + xOffset * Math.cos(canvasRotation) - yOffset * Math.sin(canvasRotation);
+  const baselineY =
+    shape.y + xOffset * Math.sin(canvasRotation) + yOffset * Math.cos(canvasRotation);
   const pdfRotation = -canvasRotation;
   const cosine = Math.cos(pdfRotation);
   const sine = Math.sin(pdfRotation);
@@ -173,17 +190,24 @@ function buildPdfText(shape: PlotText, scene: PlotScene): string {
   ].join("\n");
 }
 
-function measurePdfRichTextLine(line: PlotTextRun[], fontSize: number, fontWeight: PlotText["fontWeight"]): PdfTextMetrics {
-  return line.reduce<PdfTextMetrics>((combined, run) => {
-    const runFontSize = plotTextRunFontSize(fontSize, run.script);
-    const runOffset = plotTextRunBaselineOffset(fontSize, run.script);
-    const metrics = measurePdfText(run.text, runFontSize, fontWeight);
-    return {
-      width: combined.width + fontSize * (run.leadingGap ?? 0) + metrics.width,
-      ascent: Math.max(combined.ascent, metrics.ascent - runOffset),
-      descent: Math.max(combined.descent, metrics.descent + runOffset),
-    };
-  }, { width: 0, ascent: fontSize * 0.8, descent: fontSize * 0.2 });
+function measurePdfRichTextLine(
+  line: PlotTextRun[],
+  fontSize: number,
+  fontWeight: PlotText["fontWeight"],
+): PdfTextMetrics {
+  return line.reduce<PdfTextMetrics>(
+    (combined, run) => {
+      const runFontSize = plotTextRunFontSize(fontSize, run.script);
+      const runOffset = plotTextRunBaselineOffset(fontSize, run.script);
+      const metrics = measurePdfText(run.text, runFontSize, fontWeight);
+      return {
+        width: combined.width + fontSize * (run.leadingGap ?? 0) + metrics.width,
+        ascent: Math.max(combined.ascent, metrics.ascent - runOffset),
+        descent: Math.max(combined.descent, metrics.descent + runOffset),
+      };
+    },
+    { width: 0, ascent: fontSize * 0.8, descent: fontSize * 0.2 },
+  );
 }
 
 function buildPdfRichText(shape: PlotRichText, scene: PlotScene): string {
@@ -198,8 +222,9 @@ function buildPdfRichText(shape: PlotRichText, scene: PlotScene): string {
 
   shape.lines.forEach((line, lineIndex) => {
     const lineMetrics = measurePdfRichTextLine(line, shape.fontSize, shape.fontWeight);
-    const lineYOffset = plotRichTextLineOffset(lineIndex, shape.lines.length, shape.fontSize, shape.baseline)
-      + textBaselineOffset(lineMetrics, shape.baseline);
+    const lineYOffset =
+      plotRichTextLineOffset(lineIndex, shape.lines.length, shape.fontSize, shape.baseline) +
+      textBaselineOffset(lineMetrics, shape.baseline);
     let cursor = textAlignOffset(lineMetrics.width, shape.align);
 
     for (const run of line) {
@@ -379,15 +404,17 @@ export function annotatedSpectrumPdfBytes(
   width = 1600,
   height = 900,
 ): Uint8Array {
-  return buildPdfDocument(createSpectrumPlotScene({
-    peaks,
-    settings,
-    width,
-    height,
-    theme,
-    renderMode: "export",
-    transparentBackground: true,
-  }));
+  return buildPdfDocument(
+    createSpectrumPlotScene({
+      peaks,
+      settings,
+      width,
+      height,
+      theme,
+      renderMode: "export",
+      transparentBackground: true,
+    }),
+  );
 }
 
 export async function downloadAnnotatedSpectrumPdf(

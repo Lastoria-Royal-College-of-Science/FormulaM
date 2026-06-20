@@ -1,10 +1,11 @@
-import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { render } from "svelte/server";
+import { describe, expect, it } from "vitest";
+
+import SearchInputs from "../../src/components/search/SearchInputs.svelte";
+import PlotSettingsPanel from "../../src/components/spectrum/PlotSettingsPanel.svelte";
 import ChemicalFormula from "../../src/components/ui/ChemicalFormula.svelte";
 import MathTex from "../../src/components/ui/MathTex.svelte";
-import PlotSettingsPanel from "../../src/components/spectrum/PlotSettingsPanel.svelte";
-import SearchInputs from "../../src/components/search/SearchInputs.svelte";
 import { MZ_TEX, PPM_ERROR_TEX } from "../../src/core/math/tex";
 import { DEFAULT_PLOT_SETTINGS } from "../../src/core/plot/plotTicks";
 import type { SearchFormState } from "../../src/core/types";
@@ -13,7 +14,10 @@ function texAnnotation(tex: string): string {
   return `<annotation encoding="application/x-tex">${tex}</annotation>`;
 }
 
-const mathTexSource = readFileSync(new URL("../../src/components/ui/MathTex.svelte", import.meta.url), "utf8");
+const mathTexSource = readFileSync(
+  new URL("../../src/components/ui/MathTex.svelte", import.meta.url),
+  "utf8",
+);
 
 const form: SearchFormState = {
   mz: "",
@@ -57,7 +61,9 @@ describe("selectable formula rendering", () => {
   });
 
   it("omits selectable markup when MathTex opts out", () => {
-    const { body } = render(MathTex, { props: { tex: MZ_TEX, ariaLabel: "m/z", fallback: "m/z", selectable: false } });
+    const { body } = render(MathTex, {
+      props: { tex: MZ_TEX, ariaLabel: "m/z", fallback: "m/z", selectable: false },
+    });
 
     expect(body).toContain(texAnnotation(MZ_TEX));
     expect(body).not.toContain('data-selectable-formula="true"');
@@ -66,7 +72,9 @@ describe("selectable formula rendering", () => {
   });
 
   it("keeps selectable markup customizable", () => {
-    const { body } = render(MathTex, { props: { tex: PPM_ERROR_TEX, selectionLabel: "Click to select equation" } });
+    const { body } = render(MathTex, {
+      props: { tex: PPM_ERROR_TEX, selectionLabel: "Click to select equation" },
+    });
 
     expect(body).toContain(texAnnotation(PPM_ERROR_TEX));
     expect(body).toContain('title="Click to select equation"');
