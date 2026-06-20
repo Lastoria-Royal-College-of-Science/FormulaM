@@ -24,8 +24,7 @@
       <div class="rounded-2 border border-solid border-border bg-surface-2 px-3.5 py-3">
         <div class="text-xs uppercase tracking-[0.14em] text-muted">Assignment</div>
         {#if assignment}
-          <div class="mt-2 text-sm"><strong class="text-text">Formula:</strong> <ChemicalFormula formula={assignment.formula} /></div>
-          <div class="mt-1 text-sm"><strong class="text-text">Ion formula:</strong> {#if assignment.ionFormula}<ChemicalFormula formula={assignment.ionFormula} />{:else}n/a{/if}</div>
+          <div class="mt-2 text-sm"><strong class="text-text">Formula:</strong> <ChemicalFormula formula={assignment.ionFormula ?? assignment.formula} /></div>
           <div class="mt-1 text-sm"><strong class="text-text">Predicted <MathTex tex={MZ_TEX} ariaLabel="m/z" fallback="m/z" />:</strong> {assignment.predictedMz?.toFixed(6) ?? "n/a"}</div>
           <div class="mt-1 text-sm"><strong class="text-text">Error:</strong> {assignment.errorPpm?.toFixed(4) ?? "n/a"} ppm</div>
           <button class="secondary-action mt-3" type="button" on:click={() => onRemoveAssignment(selectedPeak.id)}>Remove assignment</button>

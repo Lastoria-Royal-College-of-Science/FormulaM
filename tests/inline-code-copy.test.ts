@@ -111,8 +111,9 @@ describe("DOM math label rendering", () => {
       },
     }).body;
     expect(peakInspector).toContain(texAnnotation(MZ_TEX));
-    expect(peakInspector).toContain(texAnnotation("\\ce{C6H12O6}"));
     expect(peakInspector).toContain(texAnnotation("\\ce{[C6H12O6]+}"));
+    expect(peakInspector).not.toContain(texAnnotation("\\ce{C6H12O6}"));
+    expect(peakInspector).not.toContain("Ion formula:");
 
     const spectrumImport = render(SpectrumImport, {
       props: {
@@ -158,5 +159,20 @@ describe("DOM math label rendering", () => {
 
     const darkHero = render(Hero, { props: { theme: "dark" } }).body;
     expect(darkHero).toContain("hero-logo brand-logo-dark");
+  });
+
+  it("shows the assigned ion formula as the single Peak inspector formula row", () => {
+    const peakInspector = render(PeakInspector, {
+      props: {
+        selectedPeak,
+        assignment,
+        onRemoveAssignment: () => undefined,
+      },
+    }).body;
+
+    expect(peakInspector.match(/<strong class="text-text">Formula:<\/strong>/g)).toHaveLength(1);
+    expect(peakInspector).toContain(texAnnotation("\\ce{[C6H12O6]+}"));
+    expect(peakInspector).not.toContain(texAnnotation("\\ce{C6H12O6}"));
+    expect(peakInspector).not.toContain("Ion formula:");
   });
 });
