@@ -13,6 +13,8 @@
   let root: HTMLSpanElement;
 
   $: rendered = renderTex(tex, displayMode);
+  $: modeClass = displayMode ? "math-tex-display" : "math-tex-inline";
+  $: rootClass = ["math-tex", modeClass, selectable ? "math-tex-selectable" : "", className].filter(Boolean).join(" ");
 
   function renderTex(value: string, isDisplayMode: boolean): string {
     try {
@@ -38,7 +40,7 @@
 {#if selectable}
   <span
     bind:this={root}
-    class={`math-tex math-tex-selectable ${className}`.trim()}
+    class={rootClass}
     aria-label={ariaLabel}
     role="button"
     data-selectable-formula="true"
@@ -54,7 +56,7 @@
     {/if}
   </span>
 {:else}
-  <span class={`math-tex ${className}`.trim()} aria-label={ariaLabel}>
+  <span class={rootClass} aria-label={ariaLabel}>
     {#if rendered}
       {@html rendered}
     {:else}
@@ -65,10 +67,21 @@
 
 <style>
   .math-tex {
-    display: inline-flex;
-    align-items: baseline;
     max-width: 100%;
     vertical-align: baseline;
+  }
+
+  .math-tex-inline {
+    display: inline-flex;
+    align-items: baseline;
+  }
+
+  .math-tex-display {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
 
   .math-tex-selectable {
@@ -82,8 +95,8 @@
     outline-offset: 3px;
   }
 
-  .math-tex :global(.katex) {
-    font-size: 1em;
-    line-height: 1;
+  .math-tex-display :global(.katex-display) {
+    margin: 0;
+    max-width: 100%;
   }
 </style>

@@ -287,7 +287,7 @@
       />
     </div>
   </div>
-  <dialog class="max-w-[520px] rounded-2 border border-solid border-border bg-surface p-4 text-text shadow-app" bind:this={chargeHelpDialog}>
+  <dialog class="help-dialog rounded-2 border border-solid border-border bg-surface p-4 text-text shadow-app" bind:this={chargeHelpDialog}>
     <form method="dialog" class="m-0">
       <h3 class="mt-0">Explicit charge</h3>
       <p>Enter <code class="inline-code">n</code> for a single charge or <code class="inline-code">min-max</code> for an inclusive range.</p>
@@ -295,10 +295,10 @@
       <button class="secondary-action">Close</button>
     </form>
   </dialog>
-  <dialog class="max-w-[520px] rounded-2 border border-solid border-border bg-surface p-4 text-text shadow-app" bind:this={ppmHelpDialog}>
+  <dialog class="help-dialog rounded-2 border border-solid border-border bg-surface p-4 text-text shadow-app" bind:this={ppmHelpDialog}>
     <form method="dialog" class="m-0">
       <h3 class="mt-0">Tolerance ppm</h3>
-      <p class="overflow-x-auto"><MathTex tex={PPM_ERROR_TEX} ariaLabel="ppm error equals predicted m/z minus observed m/z divided by observed m/z times 1,000,000" fallback="ppm error = (predicted_mz - observed_mz) / observed_mz * 1,000,000" selectable={true} selectionLabel="Click to select equation" /></p>
+      <div class="help-equation"><MathTex displayMode={true} tex={PPM_ERROR_TEX} ariaLabel="ppm error equals predicted m/z minus observed m/z divided by observed m/z times 1,000,000" fallback="ppm error = (predicted_mz - observed_mz) / observed_mz * 1,000,000" selectionLabel="Click to select equation" /></div>
       <p>A formula is accepted if the absolute ppm error is within the selected tolerance.</p>
       <button class="secondary-action">Close</button>
     </form>
@@ -306,6 +306,23 @@
 </section>
 
 <style>
+  .help-dialog {
+    position: fixed;
+    inset: 0;
+    width: min(520px, calc(100vw - 32px));
+    max-height: calc(100vh - 32px);
+    margin: auto;
+    overflow: auto;
+  }
+
+  .help-equation {
+    max-width: 100%;
+    margin-block: 1rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-block: 0.25rem;
+  }
+
   .charge-field-shell {
     display: flex;
     height: 42px;

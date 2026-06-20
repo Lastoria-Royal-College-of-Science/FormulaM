@@ -49,6 +49,7 @@ describe("selectable formula rendering", () => {
     expect(body).toContain(texAnnotation(MZ_TEX));
     expect(body).toContain('data-selectable-formula="true"');
     expect(body).toContain('tabindex="0"');
+    expect(body).toContain("math-tex-inline");
     expect(body).toContain("math-tex-selectable");
   });
 
@@ -66,6 +67,16 @@ describe("selectable formula rendering", () => {
 
     expect(body).toContain(texAnnotation(PPM_ERROR_TEX));
     expect(body).toContain('title="Click to select equation"');
+  });
+
+  it("renders display math as a selectable display block", () => {
+    const { body } = render(MathTex, { props: { tex: PPM_ERROR_TEX, displayMode: true } });
+
+    expect(body).toContain(texAnnotation(PPM_ERROR_TEX));
+    expect(body).toContain("math-tex-display");
+    expect(body).toContain("katex-display");
+    expect(body).toContain('data-selectable-formula="true"');
+    expect(body).toContain('tabindex="0"');
   });
 
   it("makes KaTeX chemical formulas selectable", () => {
@@ -98,6 +109,8 @@ describe("selectable formula rendering", () => {
 
     expect(searchInputs).toContain(texAnnotation(MZ_TEX));
     expect(searchInputs).toContain(texAnnotation(PPM_ERROR_TEX));
+    expect(searchInputs).toContain("math-tex-display");
+    expect(searchInputs).toContain("katex-display");
     expect(searchInputs.match(/data-selectable-formula="true"/g)).toHaveLength(2);
     expect(plotSettings.match(/data-selectable-formula="true"/g)).toHaveLength(3);
   });
