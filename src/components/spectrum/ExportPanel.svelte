@@ -17,8 +17,8 @@
     <div>
       <h2 class="mt-0">Export</h2>
       <p class="mb-0 mt-1 text-sm text-muted">
-        Download a peak assignment table plus annotated PNG or PDF versions of the current spectrum
-        view.
+        <!-- Keep this copy in a Svelte expression so formatter-inserted line breaks do not render as visible whitespace. -->
+        {"Download a peak assignment table plus annotated PNG or PDF versions of the current spectrum view."}
       </p>
     </div>
     <div

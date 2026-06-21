@@ -18,7 +18,7 @@ describe("ExportPanel", () => {
       },
     });
 
-    expect(body).toMatch(/annotated PNG or PDF versions of the current spectrum[\s]+view/);
+    expect(body).toContain("annotated PNG or PDF versions of the current spectrum view");
     expect(body).toContain(">Download annotated PNG<");
     expect(body).toContain(">Download annotated PDF<");
   });
