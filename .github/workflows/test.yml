@@ -1,13 +1,27 @@
-name: Test and Check
+name: Test and Build
 
 on:
+  workflow_call:
+    inputs:
+      upload-pages-artifact:
+        description: Whether to upload the built dist directory as a GitHub Pages artifact.
+        required: false
+        type: boolean
+        default: false
+
   push:
+    branches-ignore:
+      - main
+
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   test:
-    name: Run tests
+    name: Run tests and build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -15,11 +29,21 @@ jobs:
         with:
           node-version: lts/*
           cache: npm
+
       - run: npm ci
       - run: npm run format:check
       - run: npm run lint
       - run: npm run check
       - run: npm run test
       - run: npm run build
+
       - run: npx playwright install --with-deps chromium
       - run: npm run e2e
+
+      - uses: actions/configure-pages@v6
+        if: ${{ inputs.upload-pages-artifact }}
+
+      - uses: actions/upload-pages-artifact@v5
+        if: ${{ inputs.upload-pages-artifact }}
+        with:
+          path: dist
