@@ -4,19 +4,18 @@
   "name": "Node.js & TypeScript",
   // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
   "image": "mcr.microsoft.com/devcontainers/typescript-node:4-24-trixie",
+
+  // Features to add to the dev container. More info: https://containers.dev/features.
   "features": {
     "ghcr.io/devcontainers/features/copilot-cli:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
 
-  // Features to add to the dev container. More info: https://containers.dev/features.
-  // "features": {},
-
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   // "forwardPorts": [],
 
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "npm ci",
+  // "postCreateCommand": "",
 
   // Configure tool-specific properties.
   "customizations": {
@@ -39,7 +38,7 @@
   // "remoteUser": "root",
 
   // Use 'updateContentCommand' to run commands to update content in the container. For example, you can use this to update dependencies when the container is updated.
-  "updateContentCommand": "npm install",
+  "updateContentCommand": "npm ci",
 
   // Use 'postAttachCommand' to run commands after the container is attached. For example, you can use this to run tests after the container is attached.
   "postAttachCommand": "npm run test"
