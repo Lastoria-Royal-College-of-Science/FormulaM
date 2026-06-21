@@ -135,6 +135,7 @@ dist
 # IDEs and AI agents
 .idea/
 .vscode/
+.agents/
 .codex/
 .claude/
 .gemini/
