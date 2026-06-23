@@ -1,6 +1,6 @@
-name: Bug report
+name: 🐛 Bug report
 description: Report a UI, runtime, import/export, or interaction bug.
-title: "bug: "
+title: "[BUG] "
 labels: ["bug", "needs-reproduction"]
 body:
   - type: markdown

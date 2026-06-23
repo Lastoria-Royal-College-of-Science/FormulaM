@@ -1,6 +1,6 @@
-name: Documentation issue
+name: 📚 Documentation issue
 description: Report unclear, missing, stale, or incorrect documentation.
-title: "docs: "
+title: "[DOCS] "
 labels: ["documentation"]
 body:
   - type: textarea

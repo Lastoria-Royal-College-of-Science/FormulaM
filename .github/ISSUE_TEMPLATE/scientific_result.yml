@@ -1,6 +1,6 @@
-name: Scientific result issue
+name: 🔬 Scientific result issue
 description: Report unexpected formula enumeration, mass, m/z, charge, isotope, tolerance, assignment, or plot behavior.
-title: "scientific: "
+title: "[SCIENTIFIC] "
 labels: ["bug", "scientific", "needs-reproduction"]
 body:
   - type: markdown
