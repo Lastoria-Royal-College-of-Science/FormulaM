@@ -189,6 +189,7 @@ input[type="file"]:disabled::file-selector-button {
     textarea,
     summary
   ):not(:disabled):hover {
+  border-color: var(--accent);
   filter: var(--interactive-hover-filter);
 }
 

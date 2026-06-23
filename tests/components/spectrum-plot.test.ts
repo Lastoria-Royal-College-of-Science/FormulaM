@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { render } from "svelte/server";
 import { describe, expect, it } from "vitest";
 
@@ -31,6 +32,11 @@ const peaks: SpectrumPeak[] = [
   },
 ];
 
+const spectrumPlotSource = readFileSync(
+  new URL("../../src/components/spectrum/SpectrumPlot.svelte", import.meta.url),
+  "utf8",
+);
+
 describe("SpectrumPlot", () => {
   it("renders the interactive spectrum as native SVG instead of canvas", () => {
     const { body } = render(SpectrumPlot, {
@@ -49,6 +55,7 @@ describe("SpectrumPlot", () => {
 
     expect(body).toContain("<svg");
     expect(body).toContain('aria-label="Spectrum plot.');
+    expect(body).toContain("spectrum-plot-button");
     expect(body).toContain("<line");
     expect(body).toContain("<circle");
     expect(body).toContain("<tspan");
@@ -57,5 +64,11 @@ describe("SpectrumPlot", () => {
     expect(body).not.toContain('dx="1.98"');
     expect(body).not.toContain("[13C]");
     expect(body).not.toContain("<canvas");
+  });
+
+  it("keeps the plot frame hover border separate from glow behavior", () => {
+    expect(spectrumPlotSource).toContain(".spectrum-plot-button:hover");
+    expect(spectrumPlotSource).toContain("border-color: var(--accent);");
+    expect(spectrumPlotSource).not.toContain(".spectrum-plot-button:hover {\n    box-shadow");
   });
 });

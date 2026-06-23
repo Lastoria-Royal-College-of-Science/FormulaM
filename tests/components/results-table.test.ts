@@ -81,6 +81,7 @@ describe("ResultsTable", () => {
     expect(body).toContain('aria-label="Sort by predicted m/z"');
     expect(body).toContain('aria-label="Sort by error in daltons"');
     expect(body).toContain('aria-label="Sort by error in ppm"');
+    expect(body.match(/results-sort-button/g)).toHaveLength(4);
     expect(body.match(/aria-sort="none"/g)).toHaveLength(4);
     expect(body.match(/i-typcn-arrow-unsorted/g)).toHaveLength(4);
   });

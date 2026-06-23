@@ -39,7 +39,7 @@ export const shortcuts = {
   "toggle-control": "inline-flex select-none items-center gap-3.5 text-text",
   "toggle-control-disabled": "text-muted",
   "toggle-copy": "text-[0.98rem] leading-[1.4]",
-  "results-sort-button": `inline-flex w-full cursor-pointer items-center justify-between gap-2 rounded-[10px] border-none bg-transparent px-1 py-1 text-left text-inherit shadow-none [appearance:none] transition-colors duration-150 hover:text-text focus-visible:text-text focus-visible:shadow-control-glow ${noNativeOutline}`,
+  "results-sort-button": `inline-flex w-full cursor-pointer items-center justify-between gap-2 rounded-[10px] border border-solid border-transparent bg-transparent px-1 py-1 text-left text-inherit shadow-none [appearance:none] transition-colors duration-150 hover:[border-color:var(--accent)] hover:text-text focus:[border-color:var(--accent)] focus-visible:[border-color:var(--accent)] focus-visible:text-text focus-visible:shadow-control-glow ${noNativeOutline}`,
   "results-sort-icon": "inline-block h-4 w-4 shrink-0",
   "results-row-active":
     "[background-color:color-mix(in_srgb,var(--accent),transparent_90%)] transition-colors duration-150",

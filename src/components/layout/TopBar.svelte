@@ -146,4 +146,9 @@
     -webkit-backdrop-filter: blur(10px) saturate(135%);
     backdrop-filter: blur(10px) saturate(135%);
   }
+
+  .topbar-control-solid:hover,
+  .topbar-control-glass:hover {
+    border-color: var(--accent);
+  }
 </style>

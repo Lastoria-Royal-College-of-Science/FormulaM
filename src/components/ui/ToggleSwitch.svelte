@@ -47,6 +47,7 @@
     outline: none;
   }
 
+  .toggle-switch:enabled:hover,
   .toggle-switch:enabled:active,
   .toggle-switch:enabled:focus,
   .toggle-switch:enabled:focus-visible {

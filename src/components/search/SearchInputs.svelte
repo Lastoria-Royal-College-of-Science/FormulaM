@@ -391,7 +391,8 @@
       filter 150ms ease-out;
   }
 
-  .charge-field-shell:hover {
+  .charge-field-shell:not(.charge-field-shell-disabled):hover {
+    border-color: var(--accent);
     filter: var(--interactive-hover-filter);
   }
 
@@ -451,12 +452,15 @@
     outline: none;
   }
 
+  .charge-polarity-switch:enabled:hover,
   .charge-polarity-switch:enabled:active,
   .charge-polarity-switch:enabled:focus,
   .charge-polarity-switch:enabled:focus-visible,
+  .charge-chip-action:enabled:hover,
   .charge-chip-action:enabled:active,
   .charge-chip-action:enabled:focus,
   .charge-chip-action:enabled:focus-visible,
+  .charge-draft-action:enabled:hover,
   .charge-draft-action:enabled:active,
   .charge-draft-action:enabled:focus,
   .charge-draft-action:enabled:focus-visible {
@@ -579,6 +583,11 @@
     padding: 0 3px;
     color: var(--text);
     font-size: 0.875rem;
+    transition: border-color 150ms ease-out;
+  }
+
+  .charge-chip:has(.charge-chip-target:enabled:hover) {
+    border-color: var(--accent);
   }
 
   .charge-chip-editing {

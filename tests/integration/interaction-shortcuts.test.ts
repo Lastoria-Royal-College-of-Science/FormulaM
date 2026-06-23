@@ -1,7 +1,13 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import config from "../../uno.config";
 
+const globalCss = readFileSync(new URL("../../src/styles/global.css", import.meta.url), "utf8");
+const topBarSource = readFileSync(
+  new URL("../../src/components/layout/TopBar.svelte", import.meta.url),
+  "utf8",
+);
 const shortcuts = config.shortcuts as Record<string, string>;
 const theme = config.theme as {
   colors: Record<string, string>;
@@ -10,21 +16,48 @@ const theme = config.theme as {
 const safelist = config.safelist as string[];
 
 describe("Uno interaction shortcuts", () => {
-  it("limits button focus and active affordances to enabled controls", () => {
-    expect(shortcuts["primary-action"]).toContain("enabled:active:border-accent");
+  it("limits button hover, focus, and active affordances to enabled controls", () => {
+    expect(shortcuts["primary-action"]).toContain("enabled:hover:[border-color:var(--accent)]");
+    expect(shortcuts["primary-action"]).toContain("enabled:active:[border-color:var(--accent)]");
     expect(shortcuts["primary-action"]).toContain("enabled:focus-visible:shadow-control-glow");
-    expect(shortcuts["secondary-action"]).toContain("enabled:focus:border-accent");
+    expect(shortcuts["primary-action"]).not.toContain("enabled:hover:shadow-control-glow");
+    expect(shortcuts["secondary-action"]).toContain("enabled:hover:[border-color:var(--accent)]");
+    expect(shortcuts["secondary-action"]).toContain("enabled:focus:[border-color:var(--accent)]");
     expect(shortcuts["secondary-action"]).toContain("enabled:active:shadow-control-glow");
-    expect(shortcuts["icon-action"]).toContain("enabled:active:border-accent");
-    expect(shortcuts["danger-icon-action"]).toContain("enabled:focus:border-accent");
+    expect(shortcuts["secondary-action"]).not.toContain("enabled:hover:shadow-control-glow");
+    expect(shortcuts["field-control"]).toContain("enabled:hover:[border-color:var(--accent)]");
+    expect(shortcuts["field-control"]).not.toContain("enabled:hover:shadow-control-glow");
+    expect(shortcuts["icon-action"]).toContain("enabled:hover:[border-color:var(--accent)]");
+    expect(shortcuts["icon-action"]).toContain("enabled:active:[border-color:var(--accent)]");
+    expect(shortcuts["danger-icon-action"]).toContain("enabled:hover:[border-color:var(--accent)]");
+    expect(shortcuts["danger-icon-action"]).toContain("enabled:focus:[border-color:var(--accent)]");
   });
 
   it("keeps link controls visually consistent with buttons", () => {
     expect(shortcuts["round-link-control"]).toContain(
       "hover:[filter:var(--interactive-hover-filter)]",
     );
-    expect(shortcuts["round-link-control"]).toContain("active:border-accent");
+    expect(shortcuts["round-link-control"]).toContain("hover:[border-color:var(--accent)]");
+    expect(shortcuts["round-link-control"]).toContain("active:[border-color:var(--accent)]");
     expect(shortcuts["round-link-control"]).toContain("active:shadow-control-glow");
+    expect(shortcuts["round-link-control"]).not.toContain("hover:shadow-control-glow");
+  });
+
+  it("keeps result sort buttons on a stable hoverable border", () => {
+    expect(shortcuts["results-sort-button"]).toContain("border-transparent");
+    expect(shortcuts["results-sort-button"]).toContain("hover:[border-color:var(--accent)]");
+    expect(shortcuts["results-sort-button"]).toContain("focus:[border-color:var(--accent)]");
+    expect(shortcuts["results-sort-button"]).toContain(
+      "focus-visible:[border-color:var(--accent)]",
+    );
+    expect(shortcuts["results-sort-button"]).not.toContain("border-none");
+    expect(shortcuts["results-sort-button"]).not.toContain("hover:shadow-control-glow");
+  });
+
+  it("keeps runtime hover border rules above Uno shortcut layers", () => {
+    expect(globalCss).toContain("):not(:disabled):hover {\n  border-color: var(--accent);");
+    expect(topBarSource).toContain(".topbar-control-solid:hover");
+    expect(topBarSource).toContain(".topbar-control-glass:hover");
   });
 
   it("keeps the native file input on an explicit height separate from text fields", () => {

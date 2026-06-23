@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { render } from "svelte/server";
 import { describe, expect, it } from "vitest";
 
@@ -19,6 +20,16 @@ const baseProps = {
   onRemoveChargeEntry: () => undefined,
   onStartChargeEdit: () => undefined,
 };
+
+const searchInputsSource = readFileSync(
+  new URL("../../src/components/search/SearchInputs.svelte", import.meta.url),
+  "utf8",
+);
+
+const toggleSwitchSource = readFileSync(
+  new URL("../../src/components/ui/ToggleSwitch.svelte", import.meta.url),
+  "utf8",
+);
 
 describe("SearchInputs", () => {
   it("renders the expanded explicit-charge editor and keeps tolerance toggles", () => {
@@ -102,6 +113,18 @@ describe("SearchInputs", () => {
     expect(body).toContain('aria-label="Tolerance ppm"');
     expect(body).toContain('aria-label="Tolerance Da"');
     expect(body).toContain('aria-label="Max results"');
+  });
+
+  it("keeps charge and toggle hover borders limited to enabled controls", () => {
+    expect(searchInputsSource).toContain(
+      ".charge-field-shell:not(.charge-field-shell-disabled):hover",
+    );
+    expect(searchInputsSource).toContain(".charge-polarity-switch:enabled:hover");
+    expect(searchInputsSource).toContain(".charge-chip-action:enabled:hover");
+    expect(searchInputsSource).toContain(".charge-draft-action:enabled:hover");
+    expect(searchInputsSource).toContain(".charge-chip:has(.charge-chip-target:enabled:hover)");
+    expect(toggleSwitchSource).toContain(".toggle-switch:enabled:hover");
+    expect(toggleSwitchSource).not.toContain(".toggle-switch:enabled:hover {\n    box-shadow");
   });
 
   it("centers help dialogs and renders ppm help as display math", () => {

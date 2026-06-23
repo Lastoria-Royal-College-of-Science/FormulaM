@@ -195,7 +195,7 @@
         bind:this={plotFrame}
         bind:clientWidth={containerWidth}
         aria-label="Spectrum plot. Use left and right arrows to inspect peaks, then press Enter or Space to select one."
-        class="block w-full overflow-hidden rounded-2 border border-solid border-border bg-transparent p-0 text-left outline-none"
+        class="spectrum-plot-button block w-full overflow-hidden rounded-2 border border-solid border-border bg-transparent p-0 text-left outline-none"
         style="filter: none;"
         type="button"
         on:focus={handleFocus}
@@ -295,3 +295,16 @@
     </div>
   {/if}
 </section>
+
+<style>
+  .spectrum-plot-button {
+    transition: border-color 150ms ease-out;
+  }
+
+  .spectrum-plot-button:hover,
+  .spectrum-plot-button:focus,
+  .spectrum-plot-button:focus-visible {
+    border-color: var(--accent);
+    outline: none;
+  }
+</style>
