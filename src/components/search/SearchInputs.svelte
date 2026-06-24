@@ -315,7 +315,7 @@
       <input
         class="field-control"
         type="number"
-        min="1"
+        min="10"
         max="5000"
         step="10"
         value={form.maxResults}
