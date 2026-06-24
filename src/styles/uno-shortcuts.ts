@@ -5,6 +5,7 @@ import {
   fieldInteraction,
   linkControlInteraction,
   noNativeOutline,
+  primaryActionPressedState,
   transparentRestBorder,
 } from "./uno-interactions";
 
@@ -33,9 +34,9 @@ export const shortcuts = {
     "bg-no-repeat bg-[length:6px_6px] [background-image:linear-gradient(45deg,transparent_50%,var(--muted)_50%),linear-gradient(135deg,var(--muted)_50%,transparent_50%)] [background-position:calc(100%-18px)_50%,calc(100%-12px)_50%] pr-10",
   "help-button": `inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border border-solid border-control-border bg-surface-2 p-0 text-muted ${buttonInteraction}`,
   "help-button-icon": "h-3.5 w-3.5 shrink-0",
-  "primary-action": `min-h-[42px] cursor-pointer rounded-2 border border-solid border-transparent bg-accent px-4 py-2.5 font-[750] text-accent-contrast ${blueButtonInteraction} ${disabledState}`,
+  "primary-action": `min-h-[42px] cursor-pointer rounded-2 border border-solid border-transparent bg-accent px-4 py-2.5 font-[750] text-accent-contrast ${primaryActionPressedState} ${blueButtonInteraction} ${disabledState}`,
   "secondary-action": `min-h-[42px] cursor-pointer rounded-2 border border-solid border-control-border bg-surface-2 px-4 py-2.5 text-text ${buttonInteraction} ${disabledState}`,
-  "icon-action": `inline-flex h-[42px] min-h-[42px] w-11 items-center justify-center cursor-pointer rounded-2 border border-solid border-transparent bg-accent p-0 text-accent-contrast ${blueButtonInteraction} ${disabledState}`,
+  "icon-action": `inline-flex h-[42px] min-h-[42px] w-11 items-center justify-center cursor-pointer rounded-2 border border-solid border-transparent bg-accent p-0 text-accent-contrast ${primaryActionPressedState} ${blueButtonInteraction} ${disabledState}`,
   "danger-icon-action": `inline-flex h-10 w-10 items-center justify-center cursor-pointer rounded-[10px] border border-solid border-control-border bg-surface-2 p-0 text-danger ${buttonInteraction} ${disabledState}`,
   "toggle-control": "inline-flex select-none items-center gap-3.5 text-text",
   "toggle-control-disabled": "text-muted",
@@ -45,7 +46,7 @@ export const shortcuts = {
   "results-row-active":
     "[background-color:color-mix(in_srgb,var(--accent),transparent_90%)] transition-colors duration-150",
   "results-assign-button": `inline-flex h-8 w-8 min-h-[32px] cursor-pointer items-center justify-center rounded-[10px] border border-solid border-control-border bg-surface-2 p-0 text-text ${buttonInteraction} ${disabledState}`,
-  "results-assign-button-active": `inline-flex h-8 w-8 min-h-[32px] cursor-pointer items-center justify-center rounded-[10px] border border-solid border-transparent bg-accent p-0 text-accent-contrast ${blueButtonInteraction} ${disabledState}`,
+  "results-assign-button-active": `inline-flex h-8 w-8 min-h-[32px] cursor-pointer items-center justify-center rounded-[10px] border border-solid border-transparent bg-accent p-0 text-accent-contrast ${primaryActionPressedState} ${blueButtonInteraction} ${disabledState}`,
   "results-assign-icon": "h-[18px] w-[18px]",
   "table-head": "px-2 py-2 text-left text-[0.9rem] text-muted",
   "table-cell": "border-t border-border [border-top-style:solid] px-2 py-2 align-middle",

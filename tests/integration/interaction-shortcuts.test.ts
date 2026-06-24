@@ -14,11 +14,22 @@ const theme = config.theme as {
   shadow: Record<string, string>;
 };
 const safelist = config.safelist as string[];
+const primaryActionPressedStateTokens = [
+  "enabled:hover:bg-surface-2",
+  "enabled:hover:text-text",
+  "enabled:active:bg-surface-2",
+  "enabled:active:text-text",
+];
 
 describe("Uno interaction shortcuts", () => {
   it("limits button hover, focus, and active affordances to enabled controls", () => {
     expect(shortcuts["primary-action"]).toContain("enabled:hover:[border-color:var(--accent)]");
     expect(shortcuts["primary-action"]).toContain("enabled:active:[border-color:var(--accent)]");
+    ["primary-action", "icon-action", "results-assign-button-active"].forEach((shortcutName) => {
+      primaryActionPressedStateTokens.forEach((token) => {
+        expect(shortcuts[shortcutName]).toContain(token);
+      });
+    });
     expect(shortcuts["primary-action"]).toContain("[--control-rest-border:transparent]");
     expect(shortcuts["primary-action"]).toContain(
       "[&:not(:disabled):focus-visible:not(:hover):not(:active)]:[border-color:var(--control-rest-border)]",

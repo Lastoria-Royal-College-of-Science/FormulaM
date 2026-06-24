@@ -12,6 +12,9 @@ export const fieldFocusBorder =
 
 export const blueButtonBorder = `enabled:hover:[border-color:var(--accent)] enabled:active:[border-color:var(--accent)] ${noNativeOutline}`;
 
+export const primaryActionPressedState =
+  "enabled:hover:bg-surface-2 enabled:hover:text-text enabled:active:bg-surface-2 enabled:active:text-text";
+
 export const disabledState =
   "disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:filter-none disabled:active:filter-none disabled:hover:shadow-none disabled:active:shadow-none";
 
