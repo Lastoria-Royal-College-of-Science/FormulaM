@@ -7,13 +7,12 @@
 <script lang="ts">
   import { MZ_TEX } from "../../core/math/tex";
   import type { SpectrumImportSource, SpectrumPreviewTable } from "../../core/types";
-  import { BUSY_DISABLED_TITLE, disabledTitle } from "../ui/disabledTitle";
+  import { disabledTitle } from "../ui/disabledTitle";
   import MathTex from "../ui/MathTex.svelte";
   import ToggleSwitch from "../ui/ToggleSwitch.svelte";
 
   export let activeSheetName = "";
-  export let disabled = false;
-  export let disabledReason = BUSY_DISABLED_TITLE;
+  export let importing = false;
   export let hasHeaderRow = true;
   export let importError = "";
   export let importSource: SpectrumImportSource | null = null;
@@ -59,31 +58,6 @@
     const index = Number(value);
     return Number.isInteger(index) ? index : null;
   }
-
-  function disabledControlTitle(): string | undefined {
-    return disabledTitle(disabled, disabledReason);
-  }
-
-  function clearSpectrumTitle(): string | undefined {
-    return disabledTitle(
-      disabled || (!importSource && peakCount === 0),
-      disabled ? disabledReason : "Import a spectrum before clearing it.",
-    );
-  }
-
-  function columnSelectTitle(): string | undefined {
-    return disabledTitle(
-      disabled || columnOptions.length === 0,
-      disabled ? disabledReason : "Load a peak-list preview before choosing columns.",
-    );
-  }
-
-  function applySelectionTitle(): string | undefined {
-    return disabledTitle(
-      disabled || mzColumnIndex === null || intensityColumnIndex === null,
-      disabled ? disabledReason : "Select m/z and intensity columns before importing.",
-    );
-  }
 </script>
 
 <section class="ui-card">
@@ -99,8 +73,13 @@
     <button
       type="button"
       class="secondary-action"
-      title={clearSpectrumTitle()}
-      disabled={disabled || (!importSource && peakCount === 0)}
+      title={disabledTitle(
+        importing || (!importSource && peakCount === 0),
+        !importSource && peakCount === 0
+          ? "Import a spectrum before clearing it."
+          : "Wait for the current spectrum import to finish.",
+      )}
+      disabled={importing || (!importSource && peakCount === 0)}
       on:click={clearSelection}>Clear spectrum</button
     >
   </div>
@@ -113,8 +92,8 @@
       type="file"
       accept=".csv,.xlsx,.xls"
       aria-label="Peak list file"
-      title={disabledControlTitle()}
-      {disabled}
+      title={disabledTitle(importing, "Wait for the current spectrum import to finish.")}
+      disabled={importing}
       on:change={handleFileChange}
     />
   </div>
@@ -149,8 +128,8 @@
             class="field-control field-select"
             value={activeSheetName}
             aria-label="Worksheet"
-            title={disabledControlTitle()}
-            {disabled}
+            title={disabledTitle(importing, "Wait for the current spectrum import to finish.")}
+            disabled={importing}
             on:change={(event) => onSelectSheet((event.currentTarget as HTMLSelectElement).value)}
           >
             {#each importSource.sheets as sheet}
@@ -160,12 +139,12 @@
         </div>
       {/if}
 
-      <div class:toggle-control-disabled={disabled} class="toggle-control pt-7">
+      <div class:toggle-control-disabled={importing} class="toggle-control pt-7">
         <ToggleSwitch
           ariaLabel="First non-empty row is a header"
           checked={hasHeaderRow}
-          title={disabledControlTitle()}
-          {disabled}
+          title={disabledTitle(importing, "Wait for the current spectrum import to finish.")}
+          disabled={importing}
           onChange={onSelectHasHeaderRow}
         />
         <span class="toggle-copy">First non-empty row is a header</span>
@@ -179,8 +158,13 @@
           class="field-control field-select"
           value={mzColumnIndex ?? ""}
           aria-label="m/z column"
-          title={columnSelectTitle()}
-          disabled={disabled || columnOptions.length === 0}
+          title={disabledTitle(
+            importing || columnOptions.length === 0,
+            importing
+              ? "Wait for the current spectrum import to finish."
+              : "Load a peak-list preview before choosing columns.",
+          )}
+          disabled={importing || columnOptions.length === 0}
           on:change={(event) =>
             onSelectMzColumn(parseSelectedIndex((event.currentTarget as HTMLSelectElement).value))}
         >
@@ -197,8 +181,13 @@
           class="field-control field-select"
           value={intensityColumnIndex ?? ""}
           aria-label="Intensity column"
-          title={columnSelectTitle()}
-          disabled={disabled || columnOptions.length === 0}
+          title={disabledTitle(
+            importing || columnOptions.length === 0,
+            importing
+              ? "Wait for the current spectrum import to finish."
+              : "Load a peak-list preview before choosing columns.",
+          )}
+          disabled={importing || columnOptions.length === 0}
           on:change={(event) =>
             onSelectIntensityColumn(
               parseSelectedIndex((event.currentTarget as HTMLSelectElement).value),
@@ -216,8 +205,13 @@
       <button
         type="button"
         class="primary-action"
-        title={applySelectionTitle()}
-        disabled={disabled || mzColumnIndex === null || intensityColumnIndex === null}
+        title={disabledTitle(
+          importing || mzColumnIndex === null || intensityColumnIndex === null,
+          importing
+            ? "Wait for the current spectrum import to finish."
+            : "Select m/z and intensity columns before importing.",
+        )}
+        disabled={importing || mzColumnIndex === null || intensityColumnIndex === null}
         on:click={() => onApplySelection()}
       >
         Import selected sheet/columns

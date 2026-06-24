@@ -11,6 +11,7 @@
   import { filterPeaksInRange, resolvePlotDomain } from "../../core/plot/plotTicks";
   import { findNearestPeak } from "../../core/spectrum/peakSelection";
   import type { PlotSettings, SpectrumPeak, ThemeName } from "../../core/types";
+  import { disabledTitle } from "../ui/disabledTitle";
   import MathTex from "../ui/MathTex.svelte";
 
   export let peaks: SpectrumPeak[] = [];
@@ -184,7 +185,7 @@
     <button
       type="button"
       class="secondary-action"
-      title={peaks.length === 0 ? "Import a spectrum before resetting the view." : undefined}
+      title={disabledTitle(peaks.length === 0, "Import a spectrum before resetting the view.")}
       disabled={peaks.length === 0}
       on:click={onResetView}>Reset view</button
     >
@@ -196,7 +197,7 @@
         bind:this={plotFrame}
         bind:clientWidth={containerWidth}
         aria-label="Spectrum plot. Use left and right arrows to inspect peaks, then press Enter or Space to select one."
-        class="block w-full overflow-hidden rounded-2 border border-solid border-border bg-transparent p-0 text-left outline-none"
+        class="spectrum-plot-frame block w-full overflow-hidden rounded-2 border border-solid border-border bg-transparent p-0 text-left outline-none"
         style="filter: none;"
         type="button"
         on:focus={handleFocus}
@@ -296,3 +297,15 @@
     </div>
   {/if}
 </section>
+
+<style>
+  .spectrum-plot-frame:enabled:hover,
+  .spectrum-plot-frame:enabled:active,
+  .spectrum-plot-frame:enabled:focus,
+  .spectrum-plot-frame:enabled:focus-visible {
+    border-color: var(--border);
+    box-shadow: none;
+    filter: none;
+    outline: none;
+  }
+</style>

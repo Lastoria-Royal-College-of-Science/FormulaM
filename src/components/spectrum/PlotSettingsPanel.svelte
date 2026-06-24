@@ -7,14 +7,12 @@
     PlotSettings,
     SpectrumPeak,
   } from "../../core/types";
-  import { BUSY_DISABLED_TITLE, disabledTitle } from "../ui/disabledTitle";
+  import { disabledTitle } from "../ui/disabledTitle";
   import MathTex from "../ui/MathTex.svelte";
   import ToggleSwitch from "../ui/ToggleSwitch.svelte";
 
   export let settings: PlotSettings;
   export let peaks: SpectrumPeak[] = [];
-  export let disabled = false;
-  export let disabledReason = BUSY_DISABLED_TITLE;
   export let onChange: (patch: Partial<PlotSettings>) => void;
 
   $: autoValues = resolvePlotAutoValues(peaks, settings);
@@ -71,24 +69,6 @@
   function updateManualThresholdEnabled(value: boolean): void {
     onChange({ thresholdEnabled: value });
   }
-
-  function disabledControlTitle(): string | undefined {
-    return disabledTitle(disabled, disabledReason);
-  }
-
-  function fixedYMaxTitle(): string | undefined {
-    return disabledTitle(
-      disabled || settings.yScale === "auto",
-      disabled ? disabledReason : "Enable fixed y scale before editing y max.",
-    );
-  }
-
-  function fixedTickSpacingTitle(): string | undefined {
-    return disabledTitle(
-      disabled || settings.autoTicks,
-      disabled ? disabledReason : "Enable fixed major tick spacing before editing this value.",
-    );
-  }
 </script>
 
 <section class="ui-card">
@@ -111,8 +91,6 @@
         step="0.0001"
         value={settings.xMin ?? ""}
         aria-label="x min"
-        title={disabledControlTitle()}
-        {disabled}
         on:input={(event) =>
           onChange({ xMin: parseOptionalNumber((event.currentTarget as HTMLInputElement).value) })}
       />
@@ -126,8 +104,6 @@
         step="0.0001"
         value={settings.xMax ?? ""}
         aria-label="x max"
-        title={disabledControlTitle()}
-        {disabled}
         on:input={(event) =>
           onChange({ xMax: parseOptionalNumber((event.currentTarget as HTMLInputElement).value) })}
       />
@@ -139,8 +115,6 @@
         <ToggleSwitch
           ariaLabel="y scale"
           checked={settings.yScale === "fixed"}
-          title={disabledControlTitle()}
-          {disabled}
           onChange={updateFixedYMaxEnabled}
         />
         <input
@@ -150,8 +124,11 @@
           step="1"
           value={settings.yScale === "fixed" ? (settings.yMax ?? "") : autoValue(autoValues.yMax)}
           aria-label="y max"
-          title={fixedYMaxTitle()}
-          disabled={disabled || settings.yScale === "auto"}
+          title={disabledTitle(
+            settings.yScale === "auto",
+            "Enable fixed y scale before editing y max.",
+          )}
+          disabled={settings.yScale === "auto"}
           on:input={(event) =>
             onChange({
               yMax: parseOptionalNumber((event.currentTarget as HTMLInputElement).value),
@@ -169,8 +146,6 @@
         step="0.5"
         value={settings.lineWidth}
         aria-label="Line width"
-        title={disabledControlTitle()}
-        {disabled}
         on:input={(event) =>
           onChange({
             lineWidth: Math.max(1, Number((event.currentTarget as HTMLInputElement).value) || 1),
@@ -187,8 +162,6 @@
         type="color"
         value={settings.peakColor}
         aria-label="Peak color"
-        title={disabledControlTitle()}
-        {disabled}
         on:input={(event) =>
           onChange({ peakColor: (event.currentTarget as HTMLInputElement).value })}
       />
@@ -200,8 +173,6 @@
         type="color"
         value={settings.selectedPeakColor}
         aria-label="Selected peak color"
-        title={disabledControlTitle()}
-        {disabled}
         on:input={(event) =>
           onChange({ selectedPeakColor: (event.currentTarget as HTMLInputElement).value })}
       />
@@ -213,8 +184,6 @@
         type="color"
         value={settings.assignedPeakColor}
         aria-label="Assigned peak color"
-        title={disabledControlTitle()}
-        {disabled}
         on:input={(event) =>
           onChange({ assignedPeakColor: (event.currentTarget as HTMLInputElement).value })}
       />
@@ -228,8 +197,6 @@
         <ToggleSwitch
           ariaLabel="Use fixed major tick spacing"
           checked={!settings.autoTicks}
-          title={disabledControlTitle()}
-          {disabled}
           onChange={updateManualTickSpacingEnabled}
         />
         <input
@@ -241,8 +208,11 @@
             ? (settings.majorTickSpacing ?? "")
             : autoValue(autoValues.majorTickSpacing)}
           aria-label="Major tick spacing"
-          title={fixedTickSpacingTitle()}
-          disabled={disabled || settings.autoTicks}
+          title={disabledTitle(
+            settings.autoTicks,
+            "Enable fixed major tick spacing before editing this value.",
+          )}
+          disabled={settings.autoTicks}
           on:input={(event) =>
             onChange({
               majorTickSpacing: parseOptionalNumber(
@@ -260,8 +230,6 @@
           class="round-control rounded-[10px]"
           aria-label={settings.thresholdEnabled ? "Hide threshold" : "Show threshold"}
           aria-pressed={settings.thresholdEnabled}
-          title={disabledControlTitle()}
-          {disabled}
           on:click={() => updateManualThresholdEnabled(!settings.thresholdEnabled)}
         >
           <span
@@ -277,8 +245,6 @@
           step="0.1"
           value={settings.thresholdPercent}
           aria-label="Threshold percent"
-          title={disabledControlTitle()}
-          {disabled}
           on:input={(event) =>
             onChange({
               thresholdPercent: Math.min(
@@ -295,8 +261,6 @@
         class="field-control field-select"
         value={settings.labelMode}
         aria-label="Label content"
-        title={disabledControlTitle()}
-        {disabled}
         on:change={(event) =>
           updateLabelMode((event.currentTarget as HTMLSelectElement).value as PlotLabelMode)}
       >
@@ -311,8 +275,6 @@
         class="field-control field-select"
         value={settings.labelFilter}
         aria-label="Label target"
-        title={disabledControlTitle()}
-        {disabled}
         on:change={(event) =>
           updateLabelFilter((event.currentTarget as HTMLSelectElement).value as PlotLabelFilter)}
       >

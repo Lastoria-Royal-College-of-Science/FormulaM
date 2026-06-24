@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import SpectrumImport from "../../src/components/spectrum/SpectrumImport.svelte";
 import { shouldIgnoreFilePickerCancel } from "../../src/components/spectrum/SpectrumImport.svelte";
 import type { SpectrumImportSource, SpectrumPreviewTable } from "../../src/core/types";
+import { enabledInteractiveControlsWithTitles } from "./titleAssertions";
 
 const sampleImportSource: SpectrumImportSource = {
   sourceName: "Kaempferol.csv",
@@ -55,7 +56,6 @@ describe("SpectrumImport", () => {
     const { body } = render(SpectrumImport, {
       props: {
         activeSheetName: "",
-        disabled: false,
         hasHeaderRow: true,
         importError: "",
         importSource: null,
@@ -78,6 +78,7 @@ describe("SpectrumImport", () => {
     expect(body).toContain('type="file"');
     expect(body).toContain('class="field-control-file"');
     expect(body).toContain('title="Import a spectrum before clearing it."');
+    expect(enabledInteractiveControlsWithTitles(body)).toEqual([]);
     expect(body).not.toContain('class="field-control" type="file"');
   });
 
@@ -85,7 +86,6 @@ describe("SpectrumImport", () => {
     const { body } = render(SpectrumImport, {
       props: {
         activeSheetName: "Sheet1",
-        disabled: false,
         hasHeaderRow: true,
         importError: "",
         importSource: sampleImportSource,
@@ -110,6 +110,7 @@ describe("SpectrumImport", () => {
     expect(body).toContain('aria-label="Worksheet"');
     expect(body).toContain('aria-label="m/z column"');
     expect(body).toContain('aria-label="Intensity column"');
+    expect(enabledInteractiveControlsWithTitles(body)).toEqual([]);
   });
 
   it("explains disabled import controls", () => {
@@ -121,7 +122,6 @@ describe("SpectrumImport", () => {
     const { body } = render(SpectrumImport, {
       props: {
         activeSheetName: "Sheet1",
-        disabled: false,
         hasHeaderRow: true,
         importError: "",
         importSource: sampleImportSource,
@@ -143,32 +143,36 @@ describe("SpectrumImport", () => {
 
     expect(body).toContain('title="Load a peak-list preview before choosing columns."');
     expect(body).toContain('title="Select m/z and intensity columns before importing."');
+    expect(enabledInteractiveControlsWithTitles(body)).toEqual([]);
   });
 
-  it("explains globally disabled import controls", () => {
+  it("explains import controls disabled during an active spectrum import", () => {
     const { body } = render(SpectrumImport, {
       props: {
-        activeSheetName: "",
-        disabled: true,
+        activeSheetName: "Sheet1",
+        importing: true,
         hasHeaderRow: true,
         importError: "",
-        importSource: null,
-        intensityColumnIndex: null,
-        intensityColumnName: "",
-        mzColumnIndex: null,
-        mzColumnName: "",
+        importSource: sampleImportSource,
+        intensityColumnIndex: 1,
+        intensityColumnName: "intensity",
+        mzColumnIndex: 0,
+        mzColumnName: "m/z",
         onApplySelection: () => undefined,
         onImportFile: () => undefined,
         onSelectHasHeaderRow: () => undefined,
         onSelectIntensityColumn: () => undefined,
         onSelectMzColumn: () => undefined,
         onSelectSheet: () => undefined,
-        peakCount: 0,
-        previewTable: null,
-        sourceName: "",
+        peakCount: 1,
+        previewTable: samplePreviewTable,
+        sourceName: "Kaempferol.csv",
       },
     });
 
-    expect(body).toContain('title="Wait for the current operation to finish."');
+    expect(body).toContain('title="Wait for the current spectrum import to finish."');
+    expect(body).toMatch(/<input[^>]*aria-label="Peak list file"[^>]*disabled/);
+    expect(body).toMatch(/<button[^>]*disabled[^>]*>Clear spectrum<\/button>/);
+    expect(enabledInteractiveControlsWithTitles(body)).toEqual([]);
   });
 });

@@ -11,7 +11,7 @@
   import PlotSettingsPanel from "./components/spectrum/PlotSettingsPanel.svelte";
   import SpectrumImport from "./components/spectrum/SpectrumImport.svelte";
   import SpectrumPlot from "./components/spectrum/SpectrumPlot.svelte";
-  import { BUSY_DISABLED_TITLE } from "./components/ui/disabledTitle";
+  import { disabledTitle } from "./components/ui/disabledTitle";
   import { buildMassIndex, loadMassPayload } from "./core/chemistry/massData";
   import { downloadHitsCsv } from "./core/export/csv";
   import { downloadAssignmentsCsv } from "./core/export/spectrumCsv";
@@ -54,7 +54,6 @@
     suggestSpectrumSelection,
   } from "./core/spectrum/spectrumNormalize";
   import type {
-    AppStatus,
     FormulaSearchRequest,
     FormulaHit,
     FormulaSpaceRow,
@@ -77,7 +76,6 @@
   let nextChargeEntryId = 1;
   let results: FormulaHit[] = [];
   let form: SearchFormState = createDefaultSearchForm();
-  let status: AppStatus = "loading";
   let hasSearched = false;
   let worker: Worker | null = null;
   let activeRequestId: string | null = null;
@@ -100,10 +98,10 @@
   let spectrumMzColumnIndex: number | null = null;
   let spectrumIntensityColumnIndex: number | null = null;
   let spectrumImportError = "";
+  let isImportingSpectrum = false;
   let includeUnassignedInAssignmentCsv = false;
   let plotSettings: PlotSettings = { ...DEFAULT_PLOT_SETTINGS };
 
-  $: isBusy = status === "loading" || status === "running";
   $: spectrumPeaks = attachAssignmentsToPeaks(
     rawSpectrumPeaks,
     spectrumAssignments,
@@ -115,21 +113,15 @@
   $: selectedPeakLabel = selectedPeak ? selectedPeak.mz.toFixed(6) : "";
   $: canExportAssignmentCsv =
     rawSpectrumPeaks.length > 0 && (includeUnassignedInAssignmentCsv || assignedCount > 0);
-  $: appDisabledReason = isBusy ? BUSY_DISABLED_TITLE : "";
-  $: searchDisabledReason = isBusy
-    ? BUSY_DISABLED_TITLE
-    : !massIndex
-      ? "Wait for the mass database to finish loading."
-      : !hasCommittedCharges(form)
-        ? "Add at least one charge before searching."
-        : !hasEnabledTolerance(form)
-          ? "Enable at least one tolerance before searching."
-          : "";
-  $: hitsCsvDisabledReason = isBusy
-    ? BUSY_DISABLED_TITLE
-    : results.length === 0
-      ? "Run a search with results before downloading formula hits."
-      : "";
+  $: searchDisabledReason = !massIndex
+    ? "Wait for the mass database to finish loading."
+    : !hasCommittedCharges(form)
+      ? "Add at least one charge before searching."
+      : !hasEnabledTolerance(form)
+        ? "Enable at least one tolerance before searching."
+        : "";
+  $: hitsCsvDisabledReason =
+    results.length === 0 ? "Run a search with results before downloading formula hits." : "";
   $: assignmentDisabledReason =
     rawSpectrumPeaks.length === 0
       ? "Import a spectrum before assigning formulae to peaks."
@@ -332,10 +324,8 @@
     if (response.type === "result") {
       results = response.hits;
       hasSearched = true;
-      status = "success";
       return;
     }
-    status = "error";
   }
 
   function runSearch(): void {
@@ -343,7 +333,6 @@
       const request = buildRequest();
       const requestId = crypto.randomUUID();
       activeRequestId = requestId;
-      status = "running";
 
       if (worker) {
         worker.postMessage({ type: "search", requestId, payload: request });
@@ -354,10 +343,8 @@
       const hits = findFormulaeForCharges(request);
       results = hits;
       hasSearched = true;
-      status = "success";
     } catch (error) {
       console.error(error);
-      status = "error";
     }
   }
 
@@ -422,12 +409,10 @@
       spectrumImportError = "";
       const label = importSourceLabel(resolvedSheet.name);
       applySpectrumImportResult(label, resolvedSheet);
-      status = "success";
     } catch (error) {
       console.error(error);
       clearImportedSpectrumData();
       spectrumImportError = error instanceof Error ? error.message : String(error);
-      status = "error";
     }
   }
 
@@ -460,14 +445,13 @@
   async function handleSpectrumImport(file: File | null): Promise<void> {
     if (!file) {
       clearSpectrumImportState();
-      status = "idle";
       return;
     }
 
     try {
+      isImportingSpectrum = true;
       clearImportedSpectrumData();
       spectrumImportError = "";
-      status = "running";
 
       spectrumImportSource = await loadSpectrumImportSource(file);
       spectrumFileName = file.name;
@@ -484,14 +468,14 @@
       console.error(error);
       clearSpectrumImportState();
       spectrumImportError = error instanceof Error ? error.message : String(error);
-      status = "error";
+    } finally {
+      isImportingSpectrum = false;
     }
   }
 
   function handlePeakSelect(peak: SpectrumPeak): void {
     selectedPeakId = peak.id;
     updateForm({ mz: peak.mz.toFixed(6) });
-    status = "idle";
   }
 
   function handleAssign(hit: FormulaHit): void {
@@ -500,7 +484,6 @@
       spectrumAssignments,
       buildPeakAssignment(selectedPeak, hit),
     );
-    status = "success";
   }
 
   function isAssignedHitForSelectedPeak(hit: FormulaHit): boolean {
@@ -517,40 +500,29 @@
   }
 
   function handleRemoveAssignment(peakId: string): void {
-    const previous = getAssignment(spectrumAssignments, peakId);
     spectrumAssignments = removeAssignment(spectrumAssignments, peakId);
-    if (previous) {
-      status = "success";
-    }
   }
 
   function handleExportAssignments(): void {
     if (!canExportAssignmentCsv) return;
     downloadAssignmentsCsv(spectrumPeaks, includeUnassignedInAssignmentCsv);
-    status = "success";
   }
 
   async function handleExportPng(): Promise<void> {
     if (!rawSpectrumPeaks.length) return;
     try {
-      status = "running";
       await downloadAnnotatedSpectrumPng(spectrumPeaks, plotSettings, theme);
-      status = "success";
     } catch (error) {
       console.error(error);
-      status = "error";
     }
   }
 
   async function handleExportPdf(): Promise<void> {
     if (!rawSpectrumPeaks.length) return;
     try {
-      status = "running";
       await downloadAnnotatedSpectrumPdf(spectrumPeaks, plotSettings, theme);
-      status = "success";
     } catch (error) {
       console.error(error);
-      status = "error";
     }
   }
 
@@ -585,10 +557,8 @@
       const initial = createInitialRows(massIndex);
       rows = initial.rows;
       nextRowId = initial.nextRowId;
-      status = "idle";
     } catch (error) {
       console.error(error);
-      status = "error";
     }
   });
 
@@ -612,8 +582,7 @@
 
     <SpectrumImport
       activeSheetName={spectrumActiveSheetName}
-      disabled={isBusy}
-      disabledReason={appDisabledReason}
+      importing={isImportingSpectrum}
       hasHeaderRow={spectrumHasHeaderRow}
       importSource={spectrumImportSource}
       intensityColumnIndex={spectrumIntensityColumnIndex}
@@ -645,8 +614,6 @@
       <PlotSettingsPanel
         settings={plotSettings}
         peaks={spectrumPeaks}
-        disabled={isBusy}
-        disabledReason={appDisabledReason}
         onChange={updatePlotSettings}
       />
       <PeakInspector
@@ -658,8 +625,6 @@
 
     <SearchInputs
       {form}
-      disabled={isBusy}
-      disabledReason={appDisabledReason}
       onChange={updateForm}
       onChargeInputTextChange={updateChargeInputText}
       onChargeEditTextChange={updateChargeEditText}
@@ -674,8 +639,6 @@
       <FormulaSpaceTable
         {rows}
         {massIndex}
-        disabled={isBusy}
-        disabledReason={appDisabledReason}
         onAddRow={addRow}
         onRemoveRow={removeRow}
         onUpdateRow={updateRow}
@@ -686,7 +649,7 @@
       <button
         type="button"
         class="primary-action"
-        title={searchDisabledReason || undefined}
+        title={disabledTitle(Boolean(searchDisabledReason), searchDisabledReason)}
         disabled={Boolean(searchDisabledReason)}
         on:click={runSearch}>Find candidate formulae</button
       >
@@ -694,7 +657,7 @@
         id="downloadCsv"
         type="button"
         class="secondary-action"
-        title={hitsCsvDisabledReason || undefined}
+        title={disabledTitle(Boolean(hitsCsvDisabledReason), hitsCsvDisabledReason)}
         disabled={Boolean(hitsCsvDisabledReason)}
         on:click={downloadCsv}>Download formula hits CSV</button
       >
@@ -714,8 +677,6 @@
       <ExportPanel
         includeUnassigned={includeUnassignedInAssignmentCsv}
         canExportAssignments={canExportAssignmentCsv}
-        disabled={isBusy}
-        disabledReason={appDisabledReason}
         totalPeaks={rawSpectrumPeaks.length}
         {assignedCount}
         onIncludeUnassignedChange={(value) => (includeUnassignedInAssignmentCsv = value)}

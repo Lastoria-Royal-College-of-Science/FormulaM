@@ -2,6 +2,7 @@ import { render } from "svelte/server";
 import { describe, expect, it } from "vitest";
 
 import ExportPanel from "../../src/components/spectrum/ExportPanel.svelte";
+import { enabledInteractiveControlsWithTitles } from "./titleAssertions";
 
 describe("ExportPanel", () => {
   it("renders PNG and PDF export actions in the final export section", () => {
@@ -21,6 +22,7 @@ describe("ExportPanel", () => {
     expect(body).toContain("annotated PNG or PDF versions of the current spectrum view");
     expect(body).toContain(">Download annotated PNG<");
     expect(body).toContain(">Download annotated PDF<");
+    expect(enabledInteractiveControlsWithTitles(body)).toEqual([]);
   });
 
   it("explains disabled export actions", () => {
@@ -41,5 +43,6 @@ describe("ExportPanel", () => {
       'title="Assign at least one peak or include unassigned peaks before exporting assignments."',
     );
     expect(body).toContain('title="Import a spectrum before exporting an annotated plot."');
+    expect(enabledInteractiveControlsWithTitles(body)).toEqual([]);
   });
 });

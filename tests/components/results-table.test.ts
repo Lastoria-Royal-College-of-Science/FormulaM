@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import ResultsTable from "../../src/components/results/ResultsTable.svelte";
 import { MZ_TEX } from "../../src/core/math/tex";
 import type { FormulaHit, PeakAssignment } from "../../src/core/types";
+import { enabledInteractiveControlsWithTitles } from "./titleAssertions";
 
 const sampleHit: FormulaHit = {
   formula: "C5[13C]H12O6",
@@ -65,6 +66,7 @@ describe("ResultsTable", () => {
     expect(body).toContain('class="results-assign-button"');
     expect(body).toContain('title="Import a spectrum before assigning formulae to peaks."');
     expect(body).toContain("disabled");
+    expect(enabledInteractiveControlsWithTitles(body)).toEqual([]);
     expect(body).toContain(texAnnotation("\\ce{[C5{}^{13}CH12O6]+}"));
     expect(body).not.toContain("formula-isotope");
     expect(body).not.toMatch(/<sub\b/);
@@ -108,6 +110,7 @@ describe("ResultsTable", () => {
     expect(body).toContain("i-mdi-minus");
     expect(body).toContain("Remove [C5[13C]H12O6]+ from the selected peak");
     expect(body).toContain('data-selectable-formula="true"');
+    expect(enabledInteractiveControlsWithTitles(body)).toEqual([]);
   });
 
   it("renders pagination controls and shows the first 10 rows by default", () => {
@@ -122,6 +125,8 @@ describe("ResultsTable", () => {
     expect(body).toContain("Go to previous results page");
     expect(body).toContain("Go to next results page");
     expect(body).toContain('title="Already on the first results page."');
+    expect(body).not.toContain('title="Already on the last results page."');
+    expect(enabledInteractiveControlsWithTitles(body)).toEqual([]);
     expect(body).toContain("[F10]+");
     expect(body).not.toContain('aria-label="[F11]+"');
     expect(body).not.toContain('aria-label="[F12]+"');
@@ -139,5 +144,7 @@ describe("ResultsTable", () => {
     expect(withoutSpectrum).toContain("Showing 0 results");
     expect(withoutSpectrum).toContain("Page 1 of 1");
     expect(withoutSpectrum).toContain('title="Already on the last results page."');
+    expect(enabledInteractiveControlsWithTitles(withoutSpectrum)).toEqual([]);
+    expect(enabledInteractiveControlsWithTitles(withAssignment)).toEqual([]);
   });
 });

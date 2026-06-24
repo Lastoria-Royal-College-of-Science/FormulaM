@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import SpectrumPlot from "../../src/components/spectrum/SpectrumPlot.svelte";
 import { DEFAULT_PLOT_SETTINGS } from "../../src/core/plot/plotTicks";
 import type { SpectrumPeak } from "../../src/core/types";
+import { enabledInteractiveControlsWithTitles } from "./titleAssertions";
 
 const peaks: SpectrumPeak[] = [
   {
@@ -55,7 +56,9 @@ describe("SpectrumPlot", () => {
 
     expect(body).toContain("<svg");
     expect(body).toContain('aria-label="Spectrum plot.');
+    expect(body).toContain("spectrum-plot-frame");
     expect(body).not.toContain("spectrum-plot-button");
+    expect(enabledInteractiveControlsWithTitles(body)).toEqual([]);
     expect(body).toContain("<line");
     expect(body).toContain("<circle");
     expect(body).toContain("<tspan");
@@ -69,6 +72,11 @@ describe("SpectrumPlot", () => {
   it("does not add a custom hover border to the plot frame", () => {
     expect(spectrumPlotSource).not.toContain("spectrum-plot-button");
     expect(spectrumPlotSource).not.toContain(".spectrum-plot-button:hover");
+    expect(spectrumPlotSource).toContain(".spectrum-plot-frame:enabled:hover");
+    expect(spectrumPlotSource).toContain("border-color: var(--border);");
+    expect(spectrumPlotSource).toContain("box-shadow: none;");
+    expect(spectrumPlotSource).toContain("filter: none;");
+    expect(spectrumPlotSource).not.toContain("border-color: var(--accent);");
   });
 
   it("explains why reset is disabled before a spectrum is imported", () => {
@@ -83,5 +91,6 @@ describe("SpectrumPlot", () => {
 
     expect(body).toContain('title="Import a spectrum before resetting the view."');
     expect(body).toContain("disabled");
+    expect(enabledInteractiveControlsWithTitles(body)).toEqual([]);
   });
 });

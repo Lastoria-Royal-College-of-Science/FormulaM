@@ -55,14 +55,8 @@
       ? "Showing 0 results"
       : `Showing ${pageStart + 1}-${pageEnd} of ${totalResults}`;
   $: assignmentDisabled = Boolean(assignmentDisabledReason) || !onToggleAssignment;
-  $: assignmentButtonTitle = disabledTitle(
-    assignmentDisabled,
-    assignmentDisabledReason || "Assignment is currently unavailable.",
-  );
   $: previousPageDisabled = currentPage <= 1;
   $: nextPageDisabled = currentPage >= totalPages;
-  $: previousPageTitle = disabledTitle(previousPageDisabled, "Already on the first results page.");
-  $: nextPageTitle = disabledTitle(nextPageDisabled, "Already on the last results page.");
 
   function toggleSort(column: ResultSortColumn): void {
     sortState = cycleResultSortState(sortState, column);
@@ -199,7 +193,10 @@
                 class={isAssigned ? "results-assign-button-active" : "results-assign-button"}
                 aria-label={assignmentAriaLabel(hit, isAssigned)}
                 aria-pressed={isAssigned}
-                title={assignmentButtonTitle}
+                title={disabledTitle(
+                  assignmentDisabled,
+                  assignmentDisabledReason || "Assignment is currently unavailable.",
+                )}
                 disabled={assignmentDisabled}
                 on:click={() => toggleAssignment(hit)}
               >
@@ -228,7 +225,7 @@
         type="button"
         class="secondary-action min-h-9 rounded-[10px] px-3 py-1.5 text-sm"
         aria-label="Go to previous results page"
-        title={previousPageTitle}
+        title={disabledTitle(previousPageDisabled, "Already on the first results page.")}
         disabled={previousPageDisabled}
         on:click={() => goToPage(currentPage - 1)}
       >
@@ -238,7 +235,7 @@
         type="button"
         class="secondary-action min-h-9 rounded-[10px] px-3 py-1.5 text-sm"
         aria-label="Go to next results page"
-        title={nextPageTitle}
+        title={disabledTitle(nextPageDisabled, "Already on the last results page.")}
         disabled={nextPageDisabled}
         on:click={() => goToPage(currentPage + 1)}
       >

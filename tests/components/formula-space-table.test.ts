@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import FormulaSpaceTable from "../../src/components/search/FormulaSpaceTable.svelte";
 import { buildMassIndex, formatIsotopeOption } from "../../src/core/chemistry/massData";
 import type { FormulaSpaceRow, MassPayload } from "../../src/core/types";
+import { enabledInteractiveControlsWithTitles } from "./titleAssertions";
 
 const massPayload: MassPayload = {
   default_isotope_by_symbol: {
@@ -51,6 +52,7 @@ describe("FormulaSpaceTable", () => {
     expect(body).toContain(">¹⁷O</option>");
     expect(body).toContain('value="18O"');
     expect(body).toContain(">¹⁸O</option>");
+    expect(enabledInteractiveControlsWithTitles(body)).toEqual([]);
     expect(body).not.toContain(">16O (default)</option>");
   });
 
@@ -67,21 +69,30 @@ describe("FormulaSpaceTable", () => {
     });
 
     expect(body).toContain('title="Keep at least one formula search-space row."');
+    expect(enabledInteractiveControlsWithTitles(body)).toEqual([]);
   });
 
-  it("explains disabled formula-space controls while busy", () => {
-    const rows: FormulaSpaceRow[] = [{ id: 1, element: "O", isotope: "16O", lower: 0, upper: 20 }];
+  it("omits titles from enabled formula-space row actions", () => {
+    const rows: FormulaSpaceRow[] = [
+      { id: 1, element: "O", isotope: "16O", lower: 0, upper: 20 },
+      { id: 2, element: "O", isotope: "17O", lower: 0, upper: 20 },
+      { id: 3, element: "O", isotope: "18O", lower: 0, upper: 20 },
+      { id: 4, element: "C", isotope: "12C", lower: 0, upper: 20 },
+      { id: 5, element: "C", isotope: "13C", lower: 0, upper: 20 },
+    ];
     const { body } = render(FormulaSpaceTable, {
       props: {
         rows,
         massIndex,
-        disabled: true,
         onAddRow: () => undefined,
         onRemoveRow: () => undefined,
         onUpdateRow: () => undefined,
       },
     });
 
-    expect(body).toContain('title="Wait for the current operation to finish."');
+    expect(body).toContain('title="All available element/isotope rows are already present."');
+    expect(body).not.toContain('title="Remove row"');
+    expect(body).not.toContain('title="Add row"');
+    expect(enabledInteractiveControlsWithTitles(body)).toEqual([]);
   });
 });

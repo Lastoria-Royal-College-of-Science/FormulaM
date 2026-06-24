@@ -1,37 +1,15 @@
 <script lang="ts">
-  import { BUSY_DISABLED_TITLE, disabledTitle } from "../ui/disabledTitle";
+  import { disabledTitle } from "../ui/disabledTitle";
   import ToggleSwitch from "../ui/ToggleSwitch.svelte";
 
   export let includeUnassigned = false;
   export let canExportAssignments = false;
-  export let disabled = false;
-  export let disabledReason = BUSY_DISABLED_TITLE;
   export let totalPeaks = 0;
   export let assignedCount = 0;
   export let onIncludeUnassignedChange: (value: boolean) => void;
   export let onExportAssignments: () => void;
   export let onExportPng: () => void;
   export let onExportPdf: () => void;
-
-  function disabledControlTitle(): string | undefined {
-    return disabledTitle(disabled, disabledReason);
-  }
-
-  function assignmentCsvTitle(): string | undefined {
-    return disabledTitle(
-      disabled || !canExportAssignments,
-      disabled
-        ? disabledReason
-        : "Assign at least one peak or include unassigned peaks before exporting assignments.",
-    );
-  }
-
-  function annotatedExportTitle(): string | undefined {
-    return disabledTitle(
-      disabled || totalPeaks === 0,
-      disabled ? disabledReason : "Import a spectrum before exporting an annotated plot.",
-    );
-  }
 </script>
 
 <section class="ui-card">
@@ -50,12 +28,10 @@
     </div>
   </div>
 
-  <div class:toggle-control-disabled={disabled} class="toggle-control mt-4">
+  <div class="toggle-control mt-4">
     <ToggleSwitch
       ariaLabel="Include unassigned peaks in assignment CSV"
       checked={includeUnassigned}
-      title={disabledControlTitle()}
-      {disabled}
       onChange={onIncludeUnassignedChange}
     />
     <span class="toggle-copy text-muted">Include unassigned peaks in assignment CSV</span>
@@ -65,22 +41,31 @@
     <button
       type="button"
       class="primary-action"
-      title={assignmentCsvTitle()}
-      disabled={disabled || !canExportAssignments}
+      title={disabledTitle(
+        !canExportAssignments,
+        "Assign at least one peak or include unassigned peaks before exporting assignments.",
+      )}
+      disabled={!canExportAssignments}
       on:click={onExportAssignments}>Download assignments CSV</button
     >
     <button
       type="button"
       class="secondary-action"
-      title={annotatedExportTitle()}
-      disabled={disabled || totalPeaks === 0}
+      title={disabledTitle(
+        totalPeaks === 0,
+        "Import a spectrum before exporting an annotated plot.",
+      )}
+      disabled={totalPeaks === 0}
       on:click={onExportPng}>Download annotated PNG</button
     >
     <button
       type="button"
       class="secondary-action"
-      title={annotatedExportTitle()}
-      disabled={disabled || totalPeaks === 0}
+      title={disabledTitle(
+        totalPeaks === 0,
+        "Import a spectrum before exporting an annotated plot.",
+      )}
+      disabled={totalPeaks === 0}
       on:click={onExportPdf}>Download annotated PDF</button
     >
   </div>

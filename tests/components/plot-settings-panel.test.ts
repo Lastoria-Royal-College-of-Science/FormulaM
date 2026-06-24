@@ -5,6 +5,7 @@ import PlotSettingsPanel from "../../src/components/spectrum/PlotSettingsPanel.s
 import { X_MAX_TEX, X_MIN_TEX, Y_MAX_TEX } from "../../src/core/math/tex";
 import { DEFAULT_PLOT_SETTINGS, createPlotSettings } from "../../src/core/plot/plotTicks";
 import type { SpectrumPeak } from "../../src/core/types";
+import { enabledInteractiveControlsWithTitles } from "./titleAssertions";
 
 function texAnnotation(tex: string): string {
   return `<annotation encoding="application/x-tex">${tex}</annotation>`;
@@ -53,6 +54,7 @@ describe("PlotSettingsPanel", () => {
     expect(body).toContain('value="10 (auto)"');
     expect(body).toContain('title="Enable fixed y scale before editing y max."');
     expect(body).toContain('title="Enable fixed major tick spacing before editing this value."');
+    expect(enabledInteractiveControlsWithTitles(body)).toEqual([]);
     expect(body).toContain('value="33"');
     expect(body).not.toContain('value="33 (auto)"');
     expect(body).toContain('aria-label="Show threshold"');
@@ -76,16 +78,27 @@ describe("PlotSettingsPanel", () => {
     expect(body).toContain('value="1"');
   });
 
-  it("explains globally disabled plot setting controls", () => {
+  it("omits titles from enabled fixed plot-setting inputs", () => {
     const { body } = render(PlotSettingsPanel, {
       props: {
-        settings: DEFAULT_PLOT_SETTINGS,
+        settings: {
+          ...DEFAULT_PLOT_SETTINGS,
+          yScale: "fixed",
+          yMax: 125,
+          autoTicks: false,
+          majorTickSpacing: 5,
+        },
         peaks,
-        disabled: true,
         onChange: () => undefined,
       },
     });
 
-    expect(body).toContain('title="Wait for the current operation to finish."');
+    expect(body).toContain('value="125"');
+    expect(body).toContain('value="5"');
+    expect(body).not.toContain('title="Enable fixed y scale before editing y max."');
+    expect(body).not.toContain(
+      'title="Enable fixed major tick spacing before editing this value."',
+    );
+    expect(enabledInteractiveControlsWithTitles(body)).toEqual([]);
   });
 });
