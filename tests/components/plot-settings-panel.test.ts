@@ -51,6 +51,8 @@ describe("PlotSettingsPanel", () => {
     expect(body).toContain('aria-label="Label target"');
     expect(body).toContain('value="110 (auto)"');
     expect(body).toContain('value="10 (auto)"');
+    expect(body).toContain('title="Enable fixed y scale before editing y max."');
+    expect(body).toContain('title="Enable fixed major tick spacing before editing this value."');
     expect(body).toContain('value="33"');
     expect(body).not.toContain('value="33 (auto)"');
     expect(body).toContain('aria-label="Show threshold"');
@@ -72,5 +74,18 @@ describe("PlotSettingsPanel", () => {
     expect(settings.xMin).toBe(70);
     expect(settings.xMax).toBe(130);
     expect(body).toContain('value="1"');
+  });
+
+  it("explains globally disabled plot setting controls", () => {
+    const { body } = render(PlotSettingsPanel, {
+      props: {
+        settings: DEFAULT_PLOT_SETTINGS,
+        peaks,
+        disabled: true,
+        onChange: () => undefined,
+      },
+    });
+
+    expect(body).toContain('title="Wait for the current operation to finish."');
   });
 });

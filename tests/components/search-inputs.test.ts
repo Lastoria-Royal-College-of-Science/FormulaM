@@ -80,6 +80,7 @@ describe("SearchInputs", () => {
 
     expect(body).toContain("i-codex-check");
     expect(body).toContain('aria-label="Confirm new positive charge"');
+    expect(body).toContain('title="Enter a valid charge magnitude or range before confirming."');
   });
 
   it("disables both tolerance inputs when their toggles are off", () => {
@@ -97,6 +98,22 @@ describe("SearchInputs", () => {
 
     expect(body).toMatch(/<input[^>]*id="tolerancePpm"[^>]*disabled/);
     expect(body).toMatch(/<input[^>]*id="toleranceDa"[^>]*disabled/);
+    expect(body).toContain('title="Enable ppm tolerance before editing this value."');
+    expect(body).toContain('title="Enable Da tolerance before editing this value."');
+  });
+
+  it("adds disabled reasons to globally disabled search controls", () => {
+    const { body } = render(SearchInputs, {
+      props: {
+        form: createDefaultSearchForm(),
+        disabled: true,
+        ...baseProps,
+      },
+    });
+
+    expect(body).toContain('title="Wait for the current operation to finish."');
+    expect(body).toMatch(/<input[^>]*aria-label="Observed m\/z"[^>]*disabled/);
+    expect(body).toMatch(/<button[^>]*aria-label="Charge polarity is positive/);
   });
 
   it("keeps field titles outside the interactive hit area", () => {
@@ -123,8 +140,10 @@ describe("SearchInputs", () => {
     expect(searchInputsSource).toContain(".charge-chip-action:enabled:hover");
     expect(searchInputsSource).toContain(".charge-draft-action:enabled:hover");
     expect(searchInputsSource).toContain(".charge-chip:has(.charge-chip-target:enabled:hover)");
+    expect(searchInputsSource).toContain(".charge-field-shell:has(.charge-draft-input:focus)");
     expect(toggleSwitchSource).toContain(".toggle-switch:enabled:hover");
     expect(toggleSwitchSource).not.toContain(".toggle-switch:enabled:hover {\n    box-shadow");
+    expect(toggleSwitchSource).not.toContain(".toggle-switch:enabled:focus,\n");
   });
 
   it("centers help dialogs and renders ppm help as display math", () => {

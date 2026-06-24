@@ -55,7 +55,7 @@ describe("SpectrumPlot", () => {
 
     expect(body).toContain("<svg");
     expect(body).toContain('aria-label="Spectrum plot.');
-    expect(body).toContain("spectrum-plot-button");
+    expect(body).not.toContain("spectrum-plot-button");
     expect(body).toContain("<line");
     expect(body).toContain("<circle");
     expect(body).toContain("<tspan");
@@ -66,9 +66,22 @@ describe("SpectrumPlot", () => {
     expect(body).not.toContain("<canvas");
   });
 
-  it("keeps the plot frame hover border separate from glow behavior", () => {
-    expect(spectrumPlotSource).toContain(".spectrum-plot-button:hover");
-    expect(spectrumPlotSource).toContain("border-color: var(--accent);");
-    expect(spectrumPlotSource).not.toContain(".spectrum-plot-button:hover {\n    box-shadow");
+  it("does not add a custom hover border to the plot frame", () => {
+    expect(spectrumPlotSource).not.toContain("spectrum-plot-button");
+    expect(spectrumPlotSource).not.toContain(".spectrum-plot-button:hover");
+  });
+
+  it("explains why reset is disabled before a spectrum is imported", () => {
+    const { body } = render(SpectrumPlot, {
+      props: {
+        peaks: [],
+        settings: DEFAULT_PLOT_SETTINGS,
+        onSelectPeak: () => undefined,
+        onResetView: () => undefined,
+      },
+    });
+
+    expect(body).toContain('title="Import a spectrum before resetting the view."');
+    expect(body).toContain("disabled");
   });
 });

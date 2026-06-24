@@ -7,11 +7,13 @@
 <script lang="ts">
   import { MZ_TEX } from "../../core/math/tex";
   import type { SpectrumImportSource, SpectrumPreviewTable } from "../../core/types";
+  import { BUSY_DISABLED_TITLE, disabledTitle } from "../ui/disabledTitle";
   import MathTex from "../ui/MathTex.svelte";
   import ToggleSwitch from "../ui/ToggleSwitch.svelte";
 
   export let activeSheetName = "";
   export let disabled = false;
+  export let disabledReason = BUSY_DISABLED_TITLE;
   export let hasHeaderRow = true;
   export let importError = "";
   export let importSource: SpectrumImportSource | null = null;
@@ -57,6 +59,31 @@
     const index = Number(value);
     return Number.isInteger(index) ? index : null;
   }
+
+  function disabledControlTitle(): string | undefined {
+    return disabledTitle(disabled, disabledReason);
+  }
+
+  function clearSpectrumTitle(): string | undefined {
+    return disabledTitle(
+      disabled || (!importSource && peakCount === 0),
+      disabled ? disabledReason : "Import a spectrum before clearing it.",
+    );
+  }
+
+  function columnSelectTitle(): string | undefined {
+    return disabledTitle(
+      disabled || columnOptions.length === 0,
+      disabled ? disabledReason : "Load a peak-list preview before choosing columns.",
+    );
+  }
+
+  function applySelectionTitle(): string | undefined {
+    return disabledTitle(
+      disabled || mzColumnIndex === null || intensityColumnIndex === null,
+      disabled ? disabledReason : "Select m/z and intensity columns before importing.",
+    );
+  }
 </script>
 
 <section class="ui-card">
@@ -72,6 +99,7 @@
     <button
       type="button"
       class="secondary-action"
+      title={clearSpectrumTitle()}
       disabled={disabled || (!importSource && peakCount === 0)}
       on:click={clearSelection}>Clear spectrum</button
     >
@@ -85,6 +113,7 @@
       type="file"
       accept=".csv,.xlsx,.xls"
       aria-label="Peak list file"
+      title={disabledControlTitle()}
       {disabled}
       on:change={handleFileChange}
     />
@@ -120,6 +149,7 @@
             class="field-control field-select"
             value={activeSheetName}
             aria-label="Worksheet"
+            title={disabledControlTitle()}
             {disabled}
             on:change={(event) => onSelectSheet((event.currentTarget as HTMLSelectElement).value)}
           >
@@ -134,6 +164,7 @@
         <ToggleSwitch
           ariaLabel="First non-empty row is a header"
           checked={hasHeaderRow}
+          title={disabledControlTitle()}
           {disabled}
           onChange={onSelectHasHeaderRow}
         />
@@ -148,6 +179,7 @@
           class="field-control field-select"
           value={mzColumnIndex ?? ""}
           aria-label="m/z column"
+          title={columnSelectTitle()}
           disabled={disabled || columnOptions.length === 0}
           on:change={(event) =>
             onSelectMzColumn(parseSelectedIndex((event.currentTarget as HTMLSelectElement).value))}
@@ -165,6 +197,7 @@
           class="field-control field-select"
           value={intensityColumnIndex ?? ""}
           aria-label="Intensity column"
+          title={columnSelectTitle()}
           disabled={disabled || columnOptions.length === 0}
           on:change={(event) =>
             onSelectIntensityColumn(
@@ -183,6 +216,7 @@
       <button
         type="button"
         class="primary-action"
+        title={applySelectionTitle()}
         disabled={disabled || mzColumnIndex === null || intensityColumnIndex === null}
         on:click={() => onApplySelection()}
       >

@@ -53,4 +53,35 @@ describe("FormulaSpaceTable", () => {
     expect(body).toContain(">¹⁸O</option>");
     expect(body).not.toContain(">16O (default)</option>");
   });
+
+  it("explains disabled row actions", () => {
+    const rows: FormulaSpaceRow[] = [{ id: 1, element: "O", isotope: "16O", lower: 0, upper: 20 }];
+    const { body } = render(FormulaSpaceTable, {
+      props: {
+        rows,
+        massIndex,
+        onAddRow: () => undefined,
+        onRemoveRow: () => undefined,
+        onUpdateRow: () => undefined,
+      },
+    });
+
+    expect(body).toContain('title="Keep at least one formula search-space row."');
+  });
+
+  it("explains disabled formula-space controls while busy", () => {
+    const rows: FormulaSpaceRow[] = [{ id: 1, element: "O", isotope: "16O", lower: 0, upper: 20 }];
+    const { body } = render(FormulaSpaceTable, {
+      props: {
+        rows,
+        massIndex,
+        disabled: true,
+        onAddRow: () => undefined,
+        onRemoveRow: () => undefined,
+        onUpdateRow: () => undefined,
+      },
+    });
+
+    expect(body).toContain('title="Wait for the current operation to finish."');
+  });
 });

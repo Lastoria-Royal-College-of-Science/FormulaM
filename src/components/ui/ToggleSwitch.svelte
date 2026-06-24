@@ -2,6 +2,7 @@
   export let checked = false;
   export let disabled = false;
   export let ariaLabel: string;
+  export let title: string | undefined = undefined;
   export let onChange: (value: boolean) => void;
 
   function handleClick(): void {
@@ -16,6 +17,7 @@
   role="switch"
   aria-checked={checked}
   aria-label={ariaLabel}
+  {title}
   {disabled}
   on:click={handleClick}
 >
@@ -48,9 +50,7 @@
   }
 
   .toggle-switch:enabled:hover,
-  .toggle-switch:enabled:active,
-  .toggle-switch:enabled:focus,
-  .toggle-switch:enabled:focus-visible {
+  .toggle-switch:enabled:active {
     border-color: var(--accent);
   }
 

@@ -77,6 +77,7 @@ describe("SpectrumImport", () => {
 
     expect(body).toContain('type="file"');
     expect(body).toContain('class="field-control-file"');
+    expect(body).toContain('title="Import a spectrum before clearing it."');
     expect(body).not.toContain('class="field-control" type="file"');
   });
 
@@ -109,5 +110,65 @@ describe("SpectrumImport", () => {
     expect(body).toContain('aria-label="Worksheet"');
     expect(body).toContain('aria-label="m/z column"');
     expect(body).toContain('aria-label="Intensity column"');
+  });
+
+  it("explains disabled import controls", () => {
+    const emptyPreviewTable: SpectrumPreviewTable = {
+      columnLabels: [],
+      rows: [],
+      totalRows: 0,
+    };
+    const { body } = render(SpectrumImport, {
+      props: {
+        activeSheetName: "Sheet1",
+        disabled: false,
+        hasHeaderRow: true,
+        importError: "",
+        importSource: sampleImportSource,
+        intensityColumnIndex: null,
+        intensityColumnName: "",
+        mzColumnIndex: null,
+        mzColumnName: "",
+        onApplySelection: () => undefined,
+        onImportFile: () => undefined,
+        onSelectHasHeaderRow: () => undefined,
+        onSelectIntensityColumn: () => undefined,
+        onSelectMzColumn: () => undefined,
+        onSelectSheet: () => undefined,
+        peakCount: 0,
+        previewTable: emptyPreviewTable,
+        sourceName: "Kaempferol.csv",
+      },
+    });
+
+    expect(body).toContain('title="Load a peak-list preview before choosing columns."');
+    expect(body).toContain('title="Select m/z and intensity columns before importing."');
+  });
+
+  it("explains globally disabled import controls", () => {
+    const { body } = render(SpectrumImport, {
+      props: {
+        activeSheetName: "",
+        disabled: true,
+        hasHeaderRow: true,
+        importError: "",
+        importSource: null,
+        intensityColumnIndex: null,
+        intensityColumnName: "",
+        mzColumnIndex: null,
+        mzColumnName: "",
+        onApplySelection: () => undefined,
+        onImportFile: () => undefined,
+        onSelectHasHeaderRow: () => undefined,
+        onSelectIntensityColumn: () => undefined,
+        onSelectMzColumn: () => undefined,
+        onSelectSheet: () => undefined,
+        peakCount: 0,
+        previewTable: null,
+        sourceName: "",
+      },
+    });
+
+    expect(body).toContain('title="Wait for the current operation to finish."');
   });
 });

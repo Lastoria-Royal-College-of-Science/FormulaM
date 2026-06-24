@@ -136,11 +136,13 @@
   }
 
   .topbar-control-solid {
+    --control-rest-border: var(--control-border);
     border-color: var(--control-border);
     background: var(--control-bg);
   }
 
   .topbar-control-glass {
+    --control-rest-border: color-mix(in srgb, var(--border), transparent 14%);
     border-color: color-mix(in srgb, var(--border), transparent 14%);
     background-color: color-mix(in srgb, var(--surface), transparent 40%);
     -webkit-backdrop-filter: blur(10px) saturate(135%);

@@ -9,11 +9,13 @@
     isChargeDraftText,
   } from "../../core/search/chargeInput";
   import type { SearchFormState } from "../../core/types";
+  import { BUSY_DISABLED_TITLE, disabledTitle } from "../ui/disabledTitle";
   import MathTex from "../ui/MathTex.svelte";
   import ToggleSwitch from "../ui/ToggleSwitch.svelte";
 
   export let form: SearchFormState;
   export let disabled = false;
+  export let disabledReason = BUSY_DISABLED_TITLE;
   export let onChange: (patch: Partial<SearchFormState>) => void;
   export let onChargeInputTextChange: (value: string) => void;
   export let onChargeEditTextChange: (value: string) => void;
@@ -41,6 +43,24 @@
     if (event.key !== "Enter") return;
     event.preventDefault();
     if (ready && !disabled) onCommit();
+  }
+
+  function disabledControlTitle(): string | undefined {
+    return disabledTitle(disabled, disabledReason);
+  }
+
+  function chargeCommitTitle(ready: boolean): string | undefined {
+    return disabledTitle(
+      disabled || !ready,
+      disabled ? disabledReason : "Enter a valid charge magnitude or range before confirming.",
+    );
+  }
+
+  function toleranceValueTitle(enabled: boolean, label: string): string | undefined {
+    return disabledTitle(
+      disabled || !enabled,
+      disabled ? disabledReason : `Enable ${label} tolerance before editing this value.`,
+    );
   }
 
   function signedChargeText(text: string): string {
@@ -104,6 +124,7 @@
         inputmode="decimal"
         value={form.mz}
         aria-label="Observed m/z"
+        title={disabledControlTitle()}
         {disabled}
         on:input={(event) => onChange({ mz: (event.currentTarget as HTMLInputElement).value })}
       />
@@ -131,6 +152,7 @@
           aria-label={form.chargeSign === "+"
             ? "Charge polarity is positive. Click to switch to negative charges."
             : "Charge polarity is negative. Click to switch to positive charges."}
+          title={disabledControlTitle()}
           {disabled}
           on:click={toggleChargeSign}
         >
@@ -166,6 +188,7 @@
                       type="text"
                       inputmode="numeric"
                       value={form.chargeEditText}
+                      title={disabledControlTitle()}
                       {disabled}
                       aria-label={`Edit ${signedChargeText(entry.text)}`}
                       on:input={(event) => {
@@ -179,6 +202,7 @@
                     type="button"
                     class="charge-chip-action"
                     aria-label={`Confirm ${signedChargeText(form.chargeEditText || entry.text)} changes`}
+                    title={chargeCommitTitle(canCommitChargeEntryText(form.chargeEditText))}
                     disabled={disabled || !canCommitChargeEntryText(form.chargeEditText)}
                     on:click={onCommitChargeEdit}
                   >
@@ -191,6 +215,7 @@
                     type="button"
                     class="charge-chip-target"
                     aria-label={`Edit ${signedChargeText(entry.text)}`}
+                    title={disabledControlTitle()}
                     {disabled}
                     on:click={() => onStartChargeEdit(entry.id)}
                   >
@@ -200,6 +225,7 @@
                     type="button"
                     class="charge-chip-action"
                     aria-label={`Remove ${signedChargeText(entry.text)}`}
+                    title={disabledControlTitle()}
                     {disabled}
                     on:click={() => onRemoveChargeEntry(entry.id)}
                   >
@@ -216,6 +242,7 @@
               inputmode="numeric"
               placeholder="n or min-max"
               value={form.chargeInputText}
+              title={disabledControlTitle()}
               {disabled}
               aria-label="Add charge magnitude or range"
               on:input={(event) => {
@@ -234,6 +261,7 @@
                 type="button"
                 class="charge-draft-action"
                 aria-label={`Confirm new ${form.chargeSign === "+" ? "positive" : "negative"} charge`}
+                title={chargeCommitTitle(canCommitChargeEntryText(form.chargeInputText))}
                 disabled={disabled || !canCommitChargeEntryText(form.chargeInputText)}
                 on:click={onCommitChargeInput}
               >
@@ -262,6 +290,7 @@
         <ToggleSwitch
           ariaLabel="Enable ppm tolerance"
           checked={form.tolerancePpmEnabled}
+          title={disabledControlTitle()}
           {disabled}
           onChange={(value) => onChange({ tolerancePpmEnabled: value })}
         />
@@ -272,6 +301,7 @@
           inputmode="decimal"
           value={form.tolerancePpm}
           aria-label="Tolerance ppm"
+          title={toleranceValueTitle(form.tolerancePpmEnabled, "ppm")}
           disabled={disabled || !form.tolerancePpmEnabled}
           on:input={(event) =>
             onChange({ tolerancePpm: (event.currentTarget as HTMLInputElement).value })}
@@ -286,6 +316,7 @@
         <ToggleSwitch
           ariaLabel="Enable Da tolerance"
           checked={form.toleranceDaEnabled}
+          title={disabledControlTitle()}
           {disabled}
           onChange={(value) => onChange({ toleranceDaEnabled: value })}
         />
@@ -296,6 +327,7 @@
           inputmode="decimal"
           value={form.toleranceDa}
           aria-label="Tolerance Da"
+          title={toleranceValueTitle(form.toleranceDaEnabled, "Da")}
           disabled={disabled || !form.toleranceDaEnabled}
           on:input={(event) =>
             onChange({ toleranceDa: (event.currentTarget as HTMLInputElement).value })}
@@ -312,6 +344,7 @@
         step="10"
         value={form.maxResults}
         aria-label="Max results"
+        title={disabledControlTitle()}
         {disabled}
         on:input={(event) =>
           onChange({ maxResults: Number((event.currentTarget as HTMLInputElement).value) })}
@@ -400,7 +433,8 @@
     filter: var(--interactive-active-filter);
   }
 
-  .charge-field-shell:focus-within {
+  .charge-field-shell:has(.charge-draft-input:focus),
+  .charge-field-shell:has(.charge-chip-input:focus) {
     border-color: var(--accent);
     box-shadow: var(--control-glow);
   }
@@ -454,16 +488,10 @@
 
   .charge-polarity-switch:enabled:hover,
   .charge-polarity-switch:enabled:active,
-  .charge-polarity-switch:enabled:focus,
-  .charge-polarity-switch:enabled:focus-visible,
   .charge-chip-action:enabled:hover,
   .charge-chip-action:enabled:active,
-  .charge-chip-action:enabled:focus,
-  .charge-chip-action:enabled:focus-visible,
   .charge-draft-action:enabled:hover,
-  .charge-draft-action:enabled:active,
-  .charge-draft-action:enabled:focus,
-  .charge-draft-action:enabled:focus-visible {
+  .charge-draft-action:enabled:active {
     border-color: var(--accent);
   }
 

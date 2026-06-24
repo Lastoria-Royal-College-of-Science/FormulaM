@@ -11,6 +11,7 @@
   import { matchesAssignmentHit } from "../../core/spectrum/assignments";
   import type { FormulaHit, PeakAssignment } from "../../core/types";
   import ChemicalFormula from "../ui/ChemicalFormula.svelte";
+  import { disabledTitle } from "../ui/disabledTitle";
   import MathTex from "../ui/MathTex.svelte";
 
   type ResultsPageSizeValue = "10" | "20" | "50" | "all";
@@ -26,6 +27,7 @@
   export let selectedPeakLabel = "";
   export let activeAssignment: PeakAssignment | null = null;
   export let onToggleAssignment: ((hit: FormulaHit) => void) | null = null;
+  export let assignmentDisabledReason = "Import a spectrum before assigning formulae to peaks.";
 
   let sortState: ResultSortState | null = null;
   let pageSizeValue: ResultsPageSizeValue = "10";
@@ -52,6 +54,15 @@
     totalResults === 0
       ? "Showing 0 results"
       : `Showing ${pageStart + 1}-${pageEnd} of ${totalResults}`;
+  $: assignmentDisabled = Boolean(assignmentDisabledReason) || !onToggleAssignment;
+  $: assignmentButtonTitle = disabledTitle(
+    assignmentDisabled,
+    assignmentDisabledReason || "Assignment is currently unavailable.",
+  );
+  $: previousPageDisabled = currentPage <= 1;
+  $: nextPageDisabled = currentPage >= totalPages;
+  $: previousPageTitle = disabledTitle(previousPageDisabled, "Already on the first results page.");
+  $: nextPageTitle = disabledTitle(nextPageDisabled, "Already on the last results page.");
 
   function toggleSort(column: ResultSortColumn): void {
     sortState = cycleResultSortState(sortState, column);
@@ -62,6 +73,7 @@
   }
 
   function toggleAssignment(hit: FormulaHit): void {
+    if (assignmentDisabled) return;
     onToggleAssignment?.(hit);
   }
 
@@ -169,9 +181,7 @@
               ></span>
             </button>
           </th>
-          {#if onToggleAssignment}
-            <th class="table-head w-[48px]" aria-label="Toggle assignment"></th>
-          {/if}
+          <th class="table-head w-[48px]" aria-label="Toggle assignment"></th>
         </tr>
       </thead>
       <tbody>
@@ -183,29 +193,26 @@
             <td class="table-cell">{hit.mz}</td>
             <td class="table-cell">{hit.error_da}</td>
             <td class="table-cell">{hit.error_ppm}</td>
-            {#if onToggleAssignment}
-              <td class="table-cell w-[48px] text-right">
-                <button
-                  type="button"
-                  class={isAssigned ? "results-assign-button-active" : "results-assign-button"}
-                  aria-label={assignmentAriaLabel(hit, isAssigned)}
-                  aria-pressed={isAssigned}
-                  disabled={!selectedPeakLabel}
-                  on:click={() => toggleAssignment(hit)}
-                >
-                  <span
-                    class={`results-assign-icon ${isAssigned ? "i-mdi-minus" : "i-mdi-add"}`}
-                    aria-hidden="true"
-                  ></span>
-                </button>
-              </td>
-            {/if}
+            <td class="table-cell w-[48px] text-right">
+              <button
+                type="button"
+                class={isAssigned ? "results-assign-button-active" : "results-assign-button"}
+                aria-label={assignmentAriaLabel(hit, isAssigned)}
+                aria-pressed={isAssigned}
+                title={assignmentButtonTitle}
+                disabled={assignmentDisabled}
+                on:click={() => toggleAssignment(hit)}
+              >
+                <span
+                  class={`results-assign-icon ${isAssigned ? "i-mdi-minus" : "i-mdi-add"}`}
+                  aria-hidden="true"
+                ></span>
+              </button>
+            </td>
           </tr>
         {:else}
           <tr>
-            <td
-              colspan={onToggleAssignment ? 6 : 5}
-              class="table-cell px-2 py-4.5 text-center text-muted"
+            <td colspan="6" class="table-cell px-2 py-4.5 text-center text-muted"
               >No candidate formulae matched the current search.</td
             >
           </tr>
@@ -221,7 +228,8 @@
         type="button"
         class="secondary-action min-h-9 rounded-[10px] px-3 py-1.5 text-sm"
         aria-label="Go to previous results page"
-        disabled={currentPage <= 1}
+        title={previousPageTitle}
+        disabled={previousPageDisabled}
         on:click={() => goToPage(currentPage - 1)}
       >
         Previous
@@ -230,7 +238,8 @@
         type="button"
         class="secondary-action min-h-9 rounded-[10px] px-3 py-1.5 text-sm"
         aria-label="Go to next results page"
-        disabled={currentPage >= totalPages}
+        title={nextPageTitle}
+        disabled={nextPageDisabled}
         on:click={() => goToPage(currentPage + 1)}
       >
         Next

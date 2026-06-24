@@ -22,4 +22,24 @@ describe("ExportPanel", () => {
     expect(body).toContain(">Download annotated PNG<");
     expect(body).toContain(">Download annotated PDF<");
   });
+
+  it("explains disabled export actions", () => {
+    const { body } = render(ExportPanel, {
+      props: {
+        includeUnassigned: false,
+        canExportAssignments: false,
+        totalPeaks: 0,
+        assignedCount: 0,
+        onIncludeUnassignedChange: () => undefined,
+        onExportAssignments: () => undefined,
+        onExportPng: () => undefined,
+        onExportPdf: () => undefined,
+      },
+    });
+
+    expect(body).toContain(
+      'title="Assign at least one peak or include unassigned peaks before exporting assignments."',
+    );
+    expect(body).toContain('title="Import a spectrum before exporting an annotated plot."');
+  });
 });

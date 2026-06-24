@@ -11,6 +11,7 @@
   import PlotSettingsPanel from "./components/spectrum/PlotSettingsPanel.svelte";
   import SpectrumImport from "./components/spectrum/SpectrumImport.svelte";
   import SpectrumPlot from "./components/spectrum/SpectrumPlot.svelte";
+  import { BUSY_DISABLED_TITLE } from "./components/ui/disabledTitle";
   import { buildMassIndex, loadMassPayload } from "./core/chemistry/massData";
   import { downloadHitsCsv } from "./core/export/csv";
   import { downloadAssignmentsCsv } from "./core/export/spectrumCsv";
@@ -114,6 +115,27 @@
   $: selectedPeakLabel = selectedPeak ? selectedPeak.mz.toFixed(6) : "";
   $: canExportAssignmentCsv =
     rawSpectrumPeaks.length > 0 && (includeUnassignedInAssignmentCsv || assignedCount > 0);
+  $: appDisabledReason = isBusy ? BUSY_DISABLED_TITLE : "";
+  $: searchDisabledReason = isBusy
+    ? BUSY_DISABLED_TITLE
+    : !massIndex
+      ? "Wait for the mass database to finish loading."
+      : !hasCommittedCharges(form)
+        ? "Add at least one charge before searching."
+        : !hasEnabledTolerance(form)
+          ? "Enable at least one tolerance before searching."
+          : "";
+  $: hitsCsvDisabledReason = isBusy
+    ? BUSY_DISABLED_TITLE
+    : results.length === 0
+      ? "Run a search with results before downloading formula hits."
+      : "";
+  $: assignmentDisabledReason =
+    rawSpectrumPeaks.length === 0
+      ? "Import a spectrum before assigning formulae to peaks."
+      : selectedPeakLabel
+        ? ""
+        : "Select a spectrum peak before assigning formulae.";
   $: currentSpectrumImportSheet =
     spectrumImportSource?.sheets.find((sheet) => sheet.name === spectrumActiveSheetName) ??
     spectrumImportSource?.sheets[0] ??
@@ -591,6 +613,7 @@
     <SpectrumImport
       activeSheetName={spectrumActiveSheetName}
       disabled={isBusy}
+      disabledReason={appDisabledReason}
       hasHeaderRow={spectrumHasHeaderRow}
       importSource={spectrumImportSource}
       intensityColumnIndex={spectrumIntensityColumnIndex}
@@ -623,6 +646,7 @@
         settings={plotSettings}
         peaks={spectrumPeaks}
         disabled={isBusy}
+        disabledReason={appDisabledReason}
         onChange={updatePlotSettings}
       />
       <PeakInspector
@@ -635,6 +659,7 @@
     <SearchInputs
       {form}
       disabled={isBusy}
+      disabledReason={appDisabledReason}
       onChange={updateForm}
       onChargeInputTextChange={updateChargeInputText}
       onChargeEditTextChange={updateChargeEditText}
@@ -650,6 +675,7 @@
         {rows}
         {massIndex}
         disabled={isBusy}
+        disabledReason={appDisabledReason}
         onAddRow={addRow}
         onRemoveRow={removeRow}
         onUpdateRow={updateRow}
@@ -660,14 +686,16 @@
       <button
         type="button"
         class="primary-action"
-        disabled={isBusy || !massIndex || !hasCommittedCharges(form) || !hasEnabledTolerance(form)}
+        title={searchDisabledReason || undefined}
+        disabled={Boolean(searchDisabledReason)}
         on:click={runSearch}>Find candidate formulae</button
       >
       <button
         id="downloadCsv"
         type="button"
         class="secondary-action"
-        disabled={isBusy || results.length === 0}
+        title={hitsCsvDisabledReason || undefined}
+        disabled={Boolean(hitsCsvDisabledReason)}
         on:click={downloadCsv}>Download formula hits CSV</button
       >
     </section>
@@ -677,6 +705,7 @@
         {results}
         {selectedPeakLabel}
         activeAssignment={selectedAssignment}
+        {assignmentDisabledReason}
         onToggleAssignment={rawSpectrumPeaks.length > 0 ? handleToggleAssignment : null}
       />
     {/if}
@@ -686,6 +715,7 @@
         includeUnassigned={includeUnassignedInAssignmentCsv}
         canExportAssignments={canExportAssignmentCsv}
         disabled={isBusy}
+        disabledReason={appDisabledReason}
         totalPeaks={rawSpectrumPeaks.length}
         {assignedCount}
         onIncludeUnassignedChange={(value) => (includeUnassignedInAssignmentCsv = value)}

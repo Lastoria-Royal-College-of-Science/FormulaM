@@ -2,15 +2,33 @@
   import { formatIsotopeOption } from "../../core/chemistry/massData";
   import { elementOptionsForRow } from "../../core/search/searchSpace";
   import type { FormulaSpaceRow, MassIndex } from "../../core/types";
+  import { BUSY_DISABLED_TITLE, disabledTitle } from "../ui/disabledTitle";
 
   export let rows: FormulaSpaceRow[] = [];
   export let massIndex: MassIndex;
   export let disabled = false;
+  export let disabledReason = BUSY_DISABLED_TITLE;
   export let onAddRow: () => void;
   export let onRemoveRow: (rowId: number) => void;
   export let onUpdateRow: (rowId: number, patch: Partial<FormulaSpaceRow>) => void;
 
   $: canAddRow = elementOptionsForRow(rows, massIndex, null).length > 0;
+
+  function disabledControlTitle(): string | undefined {
+    return disabledTitle(disabled, disabledReason);
+  }
+
+  function removeRowTitle(): string {
+    if (disabled) return disabledReason;
+    if (rows.length <= 1) return "Keep at least one formula search-space row.";
+    return "Remove row";
+  }
+
+  function addRowTitle(): string {
+    if (disabled) return disabledReason;
+    if (!canAddRow) return "All available element/isotope rows are already present.";
+    return "Add row";
+  }
 </script>
 
 <section class="ui-card" aria-label="Formula search space">
@@ -42,6 +60,7 @@
               <select
                 class="field-control field-select"
                 value={row.element}
+                title={disabledControlTitle()}
                 {disabled}
                 aria-label="Element"
                 on:change={(event) =>
@@ -58,6 +77,7 @@
               <select
                 class="field-control field-select"
                 value={row.isotope}
+                title={disabledControlTitle()}
                 {disabled}
                 aria-label="Isotope"
                 on:change={(event) =>
@@ -77,6 +97,7 @@
                 min="0"
                 step="1"
                 value={row.lower}
+                title={disabledControlTitle()}
                 {disabled}
                 aria-label="Lower limit"
                 on:input={(event) => {
@@ -92,6 +113,7 @@
                 min="0"
                 step="1"
                 value={row.upper}
+                title={disabledControlTitle()}
                 {disabled}
                 aria-label="Upper limit"
                 on:input={(event) => {
@@ -104,7 +126,7 @@
               <button
                 type="button"
                 class="danger-icon-action"
-                title="Remove row"
+                title={removeRowTitle()}
                 disabled={disabled || rows.length <= 1}
                 on:click={() => onRemoveRow(row.id)}
               >
@@ -121,7 +143,7 @@
       id="addRow"
       type="button"
       class="icon-action"
-      title="Add row"
+      title={addRowTitle()}
       disabled={disabled || !canAddRow}
       on:click={onAddRow}
     >

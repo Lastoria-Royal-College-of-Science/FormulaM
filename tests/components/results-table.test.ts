@@ -61,6 +61,10 @@ describe("ResultsTable", () => {
     expect(body).toContain('data-selectable-formula="true"');
     expect(body).toContain('tabindex="0"');
     expect(body.match(/data-selectable-formula="true"/g)).toHaveLength(1);
+    expect(body).toContain('aria-label="Toggle assignment"');
+    expect(body).toContain('class="results-assign-button"');
+    expect(body).toContain('title="Import a spectrum before assigning formulae to peaks."');
+    expect(body).toContain("disabled");
     expect(body).toContain(texAnnotation("\\ce{[C5{}^{13}CH12O6]+}"));
     expect(body).not.toContain("formula-isotope");
     expect(body).not.toMatch(/<sub\b/);
@@ -93,6 +97,7 @@ describe("ResultsTable", () => {
         selectedPeakLabel: "145.000000",
         activeAssignment: sampleAssignment,
         onToggleAssignment: () => undefined,
+        assignmentDisabledReason: "",
       },
     });
 
@@ -116,20 +121,23 @@ describe("ResultsTable", () => {
     expect(body).toContain("Page 1 of 2");
     expect(body).toContain("Go to previous results page");
     expect(body).toContain("Go to next results page");
+    expect(body).toContain('title="Already on the first results page."');
     expect(body).toContain("[F10]+");
     expect(body).not.toContain('aria-label="[F11]+"');
     expect(body).not.toContain('aria-label="[F12]+"');
   });
 
-  it("updates the empty-state colspan to match the visible columns", () => {
-    const withoutAssign = render(ResultsTable, { props: { results: [] } }).body;
-    const withAssign = render(ResultsTable, {
-      props: { results: [], onToggleAssignment: () => undefined },
+  it("keeps the assignment column visible in the empty state", () => {
+    const withoutSpectrum = render(ResultsTable, { props: { results: [] } }).body;
+    const withAssignment = render(ResultsTable, {
+      props: { results: [], onToggleAssignment: () => undefined, assignmentDisabledReason: "" },
     }).body;
 
-    expect(withoutAssign).toContain('colspan="5"');
-    expect(withAssign).toContain('colspan="6"');
-    expect(withoutAssign).toContain("Showing 0 results");
-    expect(withoutAssign).toContain("Page 1 of 1");
+    expect(withoutSpectrum).toContain('aria-label="Toggle assignment"');
+    expect(withoutSpectrum).toContain('colspan="6"');
+    expect(withAssignment).toContain('colspan="6"');
+    expect(withoutSpectrum).toContain("Showing 0 results");
+    expect(withoutSpectrum).toContain("Page 1 of 1");
+    expect(withoutSpectrum).toContain('title="Already on the last results page."');
   });
 });
