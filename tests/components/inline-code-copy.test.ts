@@ -2,6 +2,7 @@ import { render } from "svelte/server";
 import { describe, expect, it } from "vitest";
 
 import Hero from "../../src/components/layout/Hero.svelte";
+import TopBar from "../../src/components/layout/TopBar.svelte";
 import SearchInputs from "../../src/components/search/SearchInputs.svelte";
 import PeakInspector from "../../src/components/spectrum/PeakInspector.svelte";
 import SpectrumImport from "../../src/components/spectrum/SpectrumImport.svelte";
@@ -93,6 +94,8 @@ const plotSettings: PlotSettings = {
   labelMode: "formula",
   labelFilter: "assigned-only",
 };
+const lightBrandFilterClass = ["brand", "logo", "light"].join("-");
+const darkBrandFilterClass = ["brand", "logo", "dark"].join("-");
 
 describe("DOM math label rendering", () => {
   it("renders KaTeX for visible m/z labels and helper text", () => {
@@ -163,13 +166,29 @@ describe("DOM math label rendering", () => {
     expect(spectrumImport).toContain('<code class="inline-code">.csv</code>');
   });
 
-  it("marks the hero logo for topbar visibility and theme coloring", () => {
+  it("renders theme-specific brand assets", () => {
     const lightHero = render(Hero, { props: { theme: "light" } }).body;
     expect(lightHero).toContain('data-hero-logo="true"');
-    expect(lightHero).toContain("hero-logo brand-logo-light");
+    expect(lightHero).toContain('class="hero-logo"');
+    expect(lightHero).toContain("logo-light.svg");
+    expect(lightHero).not.toContain(lightBrandFilterClass);
 
     const darkHero = render(Hero, { props: { theme: "dark" } }).body;
-    expect(darkHero).toContain("hero-logo brand-logo-dark");
+    expect(darkHero).toContain("logo-dark.svg");
+    expect(darkHero).not.toContain(darkBrandFilterClass);
+
+    const lightTopBar = render(TopBar, {
+      props: { theme: "light", onToggleTheme: () => undefined },
+    }).body;
+    expect(lightTopBar).toContain('class="topbar-brand-mark"');
+    expect(lightTopBar).toContain("favicon-light.svg");
+    expect(lightTopBar).not.toContain(lightBrandFilterClass);
+
+    const darkTopBar = render(TopBar, {
+      props: { theme: "dark", onToggleTheme: () => undefined },
+    }).body;
+    expect(darkTopBar).toContain("favicon-dark.svg");
+    expect(darkTopBar).not.toContain(darkBrandFilterClass);
   });
 
   it("shows the assigned ion formula as the single Peak inspector formula row", () => {

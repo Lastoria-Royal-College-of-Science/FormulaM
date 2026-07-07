@@ -4,12 +4,20 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>FormulaM</title>
-    <link rel="icon" href="%BASE_URL%favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="%BASE_URL%favicon-light.svg" type="image/svg+xml" />
     <script>
-      document.documentElement.dataset.theme = window.matchMedia("(prefers-color-scheme: light)")
-        .matches
+      const initialTheme = window.matchMedia("(prefers-color-scheme: light)").matches
         ? "light"
         : "dark";
+      document.documentElement.dataset.theme = initialTheme;
+
+      const favicon = document.querySelector('link[rel="icon"]');
+      if (favicon) {
+        favicon.href = favicon.href.replace(
+          /favicon-(?:dark|light)\.svg$/,
+          `favicon-${initialTheme}.svg`,
+        );
+      }
     </script>
   </head>
   <body>

@@ -15,14 +15,11 @@ export const shortcuts = {
     "relative z-10 mx-auto flex h-[72px] w-full max-w-[1180px] items-center justify-between gap-4 px-4 lt-md:h-[66px] lt-md:gap-[13px] lt-md:px-[13px]",
   "topbar-brand":
     "inline-flex h-10 items-center gap-[6px] no-underline text-text transition-colors duration-200 hover:text-accent",
-  "topbar-brand-mark": "h-10 w-10 shrink-0 object-contain transition-[filter] duration-200",
+  "topbar-brand-mark": "h-10 w-10 shrink-0 object-contain",
   "topbar-brand-copy": "text-[1.125rem] leading-none font-bold tracking-[0.02em] lt-sm:text-[1rem]",
   "topbar-actions": "flex shrink-0 items-center gap-4 lt-md:gap-[13px]",
   "round-link-control": linkControlInteraction,
-  "hero-logo":
-    "mx-auto [margin-inline:auto] max-h-[140px] w-[min(560px,88vw)] object-contain transition-[filter] duration-200",
-  "brand-logo-light": "filter-none",
-  "brand-logo-dark": "filter invert hue-rotate-180",
+  "hero-logo": "mx-auto [margin-inline:auto] max-h-[140px] w-[min(560px,88vw)] object-contain",
   "ui-card":
     "my-4.5 rounded-2 border border-solid border-border bg-surface p-5.5 shadow-app lt-md:p-4",
   "round-control": `inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-solid border-control-border bg-control-bg p-0 text-text shadow-app ${buttonInteraction}`,

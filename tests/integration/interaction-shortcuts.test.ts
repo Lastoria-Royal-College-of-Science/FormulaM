@@ -8,6 +8,18 @@ const topBarSource = readFileSync(
   new URL("../../src/components/layout/TopBar.svelte", import.meta.url),
   "utf8",
 );
+const indexHtml = readFileSync(new URL("../../index.html", import.meta.url), "utf8");
+const brandAssetSources = [
+  "favicon-dark.svg",
+  "favicon-light.svg",
+  "logo-dark.svg",
+  "logo-light.svg",
+].map((assetName) => readFileSync(new URL(`../../public/${assetName}`, import.meta.url), "utf8"));
+const lightBrandFilterShortcut = ["brand", "logo", "light"].join("-");
+const darkBrandFilterShortcut = ["brand", "logo", "dark"].join("-");
+const oldFaviconAsset = svgAssetName("favicon");
+const oldLogoAsset = svgAssetName("logo");
+const legacyBoxShadowKey = ["box", "Shadow"].join("");
 const shortcuts = config.shortcuts as Record<string, string>;
 const theme = config.theme as {
   colors: Record<string, string>;
@@ -20,6 +32,10 @@ const primaryActionPressedStateTokens = [
   "enabled:active:bg-surface-2",
   "enabled:active:text-text",
 ];
+
+function svgAssetName(name: string): string {
+  return `${name}.svg`;
+}
 
 describe("Uno interaction shortcuts", () => {
   it("limits button hover, focus, and active affordances to enabled controls", () => {
@@ -110,14 +126,15 @@ describe("Uno interaction shortcuts", () => {
     expect(shortcuts["field-control-file"]).not.toContain("min-h-[42px]");
   });
 
-  it("keeps theme-aware brand coloring in reusable shortcuts", () => {
+  it("keeps brand image sizing in reusable shortcuts without filter coloring", () => {
     expect(shortcuts["hero-logo"]).toContain("mx-auto");
     expect(shortcuts["hero-logo"]).toContain("[margin-inline:auto]");
     expect(shortcuts["hero-logo"]).toContain("object-contain");
-    expect(shortcuts["topbar-brand-mark"]).toContain("transition-[filter]");
-    expect(shortcuts["brand-logo-light"]).toContain("filter-none");
-    expect(shortcuts["brand-logo-dark"]).toContain("invert");
-    expect(shortcuts["brand-logo-dark"]).toContain("hue-rotate-180");
+    expect(shortcuts["hero-logo"]).not.toContain("transition-[filter]");
+    expect(shortcuts["topbar-brand-mark"]).toContain("object-contain");
+    expect(shortcuts["topbar-brand-mark"]).not.toContain("transition-[filter]");
+    expect(shortcuts).not.toHaveProperty(lightBrandFilterShortcut);
+    expect(shortcuts).not.toHaveProperty(darkBrandFilterShortcut);
   });
 
   it("keeps component-scoped structural classes outside Uno shortcuts", () => {
@@ -151,6 +168,24 @@ describe("Uno interaction shortcuts", () => {
     expect(theme.colors.row).toBe("var(--row-odd)");
     expect(theme.shadow.app).toBe("var(--shadow)");
     expect(theme.shadow["control-glow"]).toBe("var(--control-glow)");
-    expect(Reflect.get(theme, "box" + "Shadow")).toBeUndefined();
+    expect(Reflect.get(theme, legacyBoxShadowKey)).toBeUndefined();
+  });
+});
+
+describe("Brand assets", () => {
+  it("uses theme-specific favicon assets in the static entrypoint", () => {
+    expect(indexHtml).toContain('href="%BASE_URL%favicon-light.svg"');
+    expect(indexHtml).toContain("favicon-${initialTheme}.svg");
+    expect(indexHtml).not.toContain(oldFaviconAsset);
+    expect(indexHtml).not.toContain(oldLogoAsset);
+  });
+
+  it("keeps theme asset color hex codes lowercase", () => {
+    brandAssetSources.forEach((source) => {
+      const colorTokens = source.match(/#[0-9A-Fa-f]{3,8}/g) ?? [];
+      const uppercaseTokens = colorTokens.filter((token) => token !== token.toLowerCase());
+
+      expect(uppercaseTokens).toEqual([]);
+    });
   });
 });

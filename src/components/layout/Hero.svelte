@@ -1,19 +1,16 @@
 <script lang="ts">
+  import { brandAssetPath } from "../../core/dom/brandAssets";
   import { MZ_TEX } from "../../core/math/tex";
   import type { ThemeName } from "../../core/types";
   import MathTex from "../ui/MathTex.svelte";
 
   export let theme: ThemeName = "dark";
-  const logoSrc = `${import.meta.env.BASE_URL}logo.svg`;
+
+  $: logoSrc = brandAssetPath("logo", theme);
 </script>
 
 <header class="mb-6 text-center">
-  <img
-    class={`hero-logo ${theme === "dark" ? "brand-logo-dark" : "brand-logo-light"}`}
-    src={logoSrc}
-    alt="FormulaM"
-    data-hero-logo="true"
-  />
+  <img class="hero-logo" src={logoSrc} alt="FormulaM" data-hero-logo="true" />
   <p class="mx-auto mt-3 max-w-[760px] text-muted leading-6">
     Enumerate candidate formulae from observed <MathTex
       tex={MZ_TEX}

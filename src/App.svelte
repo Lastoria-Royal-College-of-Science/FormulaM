@@ -13,6 +13,7 @@
   import SpectrumPlot from "./components/spectrum/SpectrumPlot.svelte";
   import { disabledTitle } from "./components/ui/disabledTitle";
   import { buildMassIndex, loadMassPayload } from "./core/chemistry/massData";
+  import { updateFavicon } from "./core/dom/brandAssets";
   import { downloadHitsCsv } from "./core/export/csv";
   import { downloadAssignmentsCsv } from "./core/export/spectrumCsv";
   import { downloadAnnotatedSpectrumPdf } from "./core/export/spectrumPdf";
@@ -139,6 +140,7 @@
   function applyTheme(nextTheme: ThemeName): void {
     theme = nextTheme;
     document.documentElement.dataset.theme = nextTheme;
+    updateFavicon(nextTheme);
   }
 
   function handleThemeMediaChange(): void {

@@ -1,18 +1,18 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
 
+  import { brandAssetPath } from "../../core/dom/brandAssets";
   import type { ThemeName } from "../../core/types";
 
   export let theme: ThemeName = "dark";
   export let onToggleTheme: () => void;
-
-  const brandMarkSrc = `${import.meta.env.BASE_URL}favicon.svg`;
 
   let isBrandVisible = false;
   let topbarShell: HTMLElement | null = null;
   let heroLogo: HTMLImageElement | null = null;
 
   $: isDark = theme === "dark";
+  $: brandMarkSrc = brandAssetPath("favicon", theme);
 
   function syncTopBarState(): void {
     if (!heroLogo) heroLogo = document.querySelector<HTMLImageElement>("[data-hero-logo]");
@@ -33,6 +33,8 @@
   });
 
   onDestroy(() => {
+    if (typeof window === "undefined") return;
+
     window.removeEventListener("scroll", syncTopBarState);
     window.removeEventListener("resize", syncTopBarState);
     heroLogo?.removeEventListener("load", syncTopBarState);
@@ -45,12 +47,7 @@
       class={`topbar-brand transition-opacity duration-200 ${isBrandVisible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
       href="#top"
     >
-      <img
-        class={`topbar-brand-mark ${isDark ? "brand-logo-dark" : "brand-logo-light"}`}
-        src={brandMarkSrc}
-        alt=""
-        aria-hidden="true"
-      />
+      <img class="topbar-brand-mark" src={brandMarkSrc} alt="" aria-hidden="true" />
       <span class="topbar-brand-copy">FormulaM</span>
     </a>
 
