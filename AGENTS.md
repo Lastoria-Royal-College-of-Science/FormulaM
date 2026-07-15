@@ -23,25 +23,25 @@ The current implementation is Vite + TypeScript + Svelte. Preserve existing scie
 
 ## Commands
 
-Use the package manager already present in the branch. See `package.json` for the current npm scripts. Use `npm install` locally, or `npm ci` when consistency with `package-lock.json` matters. Use `npm run preview` only to inspect the production build locally. Do not use `npm run lint:fix` to auto-fix; it may break formatting rules.
+Use the package manager already present in the branch. See `package.json` for the current scripts. Use `pnpm install` locally, or `pnpm ci` when a clean installation from `pnpm-lock.yaml` is required. Use `pnpm run preview` only to inspect the production build locally. Do not use `pnpm run lint:fix` to auto-fix; it may break formatting rules.
 
 Before marking a change complete, run the narrowest relevant check first. When touching shared TypeScript, search logic, scientific data, spectrum import/export, worker behavior, deployment configuration, or UI behavior, follow the full automated check order in `.github/workflows/test.yml`.
 
-Vitest uses two config projects: `smoke` for `tests/smoke.test.ts` and `regression` for all non-smoke files under `tests/`. Default `npm run test` runs the smoke project first and stops before regression tests if smoke fails. When smoke is already failing and you need diagnostic access to the remaining Vitest suite, run:
+Vitest uses two config projects: `smoke` for `tests/smoke.test.ts` and `regression` for all non-smoke files under `tests/`. Default `pnpm run test` runs the smoke project first and stops before regression tests if smoke fails. When smoke is already failing and you need diagnostic access to the remaining Vitest suite, run:
 
 ```bash
-npm run test -- --project regression --bail=0
+pnpm run test --project regression --bail=0
 ```
 
-Playwright also uses `smoke` and `regression` config projects. Playwright smoke tests must include `@smoke` in the test title. Default `npm run e2e` runs `@smoke` tests first because `regression` depends on `smoke`. When Playwright smoke is already failing and you need diagnostic access to the remaining browser tests, run:
+Playwright also uses `smoke` and `regression` config projects. Playwright smoke tests must include `@smoke` in the test title. Default `pnpm run e2e` runs `@smoke` tests first because `regression` depends on `smoke`. When Playwright smoke is already failing and you need diagnostic access to the remaining browser tests, run:
 
 ```bash
-npm run e2e -- --project regression --no-deps
+pnpm run e2e --project regression --no-deps
 ```
 
-Use bypass commands only for diagnosis. Run the relevant default command, `npm run test` or `npm run e2e`, before marking the change complete.
+Use bypass commands only for diagnosis. Run the relevant default command, `pnpm run test` or `pnpm run e2e`, before marking the change complete.
 
-Do not invent missing scripts. If a document mentions a script absent from `package.json`, such as `npm run validate:data`, report the mismatch and either add the script intentionally or use existing checks.
+Do not invent missing scripts. If a document mentions a script absent from `package.json`, such as `pnpm run validate:data`, report the mismatch and either add the script intentionally or use existing checks.
 
 ## Architecture and scientific behavior
 
@@ -69,7 +69,7 @@ Add or update focused regression tests when changing:
 
 Do not weaken assertions to make tests pass. When debugging or testing needs real data, use `examples/Kaempferol.csv`. When browser testing needs an imported spectrum/CSV fixture, prefer an existing fixture under `examples/` and state which fixture was used.
 
-Keep smoke tests at each runner root: Vitest smoke tests belong directly under `tests/`, and Playwright smoke tests belong directly under `e2e/` with `@smoke` in the test title. Configure smoke gatekeeping in the runner configuration files, not by splitting npm scripts into smoke and non-smoke phases. The Vitest config should keep the `smoke` project at `sequence.groupOrder: 0` and the parallel `regression` project at `sequence.groupOrder: 1`. The Playwright config should keep the `regression` project dependent on `smoke`, with `smoke` using `grep: /@smoke/` and `regression` using `grepInvert: /@smoke/`.
+Keep smoke tests at each runner root: Vitest smoke tests belong directly under `tests/`, and Playwright smoke tests belong directly under `e2e/` with `@smoke` in the test title. Configure smoke gatekeeping in the runner configuration files, not by splitting package scripts into smoke and non-smoke phases. The Vitest config should keep the `smoke` project at `sequence.groupOrder: 0` and the parallel `regression` project at `sequence.groupOrder: 1`. The Playwright config should keep the `regression` project dependent on `smoke`, with `smoke` using `grep: /@smoke/` and `regression` using `grepInvert: /@smoke/`.
 
 ## Style and dependencies
 
@@ -83,7 +83,7 @@ Keep smoke tests at each runner root: Vitest smoke tests belong directly under `
 - Keep UnoCSS for reusable shortcuts, layout utilities, theme tokens, and design-system rules. Component `<style>` blocks are allowed only for component-private structural CSS tightly coupled to that component's markup, such as pseudo-elements, scroll-state shells, browser-specific selectors, or complex selector relationships that are awkward to maintain as shortcuts. Do not use scoped styles as a replacement for reusable semantic component styling, and do not move such styling into `src/styles/global.css`.
 - Keep `global.css` limited to design tokens, resets, and truly global element-level behavior.
 - Keep dependencies small and browser-compatible. Explain any new runtime dependency, especially for parsing, export, or plotting behavior.
-- Add dependencies with `npm install <package>` or `npm install --save-dev <package>` so `package-lock.json` stays synchronized.
+- Add dependencies with `pnpm add <package>` or `pnpm add -D <package>` so `pnpm-lock.yaml` stays synchronized.
 - Do not manually edit dependency entries in `package.json` without updating the lockfile through the package manager.
 - Do not commit secrets, tokens, credentials, private keys, or environment-specific service configuration.
 

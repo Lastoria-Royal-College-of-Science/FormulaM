@@ -18,8 +18,8 @@ The input mass is always observed $m/z$. Charge is required and explicit. Formul
 Project scripts are defined in [`package.json`](package.json).
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 ## Checks

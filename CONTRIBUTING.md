@@ -60,33 +60,33 @@ Guidelines:
 
 ## Development setup
 
-Use the package manager already present in the repository. The current project uses npm with [`package-lock.json`](package-lock.json).
+Use the package manager already present in the repository. The current project uses pnpm with [`pnpm-lock.yaml`](pnpm-lock.yaml).
 
 Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 Start the development server:
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 Build a production-ready static site:
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 Preview the production build locally:
 
 ```bash
-npm run preview
+pnpm run preview
 ```
 
-Use `npm run preview` only after building, when you need to inspect production output locally.
+Use `pnpm run preview` only after building, when you need to inspect production output locally.
 
 ## Available scripts
 
@@ -103,16 +103,16 @@ For documentation-only changes, explain in the pull request if code checks were 
 Vitest uses two config projects: `smoke` runs [`tests/smoke.test.ts`](tests/smoke.test.ts) first, and `regression` runs all non-smoke Vitest files under [`tests/`](tests/) after smoke passes. If smoke is already failing and you need diagnostic access to the remaining Vitest suite, run:
 
 ```bash
-npm run test -- --project regression --bail=0
+pnpm run test --project regression --bail=0
 ```
 
-Playwright also uses `smoke` and `regression` config projects. Playwright smoke tests must include `@smoke` in the test title. Default `npm run e2e` runs `@smoke` tests first because `regression` depends on `smoke`. If Playwright smoke is already failing and you need diagnostic access to the remaining browser tests, run:
+Playwright also uses `smoke` and `regression` config projects. Playwright smoke tests must include `@smoke` in the test title. Default `pnpm run e2e` runs `@smoke` tests first because `regression` depends on `smoke`. If Playwright smoke is already failing and you need diagnostic access to the remaining browser tests, run:
 
 ```bash
-npm run e2e -- --project regression --no-deps
+pnpm run e2e --project regression --no-deps
 ```
 
-Use bypass commands only for diagnosis. The relevant default command, `npm run test` or `npm run e2e`, remains the final validation command. The automated check order is defined in [`.github/workflows/test.yml`](.github/workflows/test.yml).
+Use bypass commands only for diagnosis. The relevant default command, `pnpm run test` or `pnpm run e2e`, remains the final validation command. The automated check order is defined in [`.github/workflows/test.yml`](.github/workflows/test.yml).
 
 ## Scientific behavior
 
@@ -162,7 +162,7 @@ Do not weaken assertions just to make tests pass.
 
 When debugging or testing needs real data, use [`examples/Kaempferol.csv`](examples/Kaempferol.csv). If a fixture is important to the change, state which fixture was used in the pull request.
 
-Keep smoke tests at each runner root: Vitest smoke tests belong directly under [`tests/`](tests/), and Playwright smoke tests belong directly under [`e2e/`](e2e/) with `@smoke` in the test title. Configure smoke gatekeeping in the runner configuration files, not by splitting npm scripts into smoke and non-smoke phases. [`vitest.config.ts`](vitest.config.ts) should keep the `smoke` project before the parallel `regression` project. [`playwright.config.ts`](playwright.config.ts) should route `@smoke` tests to `smoke`, route non-smoke tests to `regression`, and keep `regression` dependent on `smoke`.
+Keep smoke tests at each runner root: Vitest smoke tests belong directly under [`tests/`](tests/), and Playwright smoke tests belong directly under [`e2e/`](e2e/) with `@smoke` in the test title. Configure smoke gatekeeping in the runner configuration files, not by splitting package scripts into smoke and non-smoke phases. [`vitest.config.ts`](vitest.config.ts) should keep the `smoke` project before the parallel `regression` project. [`playwright.config.ts`](playwright.config.ts) should route `@smoke` tests to `smoke`, route non-smoke tests to `regression`, and keep `regression` dependent on `smoke`.
 
 ## UI and accessibility
 
@@ -183,16 +183,16 @@ Before adding a dependency, consider whether the behavior can be implemented cle
 Add runtime dependencies with:
 
 ```bash
-npm install <package>
+pnpm add <package>
 ```
 
 Add development-only dependencies with:
 
 ```bash
-npm install --save-dev <package>
+pnpm add -D <package>
 ```
 
-Do not manually edit dependency entries in [`package.json`](package.json) without updating [`package-lock.json`](package-lock.json) through npm.
+Do not manually edit dependency entries in [`package.json`](package.json) without updating [`pnpm-lock.yaml`](pnpm-lock.yaml) through pnpm.
 
 In the pull request description, explain why any new runtime dependency is needed, especially for parsing, export, plotting, scientific computation, or data handling.
 
@@ -254,7 +254,7 @@ Before opening a pull request, confirm:
 - [ ] Automated checks in [`.github/workflows/test.yml`](.github/workflows/test.yml) pass, when relevant.
 - [ ] Documentation was updated if user-facing behavior changed.
 - [ ] New dependencies are justified and browser-compatible.
-- [ ] [`package-lock.json`](package-lock.json) is updated when dependencies changed.
+- [ ] [`pnpm-lock.yaml`](pnpm-lock.yaml) is updated when dependencies changed.
 - [ ] No secrets, tokens, credentials, private keys, or environment-specific service configuration were committed.
 
 ## Reporting bugs

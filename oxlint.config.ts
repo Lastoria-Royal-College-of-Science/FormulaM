@@ -11,7 +11,7 @@ const projectPlugins = ["import", "vitest"] as const;
 
 export default defineConfig({
   options: {
-    // TypeScript/Svelte type checking remains owned by `npm run check`
+    // TypeScript/Svelte type checking remains owned by `pnpm run check`
     // (`svelte-check --tsconfig ./tsconfig.json`).
     typeAware: false,
     typeCheck: false,
