@@ -19,7 +19,7 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
   webServer: {
-    command: "npm run dev -- --host 127.0.0.1 --port 5173 --strictPort",
+    command: "pnpm run dev --host 127.0.0.1 --port 5173 --strictPort",
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

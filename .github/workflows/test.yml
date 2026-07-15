@@ -25,20 +25,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
           node-version: lts/*
-          cache: npm
 
-      - run: npm ci
-      - run: npm run format:check
-      - run: npm run lint
-      - run: npm run check
-      - run: npm run test
-      - run: npm run build
+      - run: pnpm ci
+      - run: pnpm run format:check
+      - run: pnpm run lint
+      - run: pnpm run check
+      - run: pnpm run test
+      - run: pnpm run build
 
-      - run: npx playwright install --with-deps chromium
-      - run: npm run e2e
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm run e2e
 
       - uses: actions/configure-pages@v6
         if: ${{ inputs.upload-pages-artifact }}
