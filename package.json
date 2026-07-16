@@ -19,6 +19,7 @@
     "format:check": "oxfmt . --check",
     "check": "pnpm -r --if-present run check",
     "test": "pnpm -r --if-present run test",
+    "validate:data": "pnpm --filter @formulam/mass-data run test",
     "e2e": "pnpm --filter @formulam/web run e2e",
     "e2e:ui": "pnpm --filter @formulam/web run e2e:ui"
   },

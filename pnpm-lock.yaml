@@ -20,6 +20,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@formulam/mass-data':
+        specifier: workspace:*
+        version: link:../../packages/mass-data
       katex:
         specifier: ^0.17.0
         version: 0.17.0
@@ -65,6 +68,15 @@ importers:
         version: 8.0.16(@types/node@24.13.2)(jiti@2.7.0)
       vitest:
         specifier: ^4.1.9
+        version: 4.1.9(@types/node@24.13.2)(vite@8.0.16(@types/node@24.13.2)(jiti@2.7.0))
+
+  packages/mass-data:
+    devDependencies:
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: 4.1.9
         version: 4.1.9(@types/node@24.13.2)(vite@8.0.16(@types/node@24.13.2)(jiti@2.7.0))
 
 packages:

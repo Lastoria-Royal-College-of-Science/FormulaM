@@ -4,7 +4,7 @@ Molecular formula enumeration from observed mass spectrometry $m/z$ values.
 
 ## Overview
 
-This pnpm workspace contains the Vite + TypeScript + Svelte front-end-only FormulaM app in [`apps/web/`](apps/web/). The app applies a simplified bare-ion exact-mass rule:
+This pnpm workspace contains the Vite + TypeScript + Svelte front-end-only FormulaM app in [`apps/web/`](apps/web/) and its validated scientific source data in [`packages/mass-data/`](packages/mass-data/). The app applies a simplified bare-ion exact-mass rule:
 
 ```text
 ion_mass = candidate_formula_mass - charge * electron_mass
@@ -27,6 +27,8 @@ The production build is written to [`apps/web/dist/`](apps/web/dist/).
 ## Checks
 
 The full automated check order is defined in [`.github/workflows/test.yml`](.github/workflows/test.yml).
+
+Run `pnpm run validate:data` for the focused mass-data integrity suite.
 
 ## Scientific disclaimer
 

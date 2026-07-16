@@ -1,3 +1,5 @@
+import type { AliasRecord, IsotopeRecord } from "@formulam/mass-data";
+
 export type ChargeSpec = string | number;
 export type ChargeSign = "+" | "-";
 export type CountBound = [number, number];
@@ -32,33 +34,6 @@ export interface FormulaSpaceRow {
   isotope: string;
   lower: number | "";
   upper: number | "";
-}
-
-export interface IsotopeRecord {
-  symbol: string;
-  atomic_number?: number;
-  mass_number: number | string;
-  exact_mass: number | string;
-  abundance?: number | null;
-  [key: string]: unknown;
-}
-
-export type MassRecord = IsotopeRecord;
-
-export interface AliasRecord {
-  target: string;
-  symbol?: string;
-  mass_number?: number | string;
-  isotope_name?: string;
-  selection?: string;
-  [key: string]: unknown;
-}
-
-export interface MassPayload {
-  _meta?: Record<string, unknown>;
-  aliases?: Record<string, AliasRecord>;
-  default_isotope_by_symbol: Record<string, string>;
-  isotopes: Record<string, IsotopeRecord>;
 }
 
 export interface MassIndex {

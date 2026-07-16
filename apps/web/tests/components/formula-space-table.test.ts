@@ -1,22 +1,67 @@
+import type { MassPayload } from "@formulam/mass-data";
 import { render } from "svelte/server";
 import { describe, expect, it } from "vitest";
 
 import FormulaSpaceTable from "../../src/components/search/FormulaSpaceTable.svelte";
 import { buildMassIndex, formatIsotopeOption } from "../../src/core/chemistry/massData";
-import type { FormulaSpaceRow, MassPayload } from "../../src/core/types";
+import type { FormulaSpaceRow } from "../../src/core/types";
 import { enabledInteractiveControlsWithTitles } from "./titleAssertions";
 
 const massPayload: MassPayload = {
+  _meta: {
+    description: "test fixture",
+    isotope_source: "test fixture",
+    isotope_reference: "test fixture",
+    default_selection_source: "test fixture",
+    default_selection_source_url: "https://example.com/defaults",
+    radioactive_selection_source: "test fixture",
+    radioactive_selection_source_url: "https://example.com/radioactive",
+    isotope_record_count: 5,
+    default_element_count: 2,
+    alias_count: 0,
+    created_for_package_version: "test",
+  },
+  aliases: {},
   default_isotope_by_symbol: {
     C: "12C",
     O: "16O",
   },
   isotopes: {
-    "12C": { symbol: "C", mass_number: 12, exact_mass: "12", abundance: 0.9893 },
-    "13C": { symbol: "C", mass_number: 13, exact_mass: "13.003354835", abundance: 0.0107 },
-    "16O": { symbol: "O", mass_number: 16, exact_mass: "15.99491462", abundance: 0.99757 },
-    "17O": { symbol: "O", mass_number: 17, exact_mass: "16.99913176", abundance: 0.00038 },
-    "18O": { symbol: "O", mass_number: 18, exact_mass: "17.99915961", abundance: 0.00205 },
+    "12C": {
+      atomic_number: 6,
+      symbol: "C",
+      mass_number: 12,
+      exact_mass: "12",
+      abundance: 0.9893,
+    },
+    "13C": {
+      atomic_number: 6,
+      symbol: "C",
+      mass_number: 13,
+      exact_mass: "13.003354835",
+      abundance: 0.0107,
+    },
+    "16O": {
+      atomic_number: 8,
+      symbol: "O",
+      mass_number: 16,
+      exact_mass: "15.99491462",
+      abundance: 0.99757,
+    },
+    "17O": {
+      atomic_number: 8,
+      symbol: "O",
+      mass_number: 17,
+      exact_mass: "16.99913176",
+      abundance: 0.00038,
+    },
+    "18O": {
+      atomic_number: 8,
+      symbol: "O",
+      mass_number: 18,
+      exact_mass: "17.99915961",
+      abundance: 0.00205,
+    },
   },
 };
 

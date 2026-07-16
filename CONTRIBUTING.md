@@ -38,7 +38,8 @@ FormulaM should remain front-end only. Do not add a required server, database, h
 Important paths:
 
 - [`apps/web/`](apps/web/) Private `@formulam/web` application package
-- [`apps/web/public/data/masses.json`](apps/web/public/data/masses.json) Scientific input data loaded at runtime and in tests
+- [`packages/mass-data/`](packages/mass-data/) Private `@formulam/mass-data` package with schema types, integrity validation, and data tests
+- [`packages/mass-data/src/masses.json`](packages/mass-data/src/masses.json) Single scientific source file loaded by the Web app as a hashed asset
 - [`apps/web/src/core/`](apps/web/src/core/) Framework-independent scientific and data logic
 - [`apps/web/src/components/`](apps/web/src/components/) Svelte UI, input state, events, and accessibility
 - [`apps/web/src/workers/`](apps/web/src/workers/) Worker protocol and long-running search execution
@@ -56,7 +57,8 @@ Guidelines:
 - Keep formula enumeration and mass/tolerance calculations out of Svelte components.
 - Keep Svelte components focused on rendering, input state, events, and accessibility.
 - Keep long-running searches on the Web Worker path so large enumerations do not block the main UI thread.
-- Keep [`apps/web/public/data/masses.json`](apps/web/public/data/masses.json) as scientific source data. Do not replace, regenerate, reformat, or normalize it unless the change explicitly requires that.
+- Keep [`packages/mass-data/src/masses.json`](packages/mass-data/src/masses.json) as the single scientific source file. Do not replace, regenerate, reformat, or normalize it unless the change explicitly requires that.
+- Keep mass-data schema types and integrity validation in [`packages/mass-data/`](packages/mass-data/); do not maintain a second checked-in copy under the Web package.
 - Keep global CSS limited to design tokens, resets, and truly global element-level behavior.
 - Keep UnoCSS responsible for shortcuts, layout utilities, theme tokens, and design-system rules.
 
@@ -115,6 +117,12 @@ pnpm --filter @formulam/web run e2e --project regression --no-deps
 ```
 
 Use bypass commands only for diagnosis. The relevant default command, `pnpm run test` or `pnpm run e2e`, remains the final validation command. The automated check order is defined in [`.github/workflows/test.yml`](.github/workflows/test.yml).
+
+For a focused mass-data check, run:
+
+```bash
+pnpm run validate:data
+```
 
 ## Scientific behavior
 
@@ -194,7 +202,13 @@ Add development-only dependencies with:
 pnpm --filter @formulam/web add -D <package>
 ```
 
-Keep the root [`package.json`](package.json) limited to workspace orchestration and repository-wide tooling. Do not add application runtime dependencies there. Declare internal package dependencies with `workspace:*`, and do not manually edit dependency entries without updating [`pnpm-lock.yaml`](pnpm-lock.yaml) through pnpm.
+Add development-only dependencies owned by the mass-data package with:
+
+```bash
+pnpm --filter @formulam/mass-data add -D <package>
+```
+
+Keep the root [`package.json`](package.json) limited to workspace orchestration and repository-wide tooling. Do not add application runtime dependencies there. Declare internal package dependencies with `workspace:*`; the Web package may depend on mass-data, but mass-data must not depend on Web. Do not manually edit dependency entries without updating [`pnpm-lock.yaml`](pnpm-lock.yaml) through pnpm.
 
 In the pull request description, explain why any new runtime dependency is needed, especially for parsing, export, plotting, scientific computation, or data handling.
 

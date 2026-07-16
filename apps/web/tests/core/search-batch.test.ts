@@ -1,14 +1,11 @@
-import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
 import { buildMassIndex } from "../../src/core/chemistry/massData";
 import { findFormulae, findFormulaeForCharges } from "../../src/core/search/search";
-import type { FormulaSearchRequest, MassPayload } from "../../src/core/types";
+import type { FormulaSearchRequest } from "../../src/core/types";
+import { massPayload } from "../helpers/massData";
 
-const payload = JSON.parse(
-  await readFile(new URL("../../public/data/masses.json", import.meta.url), "utf8"),
-) as MassPayload;
-const massIndex = buildMassIndex(payload);
+const massIndex = buildMassIndex(massPayload);
 
 describe("batched charge searches", () => {
   it("matches the single-charge result when duplicates collapse to one resolved charge", () => {

@@ -1,14 +1,10 @@
-import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
 import { buildMassIndex } from "../src/core/chemistry/massData";
 import { findFormulae } from "../src/core/search/search";
-import type { MassPayload } from "../src/core/types";
+import { massPayload } from "./helpers/massData";
 
-const payload = JSON.parse(
-  await readFile(new URL("../public/data/masses.json", import.meta.url), "utf8"),
-) as MassPayload;
-const massIndex = buildMassIndex(payload);
+const massIndex = buildMassIndex(massPayload);
 
 describe("FormulaM search", () => {
   it("finds a glucose-like singly charged formula", () => {

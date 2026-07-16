@@ -14,7 +14,8 @@ The current implementation is Vite + TypeScript + Svelte. Preserve existing scie
 - `apps/web/src/core/`: framework-independent scientific logic grouped by domain: `chemistry/` for mass data, formula formatting/display, formula TeX conversion, and decimal helpers; `dom/` for browser-safe DOM utilities; `math/` for shared TeX rendering helpers and math label constants; `search/` for search-space handling, charge input, search execution, form state, and result sorting; `spectrum/` for import, normalization, assignments, and peak selection; `plot/` for plot calculations and scene construction; `export/` for CSV/download/PNG/PDF export helpers.
 - `apps/web/src/components/`: Svelte rendering, input state, events, accessibility, user interaction, and component-local scoped structural styles grouped by feature: `layout/`, `ui/`, `search/`, `results/`, and `spectrum/`. Delegate scientific/data-transformation logic to `apps/web/src/core/`.
 - `apps/web/src/workers/`: worker protocol and long-running search execution.
-- `apps/web/public/data/masses.json`: scientific input data for runtime loading and tests.
+- `packages/mass-data/`: the private `@formulam/mass-data` package, including the single scientific source file, schema types, integrity validator, and data-level tests.
+- `packages/mass-data/src/masses.json`: scientific input data consumed by the Web app as a hashed static resource.
 - `apps/web/tests/`: Vitest regression coverage organized into root smoke tests, `core/` for framework-independent logic, `components/` for Svelte SSR/component output tests, and `integration/` for cross-layer Vitest checks.
 - `apps/web/e2e/`: Playwright browser-flow tests. Keep Playwright smoke tests at the package-local `e2e/` root and tag them with `@smoke` so the Playwright config can run them as the gatekeeper project before dependent browser tests.
 - `examples/`: Shared example and test input files such as `examples/Kaempferol.csv`.
@@ -44,7 +45,7 @@ pnpm --filter @formulam/web run e2e --project regression --no-deps
 
 Use bypass commands only for diagnosis. Run the relevant default command, `pnpm run test` or `pnpm run e2e`, before marking the change complete.
 
-Do not invent missing scripts. If a document mentions a script absent from `package.json`, such as `pnpm run validate:data`, report the mismatch and either add the script intentionally or use existing checks.
+Use `pnpm run validate:data` for the focused mass-data integrity suite. Do not invent other missing scripts; if a document mentions one that is absent from `package.json`, report the mismatch and either add it intentionally or use existing checks.
 
 ## Architecture and scientific behavior
 
@@ -58,7 +59,8 @@ Do not invent missing scripts. If a document mentions a script absent from `pack
 - Make whole-expression click/keyboard selection the default at the shared KaTeX component layer. Opt out only when the formula is inside a non-selectable or conflicting interactive surface, such as a sort button or pointer-disabled tooltip.
 - Let DOM KaTeX formulas expand their line boxes vertically instead of clipping or adding height-driven scrollbars. Use display math for standalone equations; reserve horizontal overflow handling for width constraints only.
 - Keep spectrum plot labels and PNG/PDF export labels on the existing rich-text plot renderer rather than DOM KaTeX. Plot/export formula labels should continue to use the shared formula display token stream.
-- Treat `apps/web/public/data/masses.json` as scientific source data. Do not replace, regenerate, reformat, or normalize it unless explicitly asked.
+- Treat `packages/mass-data/src/masses.json` as the single scientific source data file. Do not replace, regenerate, reformat, or normalize it unless explicitly asked.
+- Keep mass-data schema types and integrity validation in `packages/mass-data/`. The Web app should consume its JSON through the package export as a hashed Vite asset and must not maintain a second checked-in copy.
 - Keep deployment base intentional. FormulaM uses a custom domain, so Vite `base` should remain `/` unless the deployment target changes. Do not change it to `/FormulaM/` merely because the repository is hosted on GitHub Pages; use `/FormulaM/` only for project-site deployment without the custom domain.
 
 ## Testing expectations
@@ -69,6 +71,7 @@ Add or update focused regression tests when changing:
 - electron-mass correction, exact-mass calculation, ppm/Da tolerance handling, isotope labels, formula formatting, display markup, KaTeX/mhchem conversion, or math label rendering
 - result sorting, filtering, table rendering, CSV output, error messages, mass-data loading, or data-shape assumptions
 - spectrum import, sheet/column detection, peak normalization, assignment behavior, exports, plot rendering, worker protocol, cancellation, busy/loading state, or error propagation
+- mass-data schema, metadata counts, isotope/default/alias references, source metadata, or Web asset loading
 
 Do not weaken assertions to make tests pass. When debugging or testing needs real data, use `examples/Kaempferol.csv`. When browser testing needs an imported spectrum/CSV fixture, prefer an existing fixture under `examples/` and state which fixture was used.
 
@@ -87,6 +90,7 @@ Keep smoke tests at each Web runner root: Vitest smoke tests belong directly und
 - Keep `apps/web/src/styles/global.css` limited to design tokens, resets, and truly global element-level behavior.
 - Keep dependencies small and browser-compatible. Explain any new runtime dependency, especially for parsing, export, or plotting behavior.
 - Add Web dependencies with `pnpm --filter @formulam/web add <package>` or `pnpm --filter @formulam/web add -D <package>` so ownership is explicit and `pnpm-lock.yaml` stays synchronized.
+- Add mass-data development dependencies with `pnpm --filter @formulam/mass-data add -D <package>`; the data package must not depend on the Web package.
 - Keep the root package limited to workspace orchestration and repository-wide tooling. Do not add application runtime dependencies at the workspace root.
 - Declare internal package dependencies with `workspace:*` and keep dependency direction acyclic.
 - Do not manually edit dependency entries in `package.json` without updating the lockfile through the package manager.

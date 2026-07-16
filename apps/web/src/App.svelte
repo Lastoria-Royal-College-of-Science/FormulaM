@@ -554,7 +554,7 @@
     }
 
     try {
-      const { payload, url } = await loadMassPayload();
+      const payload = await loadMassPayload();
       massIndex = buildMassIndex(payload);
       const initial = createInitialRows(massIndex);
       rows = initial.rows;

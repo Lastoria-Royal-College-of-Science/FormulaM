@@ -1,11 +1,13 @@
-import type { AliasRecord, IsotopeRecord, MassIndex, MassPayload } from "../types";
-import { normalizeSpeciesLabel } from "./formula";
+import {
+  validateMassPayload,
+  type AliasRecord,
+  type IsotopeRecord,
+  type MassPayload,
+} from "@formulam/mass-data";
+import massDataUrl from "@formulam/mass-data/masses.json?url";
 
-export const MASS_DATA_CANDIDATES = [
-  "data/masses.json",
-  "masses.json",
-  "ms_formula_finder/data/masses.json",
-] as const;
+import type { MassIndex } from "../types";
+import { normalizeSpeciesLabel } from "./formula";
 
 const SUPERSCRIPT_DIGITS: Record<string, string> = {
   "0": "⁰",
@@ -20,11 +22,6 @@ const SUPERSCRIPT_DIGITS: Record<string, string> = {
   "9": "⁹",
 };
 
-function resolveAssetPath(path: string): string {
-  const base = import.meta.env.BASE_URL || "/";
-  return `${base.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
-}
-
 function superscriptDigits(text: string): string {
   return text.replace(/\d/g, (digit) => SUPERSCRIPT_DIGITS[digit] ?? digit);
 }
@@ -34,23 +31,17 @@ function formatIsotopeDisplayLabel(label: string): string {
   return match ? `${superscriptDigits(match[1])}${match[2]}` : label;
 }
 
-export async function loadMassPayload(
-  urls: readonly string[] = MASS_DATA_CANDIDATES,
-): Promise<{ payload: MassPayload; url: string }> {
-  const errors: string[] = [];
-  for (const path of urls) {
-    const url = resolveAssetPath(path);
-    try {
-      const response = await fetch(url, { cache: "force-cache" });
-      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-      const payload = (await response.json()) as MassPayload;
-      return { payload, url };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      errors.push(`${url}: ${message}`);
-    }
+export async function loadMassPayload(url: string = massDataUrl): Promise<MassPayload> {
+  try {
+    const response = await fetch(url, { cache: "force-cache" });
+    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+    const payload: unknown = await response.json();
+    validateMassPayload(payload);
+    return payload;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Could not load masses.json from ${url}: ${message}`, { cause: error });
   }
-  throw new Error(`Could not load masses.json. Tried: ${errors.join("; ")}`);
 }
 
 export function buildMassIndex(payload: MassPayload): MassIndex {
@@ -97,7 +88,7 @@ export function buildMassIndex(payload: MassPayload): MassIndex {
   }
 
   return {
-    meta: payload._meta ?? {},
+    meta: payload["_meta"] ?? {},
     isotopes,
     defaultIsotopeBySymbol,
     aliases: aliases as Record<string, AliasRecord>,
