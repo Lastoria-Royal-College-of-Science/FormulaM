@@ -20,7 +20,7 @@
   // Configure tool-specific properties.
   "customizations": {
     "codespaces": {
-      "openFiles": ["README.md", "CONTRIBUTING.md", "package.json"]
+      "openFiles": ["README.md", "CONTRIBUTING.md", "package.json", "apps/web/package.json"]
     },
     "vscode": {
       "extensions": [

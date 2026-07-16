@@ -4,7 +4,7 @@ Molecular formula enumeration from observed mass spectrometry $m/z$ values.
 
 ## Overview
 
-This package is a Vite + TypeScript + Svelte refactor of the front-end-only FormulaM app. It applies a simplified bare-ion exact-mass rule:
+This pnpm workspace contains the Vite + TypeScript + Svelte front-end-only FormulaM app in [`apps/web/`](apps/web/). The app applies a simplified bare-ion exact-mass rule:
 
 ```text
 ion_mass = candidate_formula_mass - charge * electron_mass
@@ -15,12 +15,14 @@ The input mass is always observed $m/z$. Charge is required and explicit. Formul
 
 ## Local development
 
-Project scripts are defined in [`package.json`](package.json).
+Workspace scripts are defined in [`package.json`](package.json), and the Web package scripts and dependencies are defined in [`apps/web/package.json`](apps/web/package.json).
 
 ```bash
 pnpm install
 pnpm run dev
 ```
+
+The production build is written to [`apps/web/dist/`](apps/web/dist/).
 
 ## Checks
 

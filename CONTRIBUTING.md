@@ -37,24 +37,26 @@ FormulaM should remain front-end only. Do not add a required server, database, h
 
 Important paths:
 
-- [`public/data/masses.json`](public/data/masses.json) Scientific input data loaded at runtime and in tests
-- [`src/core/`](src/core/) Framework-independent scientific and data logic
-- [`src/components/`](src/components/) Svelte UI, input state, events, and accessibility
-- [`src/workers/`](src/workers/) Worker protocol and long-running search execution
-- [`src/styles/global.css`](src/styles/global.css) Design tokens, resets, and truly global styles only
-- [`uno.config.ts`](uno.config.ts) UnoCSS shortcuts, safelist, theme tokens, and utilities
-- [`tests/`](tests/) Vitest coverage with root smoke tests, [`tests/core/`](tests/core/), [`tests/components/`](tests/components/), and [`tests/integration/`](tests/integration/)
-- [`e2e/`](e2e/) Playwright browser-flow tests with root smoke tests tagged `@smoke`
+- [`apps/web/`](apps/web/) Private `@formulam/web` application package
+- [`apps/web/public/data/masses.json`](apps/web/public/data/masses.json) Scientific input data loaded at runtime and in tests
+- [`apps/web/src/core/`](apps/web/src/core/) Framework-independent scientific and data logic
+- [`apps/web/src/components/`](apps/web/src/components/) Svelte UI, input state, events, and accessibility
+- [`apps/web/src/workers/`](apps/web/src/workers/) Worker protocol and long-running search execution
+- [`apps/web/src/styles/global.css`](apps/web/src/styles/global.css) Design tokens, resets, and truly global styles only
+- [`apps/web/uno.config.ts`](apps/web/uno.config.ts) UnoCSS shortcuts, safelist, theme tokens, and utilities
+- [`apps/web/tests/`](apps/web/tests/) Vitest coverage with root smoke tests, [`apps/web/tests/core/`](apps/web/tests/core/), [`apps/web/tests/components/`](apps/web/tests/components/), and [`apps/web/tests/integration/`](apps/web/tests/integration/)
+- [`apps/web/e2e/`](apps/web/e2e/) Playwright browser-flow tests with root smoke tests tagged `@smoke`
 - [`examples/`](examples/) Shared example and test input files such as [`examples/Kaempferol.csv`](examples/Kaempferol.csv)
 - [`.github/workflows/`](.github/workflows/) CI and GitHub Pages deployment
+- [`pnpm-workspace.yaml`](pnpm-workspace.yaml) Workspace package discovery and cycle policy
 
 Guidelines:
 
-- Keep scientific calculations in [`src/core/`](src/core/).
+- Keep scientific calculations in [`apps/web/src/core/`](apps/web/src/core/).
 - Keep formula enumeration and mass/tolerance calculations out of Svelte components.
 - Keep Svelte components focused on rendering, input state, events, and accessibility.
 - Keep long-running searches on the Web Worker path so large enumerations do not block the main UI thread.
-- Keep [`public/data/masses.json`](public/data/masses.json) as scientific source data. Do not replace, regenerate, reformat, or normalize it unless the change explicitly requires that.
+- Keep [`apps/web/public/data/masses.json`](apps/web/public/data/masses.json) as scientific source data. Do not replace, regenerate, reformat, or normalize it unless the change explicitly requires that.
 - Keep global CSS limited to design tokens, resets, and truly global element-level behavior.
 - Keep UnoCSS responsible for shortcuts, layout utilities, theme tokens, and design-system rules.
 
@@ -90,7 +92,7 @@ Use `pnpm run preview` only after building, when you need to inspect production 
 
 ## Available scripts
 
-Current package scripts are defined in [`package.json`](package.json).
+Workspace scripts are defined in [`package.json`](package.json). Web package scripts and dependencies are defined in [`apps/web/package.json`](apps/web/package.json).
 
 Do not rely on scripts that are not present in [`package.json`](package.json) in your branch. If documentation mentions a missing script, either update the documentation or add the script intentionally with the relevant implementation.
 
@@ -100,16 +102,16 @@ Run the narrowest relevant check first while developing. Before opening a pull r
 
 For documentation-only changes, explain in the pull request if code checks were not run.
 
-Vitest uses two config projects: `smoke` runs [`tests/smoke.test.ts`](tests/smoke.test.ts) first, and `regression` runs all non-smoke Vitest files under [`tests/`](tests/) after smoke passes. If smoke is already failing and you need diagnostic access to the remaining Vitest suite, run:
+The Web package Vitest configuration uses two projects: `smoke` runs [`apps/web/tests/smoke.test.ts`](apps/web/tests/smoke.test.ts) first, and `regression` runs all non-smoke Vitest files under [`apps/web/tests/`](apps/web/tests/) after smoke passes. If smoke is already failing and you need diagnostic access to the remaining Vitest suite, run:
 
 ```bash
-pnpm run test --project regression --bail=0
+pnpm --filter @formulam/web run test --project regression --bail=0
 ```
 
 Playwright also uses `smoke` and `regression` config projects. Playwright smoke tests must include `@smoke` in the test title. Default `pnpm run e2e` runs `@smoke` tests first because `regression` depends on `smoke`. If Playwright smoke is already failing and you need diagnostic access to the remaining browser tests, run:
 
 ```bash
-pnpm run e2e --project regression --no-deps
+pnpm --filter @formulam/web run e2e --project regression --no-deps
 ```
 
 Use bypass commands only for diagnosis. The relevant default command, `pnpm run test` or `pnpm run e2e`, remains the final validation command. The automated check order is defined in [`.github/workflows/test.yml`](.github/workflows/test.yml).
@@ -162,14 +164,14 @@ Do not weaken assertions just to make tests pass.
 
 When debugging or testing needs real data, use [`examples/Kaempferol.csv`](examples/Kaempferol.csv). If a fixture is important to the change, state which fixture was used in the pull request.
 
-Keep smoke tests at each runner root: Vitest smoke tests belong directly under [`tests/`](tests/), and Playwright smoke tests belong directly under [`e2e/`](e2e/) with `@smoke` in the test title. Configure smoke gatekeeping in the runner configuration files, not by splitting package scripts into smoke and non-smoke phases. [`vitest.config.ts`](vitest.config.ts) should keep the `smoke` project before the parallel `regression` project. [`playwright.config.ts`](playwright.config.ts) should route `@smoke` tests to `smoke`, route non-smoke tests to `regression`, and keep `regression` dependent on `smoke`.
+Keep smoke tests at each Web runner root: Vitest smoke tests belong directly under [`apps/web/tests/`](apps/web/tests/), and Playwright smoke tests belong directly under [`apps/web/e2e/`](apps/web/e2e/) with `@smoke` in the test title. Configure smoke gatekeeping in the runner configuration files, not by splitting package scripts into smoke and non-smoke phases. [`apps/web/vitest.config.ts`](apps/web/vitest.config.ts) should keep the `smoke` project before the parallel `regression` project. [`apps/web/playwright.config.ts`](apps/web/playwright.config.ts) should route `@smoke` tests to `smoke`, route non-smoke tests to `regression`, and keep `regression` dependent on `smoke`.
 
 ## UI and accessibility
 
 When working on Svelte components:
 
 - Keep components focused on rendering, input state, events, and accessibility.
-- Move reusable data transformation, parsing, validation, formatting, search, export, and normalization logic into [`src/core/`](src/core/).
+- Move reusable Web data transformation, parsing, validation, formatting, search, export, and normalization logic into [`apps/web/src/core/`](apps/web/src/core/).
 - Preserve keyboard and screen-reader behavior where applicable.
 - Prefer explicit error messages over silent fallback behavior, especially for scientific inputs and data-loading failures.
 - Follow nearby naming, structure, and formatting conventions before introducing new patterns.
@@ -183,22 +185,24 @@ Before adding a dependency, consider whether the behavior can be implemented cle
 Add runtime dependencies with:
 
 ```bash
-pnpm add <package>
+pnpm --filter @formulam/web add <package>
 ```
 
 Add development-only dependencies with:
 
 ```bash
-pnpm add -D <package>
+pnpm --filter @formulam/web add -D <package>
 ```
 
-Do not manually edit dependency entries in [`package.json`](package.json) without updating [`pnpm-lock.yaml`](pnpm-lock.yaml) through pnpm.
+Keep the root [`package.json`](package.json) limited to workspace orchestration and repository-wide tooling. Do not add application runtime dependencies there. Declare internal package dependencies with `workspace:*`, and do not manually edit dependency entries without updating [`pnpm-lock.yaml`](pnpm-lock.yaml) through pnpm.
 
 In the pull request description, explain why any new runtime dependency is needed, especially for parsing, export, plotting, scientific computation, or data handling.
 
 ## Deployment
 
 FormulaM is deployed as a static GitHub Pages site.
+
+The Pages artifact is built at [`apps/web/dist/`](apps/web/dist/).
 
 The Vite `base` is intentionally `/` for the current custom-domain deployment. Do not change it to `/FormulaM/` merely because the repository is hosted on GitHub Pages. Only change the base path when the deployment target changes and the pull request explains why.
 

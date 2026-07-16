@@ -7,6 +7,18 @@ settings:
 importers:
 
   .:
+    devDependencies:
+      oxfmt:
+        specifier: ^0.55.0
+        version: 0.55.0(svelte@5.56.3)
+      oxlint:
+        specifier: ^1.70.0
+        version: 1.70.0
+      svelte:
+        specifier: ^5.56.3
+        version: 5.56.3
+
+  apps/web:
     dependencies:
       katex:
         specifier: ^0.17.0
@@ -42,12 +54,6 @@ importers:
       '@types/node':
         specifier: ^24.13.2
         version: 24.13.2
-      oxfmt:
-        specifier: ^0.55.0
-        version: 0.55.0(svelte@5.56.3)
-      oxlint:
-        specifier: ^1.70.0
-        version: 1.70.0
       svelte-check:
         specifier: ^4.6.0
         version: 4.6.0(picomatch@4.0.4)(svelte@5.56.3)(typescript@6.0.3)

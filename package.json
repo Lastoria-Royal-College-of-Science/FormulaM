@@ -1,6 +1,5 @@
 {
-  "name": "formulam",
-  "version": "2.0.0",
+  "name": "formulam-workspace",
   "private": true,
   "description": "Interactive molecular formula elucidation from high-resolution mass spectrometry m/z values.",
   "keywords": [
@@ -11,38 +10,22 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "lint": "oxlint",
-    "lint:fix": "oxlint --fix",
-    "format": "oxfmt",
-    "format:check": "oxfmt --check",
-    "check": "svelte-check --tsconfig ./tsconfig.json",
-    "test": "vitest run",
-    "e2e": "playwright test",
-    "e2e:ui": "playwright test --ui"
-  },
-  "dependencies": {
-    "katex": "^0.17.0",
-    "svelte": "^5.56.3",
-    "unocss": "^66.7.2",
-    "xlsx": "^0.18.5"
+    "dev": "pnpm --filter @formulam/web run dev",
+    "build": "pnpm -r --if-present run build",
+    "preview": "pnpm --filter @formulam/web run preview",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint . --fix",
+    "format": "oxfmt .",
+    "format:check": "oxfmt . --check",
+    "check": "pnpm -r --if-present run check",
+    "test": "pnpm -r --if-present run test",
+    "e2e": "pnpm --filter @formulam/web run e2e",
+    "e2e:ui": "pnpm --filter @formulam/web run e2e:ui"
   },
   "devDependencies": {
-    "@iconify-json/codex": "^1.2.0",
-    "@iconify-json/mdi": "^1.2.3",
-    "@iconify-json/typcn": "^1.2.2",
-    "@playwright/test": "^1.61.0",
-    "@sveltejs/vite-plugin-svelte": "^7.1.2",
-    "@tsconfig/svelte": "^5.0.4",
-    "@types/node": "^24.13.2",
     "oxfmt": "^0.55.0",
     "oxlint": "^1.70.0",
-    "svelte-check": "^4.6.0",
-    "typescript": "^6.0.3",
-    "vite": "^8.0.16",
-    "vitest": "^4.1.9"
+    "svelte": "^5.56.3"
   },
   "engines": {
     "node": ">=22.13.0"

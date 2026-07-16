@@ -12,7 +12,7 @@ const projectPlugins = ["import", "vitest"] as const;
 export default defineConfig({
   options: {
     // TypeScript/Svelte type checking remains owned by `pnpm run check`
-    // (`svelte-check --tsconfig ./tsconfig.json`).
+    // (`pnpm run check` from the workspace root).
     typeAware: false,
     typeCheck: false,
   },
@@ -46,21 +46,13 @@ export default defineConfig({
 
   overrides: [
     {
-      files: ["src/**/*.svelte"],
+      files: ["apps/*/src/**/*.svelte"],
       rules: {
         "eslint/no-unassigned-vars": "off",
       },
     },
     {
-      files: [
-        "*.config.ts",
-        "vite.config.ts",
-        "vitest.config.ts",
-        "playwright.config.ts",
-        "uno.config.ts",
-        "oxlint.config.ts",
-        "oxfmt.config.ts",
-      ],
+      files: ["**/*.config.ts", "oxlint.config.ts", "oxfmt.config.ts"],
       env: {
         node: true,
       },
@@ -69,7 +61,7 @@ export default defineConfig({
       },
     },
     {
-      files: ["tests/**/*.ts", "**/*.test.ts", "**/*.spec.ts"],
+      files: ["apps/*/tests/**/*.ts", "packages/*/tests/**/*.ts", "**/*.test.ts", "**/*.spec.ts"],
       env: {
         node: true,
       },
@@ -79,7 +71,7 @@ export default defineConfig({
       },
     },
     {
-      files: ["e2e/**/*.ts"],
+      files: ["apps/*/e2e/**/*.ts"],
       env: {
         browser: true,
         node: true,
@@ -91,11 +83,11 @@ export default defineConfig({
   ],
 
   ignorePatterns: [
-    "node_modules/**",
-    "dist/**",
-    "coverage/**",
-    "playwright-report/**",
-    "test-results/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/coverage/**",
+    "**/playwright-report/**",
+    "**/test-results/**",
     "*.min.*",
   ],
 });

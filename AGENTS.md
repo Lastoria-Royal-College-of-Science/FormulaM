@@ -10,33 +10,36 @@ The current implementation is Vite + TypeScript + Svelte. Preserve existing scie
 
 ## Repository map
 
-- `src/core/`: framework-independent scientific logic grouped by domain: `chemistry/` for mass data, formula formatting/display, formula TeX conversion, and decimal helpers; `dom/` for browser-safe DOM utilities; `math/` for shared TeX rendering helpers and math label constants; `search/` for search-space handling, charge input, search execution, form state, and result sorting; `spectrum/` for import, normalization, assignments, and peak selection; `plot/` for plot calculations and scene construction; `export/` for CSV/download/PNG/PDF export helpers.
-- `src/components/`: Svelte rendering, input state, events, accessibility, user interaction, and component-local scoped structural styles grouped by feature: `layout/`, `ui/`, `search/`, `results/`, and `spectrum/`. Delegate scientific/data-transformation logic to `src/core/`.
-- `src/workers/`: worker protocol and long-running search execution.
-- `public/data/masses.json`: scientific input data for runtime loading and tests.
-- `tests/`: Vitest regression coverage organized into root smoke tests, `core/` for framework-independent logic, `components/` for Svelte SSR/component output tests, and `integration/` for cross-layer Vitest checks.
-- `e2e/`: Playwright browser-flow tests. Keep Playwright smoke tests at the `e2e/` root and tag them with `@smoke` so the Playwright config can run them as the gatekeeper project before dependent browser tests.
+- `apps/web/`: the private `@formulam/web` Vite + Svelte application package and its package-local configuration.
+- `apps/web/src/core/`: framework-independent scientific logic grouped by domain: `chemistry/` for mass data, formula formatting/display, formula TeX conversion, and decimal helpers; `dom/` for browser-safe DOM utilities; `math/` for shared TeX rendering helpers and math label constants; `search/` for search-space handling, charge input, search execution, form state, and result sorting; `spectrum/` for import, normalization, assignments, and peak selection; `plot/` for plot calculations and scene construction; `export/` for CSV/download/PNG/PDF export helpers.
+- `apps/web/src/components/`: Svelte rendering, input state, events, accessibility, user interaction, and component-local scoped structural styles grouped by feature: `layout/`, `ui/`, `search/`, `results/`, and `spectrum/`. Delegate scientific/data-transformation logic to `apps/web/src/core/`.
+- `apps/web/src/workers/`: worker protocol and long-running search execution.
+- `apps/web/public/data/masses.json`: scientific input data for runtime loading and tests.
+- `apps/web/tests/`: Vitest regression coverage organized into root smoke tests, `core/` for framework-independent logic, `components/` for Svelte SSR/component output tests, and `integration/` for cross-layer Vitest checks.
+- `apps/web/e2e/`: Playwright browser-flow tests. Keep Playwright smoke tests at the package-local `e2e/` root and tag them with `@smoke` so the Playwright config can run them as the gatekeeper project before dependent browser tests.
 - `examples/`: Shared example and test input files such as `examples/Kaempferol.csv`.
-- `uno.config.ts`: UnoCSS preset assembly, safelist, theme token mapping, and shortcuts wiring.
-- `src/styles/uno-*.ts`: UnoCSS theme token aliases, shared interaction fragments, and semantic shortcut definitions.
-- `src/styles/global.css`: design tokens, resets, and truly global element-level styles only.
+- `apps/web/uno.config.ts`: UnoCSS preset assembly, safelist, theme token mapping, and shortcuts wiring.
+- `apps/web/src/styles/uno-*.ts`: UnoCSS theme token aliases, shared interaction fragments, and semantic shortcut definitions.
+- `apps/web/src/styles/global.css`: design tokens, resets, and truly global element-level styles only.
+- `package.json`: workspace orchestration scripts and repository-wide Oxc tooling only.
+- `pnpm-workspace.yaml`: workspace package discovery and cycle policy.
 
 ## Commands
 
-Use the package manager already present in the branch. See `package.json` for the current scripts. Use `pnpm install` locally, or `pnpm ci` when a clean installation from `pnpm-lock.yaml` is required. Use `pnpm run preview` only to inspect the production build locally. Do not use `pnpm run lint:fix` to auto-fix; it may break formatting rules.
+Use the package manager already present in the branch. See the root `package.json` for workspace scripts and package-local manifests for owned dependencies. Use `pnpm install` locally, or `pnpm ci` when a clean installation from `pnpm-lock.yaml` is required. Use `pnpm run preview` only to inspect the production build locally. Do not use `pnpm run lint:fix` to auto-fix; it may break formatting rules.
 
 Before marking a change complete, run the narrowest relevant check first. When touching shared TypeScript, search logic, scientific data, spectrum import/export, worker behavior, deployment configuration, or UI behavior, follow the full automated check order in `.github/workflows/test.yml`.
 
-Vitest uses two config projects: `smoke` for `tests/smoke.test.ts` and `regression` for all non-smoke files under `tests/`. Default `pnpm run test` runs the smoke project first and stops before regression tests if smoke fails. When smoke is already failing and you need diagnostic access to the remaining Vitest suite, run:
+The Web package Vitest configuration uses two projects: `smoke` for `apps/web/tests/smoke.test.ts` and `regression` for all non-smoke files under `apps/web/tests/`. Default `pnpm run test` runs package tests recursively; within the Web package, smoke runs first and stops before regression tests if it fails. When Web smoke is already failing and you need diagnostic access to the remaining Vitest suite, run:
 
 ```bash
-pnpm run test --project regression --bail=0
+pnpm --filter @formulam/web run test --project regression --bail=0
 ```
 
 Playwright also uses `smoke` and `regression` config projects. Playwright smoke tests must include `@smoke` in the test title. Default `pnpm run e2e` runs `@smoke` tests first because `regression` depends on `smoke`. When Playwright smoke is already failing and you need diagnostic access to the remaining browser tests, run:
 
 ```bash
-pnpm run e2e --project regression --no-deps
+pnpm --filter @formulam/web run e2e --project regression --no-deps
 ```
 
 Use bypass commands only for diagnosis. Run the relevant default command, `pnpm run test` or `pnpm run e2e`, before marking the change complete.
@@ -45,7 +48,7 @@ Do not invent missing scripts. If a document mentions a script absent from `pack
 
 ## Architecture and scientific behavior
 
-- Keep scientific calculations in `src/core/`; keep formula enumeration and mass/tolerance calculations out of Svelte components.
+- Keep Web scientific calculations in `apps/web/src/core/`; keep formula enumeration and mass/tolerance calculations out of Svelte components.
 - Keep long-running searches on the Web Worker path; do not block the main UI thread with large enumeration work.
 - Treat observed input mass as `m/z`, not neutral mass.
 - Keep charge explicit. FormulaM applies bare-ion electron-mass correction for charged species; do not add adduct behavior unless explicitly requested.
@@ -55,7 +58,7 @@ Do not invent missing scripts. If a document mentions a script absent from `pack
 - Make whole-expression click/keyboard selection the default at the shared KaTeX component layer. Opt out only when the formula is inside a non-selectable or conflicting interactive surface, such as a sort button or pointer-disabled tooltip.
 - Let DOM KaTeX formulas expand their line boxes vertically instead of clipping or adding height-driven scrollbars. Use display math for standalone equations; reserve horizontal overflow handling for width constraints only.
 - Keep spectrum plot labels and PNG/PDF export labels on the existing rich-text plot renderer rather than DOM KaTeX. Plot/export formula labels should continue to use the shared formula display token stream.
-- Treat `public/data/masses.json` as scientific source data. Do not replace, regenerate, reformat, or normalize it unless explicitly asked.
+- Treat `apps/web/public/data/masses.json` as scientific source data. Do not replace, regenerate, reformat, or normalize it unless explicitly asked.
 - Keep deployment base intentional. FormulaM uses a custom domain, so Vite `base` should remain `/` unless the deployment target changes. Do not change it to `/FormulaM/` merely because the repository is hosted on GitHub Pages; use `/FormulaM/` only for project-site deployment without the custom domain.
 
 ## Testing expectations
@@ -69,21 +72,23 @@ Add or update focused regression tests when changing:
 
 Do not weaken assertions to make tests pass. When debugging or testing needs real data, use `examples/Kaempferol.csv`. When browser testing needs an imported spectrum/CSV fixture, prefer an existing fixture under `examples/` and state which fixture was used.
 
-Keep smoke tests at each runner root: Vitest smoke tests belong directly under `tests/`, and Playwright smoke tests belong directly under `e2e/` with `@smoke` in the test title. Configure smoke gatekeeping in the runner configuration files, not by splitting package scripts into smoke and non-smoke phases. The Vitest config should keep the `smoke` project at `sequence.groupOrder: 0` and the parallel `regression` project at `sequence.groupOrder: 1`. The Playwright config should keep the `regression` project dependent on `smoke`, with `smoke` using `grep: /@smoke/` and `regression` using `grepInvert: /@smoke/`.
+Keep smoke tests at each Web runner root: Vitest smoke tests belong directly under `apps/web/tests/`, and Playwright smoke tests belong directly under `apps/web/e2e/` with `@smoke` in the test title. Configure smoke gatekeeping in the runner configuration files, not by splitting package scripts into smoke and non-smoke phases. The Vitest config should keep the `smoke` project at `sequence.groupOrder: 0` and the parallel `regression` project at `sequence.groupOrder: 1`. The Playwright config should keep the `regression` project dependent on `smoke`, with `smoke` using `grep: /@smoke/` and `regression` using `grepInvert: /@smoke/`.
 
 ## Style and dependencies
 
 - Use TypeScript for new application and core code.
 - Keep Svelte components focused on rendering, input state, events, and accessibility.
-- Put reusable parsing, validation, formatting, search, export, and normalization logic in `src/core/` with typed inputs and outputs.
+- Put reusable Web parsing, validation, formatting, search, export, and normalization logic in `apps/web/src/core/` with typed inputs and outputs.
 - Prefer explicit error messages over silent fallback behavior for scientific inputs and data-loading failures.
 - Follow nearby naming and formatting conventions before introducing new patterns.
 - Use forward slashes as path separators in code, documentation, comments, Markdown, and test strings. Use backslashes only in scripts or snippets explicitly intended for Windows command-line behavior.
 - In top-level Markdown documents intended for human readers, such as `README.md` and `CONTRIBUTING.md`, format repository-relative file and directory references as relative Markdown links whose visible text is the path in inline code. AI-only Markdown documents, including `AGENTS.md` files, should keep repository-relative paths as inline code without Markdown links.
-- Keep UnoCSS for reusable shortcuts, layout utilities, theme tokens, and design-system rules. Component `<style>` blocks are allowed only for component-private structural CSS tightly coupled to that component's markup, such as pseudo-elements, scroll-state shells, browser-specific selectors, or complex selector relationships that are awkward to maintain as shortcuts. Do not use scoped styles as a replacement for reusable semantic component styling, and do not move such styling into `src/styles/global.css`.
-- Keep `global.css` limited to design tokens, resets, and truly global element-level behavior.
+- Keep UnoCSS for reusable shortcuts, layout utilities, theme tokens, and design-system rules. Component `<style>` blocks are allowed only for component-private structural CSS tightly coupled to that component's markup, such as pseudo-elements, scroll-state shells, browser-specific selectors, or complex selector relationships that are awkward to maintain as shortcuts. Do not use scoped styles as a replacement for reusable semantic component styling, and do not move such styling into `apps/web/src/styles/global.css`.
+- Keep `apps/web/src/styles/global.css` limited to design tokens, resets, and truly global element-level behavior.
 - Keep dependencies small and browser-compatible. Explain any new runtime dependency, especially for parsing, export, or plotting behavior.
-- Add dependencies with `pnpm add <package>` or `pnpm add -D <package>` so `pnpm-lock.yaml` stays synchronized.
+- Add Web dependencies with `pnpm --filter @formulam/web add <package>` or `pnpm --filter @formulam/web add -D <package>` so ownership is explicit and `pnpm-lock.yaml` stays synchronized.
+- Keep the root package limited to workspace orchestration and repository-wide tooling. Do not add application runtime dependencies at the workspace root.
+- Declare internal package dependencies with `workspace:*` and keep dependency direction acyclic.
 - Do not manually edit dependency entries in `package.json` without updating the lockfile through the package manager.
 - Do not commit secrets, tokens, credentials, private keys, or environment-specific service configuration.
 
